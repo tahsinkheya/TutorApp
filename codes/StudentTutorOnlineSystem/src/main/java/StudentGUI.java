@@ -1,6 +1,8 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 
 import javax.swing.JButton;
@@ -13,9 +15,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 
-public class StudentGUI {
+public class StudentGUI implements ActionListener {
 	public JLabel name;
 	public JPanel panel;
+	
+	JButton submitButton;
 	
 	public StudentGUI() {
 		// Creating instance of JFrame
@@ -28,7 +32,6 @@ public class StudentGUI {
         panel = new JPanel();    
         // adding panel to frame
         frame.add(panel);
-        
         panel.setLayout(null);
         
         
@@ -124,20 +127,35 @@ public class StudentGUI {
         allRates.setBounds(180, 240, 100, 25);
         panel.add(allRates);
         
-        
-        
-
         // Creating request button
         
-        JButton submitButton = new JButton("Make Request");
+        submitButton = new JButton("Make Request");
         submitButton.setBounds(10, 270, 120, 25);
+        submitButton.addActionListener(this);
         panel.add(submitButton);
+        
+        /*
+        submitButton2 = new JButton("Test button");
+        submitButton2.setBounds(10, 300, 120, 25);
+        submitButton2.addActionListener(this);
+        panel.add(submitButton2);
+        */
         
         // Setting the frame visibility to true
         frame.setVisible(true);
 	}
-	
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		if (e.getSource() == submitButton)
+	          saveRequest();	
+	}
+	
+	private void saveRequest() {
+		System.out.println("Submit button clicked");
+	}
+	
 }
 
 
