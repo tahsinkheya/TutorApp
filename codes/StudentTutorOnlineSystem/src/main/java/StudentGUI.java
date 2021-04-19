@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.text.NumberFormat;
@@ -30,18 +31,20 @@ public class StudentGUI {
         
         panel.setLayout(null);
         
-        JLabel lineBreak = new JLabel("\n");
-        lineBreak.setBounds(10,40,80,25);
-        panel.add(lineBreak);
-        
         
         // take user inputs over here
         JLabel actionLabel = new JLabel("Make a matching request");
-        actionLabel.setBounds(10,60,300,25);
+        actionLabel.setBounds(10,50,300,25);
         panel.add(actionLabel);
         
-        lineBreak.setBounds(10,80,80,25);
-        panel.add(lineBreak);
+        
+        
+        JLabel desc = new JLabel("Specify tutor details");
+        desc.setBounds(10,70,300,25);
+        desc.setForeground(Color.red);
+        panel.add(desc);
+        
+        
         
         // Required qualification
         JLabel qualification = new JLabel("Specialisation: ");
@@ -53,7 +56,7 @@ public class StudentGUI {
         panel.add(qualText);
         
         // Types of qualification
-        String[] qualificationTypes = {"Bachelor's Degree", "Master's Degree", "Doctoral Degree"};
+        String[] qualificationTypes = {"Bachelor's Degree", "Master's Degree", "Doctoral Degree","Secondary Education"};
         JComboBox qualList = new JComboBox(qualificationTypes);
         qualList.setSelectedIndex(0);
         qualList.setBounds(300, 100, 200, 25);
