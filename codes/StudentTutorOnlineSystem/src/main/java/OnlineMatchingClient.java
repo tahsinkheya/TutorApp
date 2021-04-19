@@ -21,7 +21,7 @@ public class OnlineMatchingClient implements ActionListener {
     NOTE: In order to access the web service, you will need to include your API key in the Authorization header of all requests you make.
     Your personal API key can be obtained here: https://fit3077.com
    */
-    private static final String myApiKey = "paste ur key";
+    private static final String myApiKey = "your api key";
 
     // Provide the root URL for the web service. All web service request URLs start with this root URL.
     private static final String rootUrl = "https://fit3077.com/api/v1";
@@ -29,6 +29,9 @@ public class OnlineMatchingClient implements ActionListener {
     private static JLabel user,usernameLabel,passwordLabel;
     private static JTextField usernameText;
     private static JPasswordField passwordText;
+    
+    // the type of user that logged in: Student or Tutor
+    private static String userType;
 
     public static void main(String[] args){
         JFrame logInFrame=new JFrame();
@@ -82,8 +85,37 @@ public class OnlineMatchingClient implements ActionListener {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest
                 .newBuilder(URI.create(usersUrl))
+                .setHeader("Authorization", myApiKey)
                 .GET()
                 .build();
+        HttpResponse<String> response = null;
+        
+        
+        // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
+        try {
+        	response=client.send(request, HttpResponse.BodyHandlers.ofString());
+        	//System.out.println("Full JSON response: " + response.body());
+        	
+        	// The GET /user endpoint returns a JSON array, so we can loop through the response as we could with a normal array/list.
+            ObjectNode[] jsonNodes = new ObjectMapper().readValue(response.body(), ObjectNode[].class);
+            String usernameEntered= usernameText.getText(); // input username
+            for (ObjectNode node: jsonNodes) {
+              String usernameFromDB = node.get("userName").asText();
+              if(usernameFromDB.equals(usernameEntered)) { // if user name matches, then check usertype
+            	  if (node.get("isStudent").booleanValue()) {
+            		  userType = "Student";
+            	  }
+            	  else {
+            		  userType = "Tutor";
+            	  }
+              }
+            }
+        }
+        catch(Exception e) {
+        	System.out.println(e.getCause());
+        }
+        
+        
 
         // Note the POST() method being used here, and the request body is supplied to it.
         // A request body needs to be supplied to this endpoint, otherwise a 400 Bad Request error will be returned.
@@ -94,7 +126,7 @@ public class OnlineMatchingClient implements ActionListener {
                 .header("Content-Type","application/json") // This header needs to be set when sending a JSON request body.
                 .POST(HttpRequest.BodyPublishers.ofString(jsonString))
                 .build();
-        HttpResponse<String> response=null;
+        
         try{
             response = client.send(request, HttpResponse.BodyHandlers.ofString());}
         catch (Exception e){
@@ -120,6 +152,16 @@ public class OnlineMatchingClient implements ActionListener {
         System.out.println(usernameEntered);
         System.out.println(passwordEntered);
         boolean loggedIn=logInUser(usernameEntered,passwordEntered);
+        
+        // open the student homepage after login
+        if (userType.equals("Student")) {
+        	StudentGUI studentUI = new StudentGUI();
+            JLabel name = new JLabel("Welcome: " + usernameEntered);
+            studentUI.name = name;
+            studentUI.name.setBounds(10,20,150,25);
+            studentUI.panel.add(name);
+        }
+        
 
     }
 }

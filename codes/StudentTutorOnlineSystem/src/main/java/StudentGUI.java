@@ -13,6 +13,8 @@ import javax.swing.JTextField;
 
 
 public class StudentGUI {
+	public JLabel name;
+	public JPanel panel;
 	
 	public StudentGUI() {
 		// Creating instance of JFrame
@@ -22,16 +24,11 @@ public class StudentGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       
-        JPanel panel = new JPanel();    
+        panel = new JPanel();    
         // adding panel to frame
         frame.add(panel);
         
         panel.setLayout(null);
-
-        // Creating JLabel
-        JLabel userLabel = new JLabel("Name:");
-        userLabel.setBounds(10,20,80,25);
-        panel.add(userLabel);
         
         JLabel lineBreak = new JLabel("\n");
         lineBreak.setBounds(10,40,80,25);
