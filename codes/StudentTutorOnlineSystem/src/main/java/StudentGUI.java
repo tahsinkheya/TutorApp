@@ -8,6 +8,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -20,7 +23,7 @@ import javax.swing.JTextField;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import org.json.simple.JSONObject;
 
 public class StudentGUI implements ActionListener {
 	public JLabel name;
@@ -30,7 +33,11 @@ public class StudentGUI implements ActionListener {
 	public String userId;
 	private static final String myApiKey = "";
 	
-	private static JTextField subjectText, descText;
+	// user inputs for subject and lesson
+	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
+	// chosen qualification level
+	private static JComboBox qualList, timeList, daysBox, allRates;
+
 	
 	public StudentGUI() {
 		// Creating instance of JFrame
@@ -71,7 +78,7 @@ public class StudentGUI implements ActionListener {
         
         // Types of qualification
         String[] qualificationTypes = {"Bachelor's Degree", "Master's Degree", "Doctoral Degree","Secondary Education"};
-        JComboBox qualList = new JComboBox(qualificationTypes);
+        qualList = new JComboBox(qualificationTypes);
         qualList.setSelectedIndex(0);
         qualList.setBounds(300, 100, 200, 25);
         panel.add(qualList);
@@ -93,19 +100,18 @@ public class StudentGUI implements ActionListener {
         panel.add(timeAndDay);
         
         // Time Selection
-        
-        JTextField time = new JTextField(20);
-        time.setBounds(100,170,50,25);
-        panel.add(time);
+        timeInput = new JTextField(20);
+        timeInput.setBounds(100,170,50,25);
+        panel.add(timeInput);
         
         String[] allTimes = {"AM", "PM"};
-        JComboBox timeList = new JComboBox(allTimes);
+        timeList = new JComboBox(allTimes);
         timeList.setBounds(150, 170, 70, 25);
         panel.add(timeList);
         
         // Day selection
         String[] days = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-        JComboBox daysBox = new JComboBox(days);
+        daysBox = new JComboBox(days);
         daysBox.setSelectedIndex(0);
         daysBox.setBounds(250, 170, 200, 25);
         panel.add(daysBox);
@@ -115,12 +121,10 @@ public class StudentGUI implements ActionListener {
         session.setBounds(10, 200, 200, 25);
         panel.add(session);
         
-        NumberFormat amountFormat = null;
-        int num = 2;
-        JFormattedTextField sessionIn= new JFormattedTextField(amountFormat);
-        sessionIn.setValue(num);
-        sessionIn.setBounds(150,200,50,25);
-        panel.add(sessionIn);
+     
+        sessionNum= new JTextField(20);
+        sessionNum.setBounds(150,200,50,25);
+        panel.add(sessionNum);
         
         
         // Payment Rate
@@ -129,12 +133,12 @@ public class StudentGUI implements ActionListener {
         rate.setBounds(10, 240, 100, 25);
         panel.add(rate);
         
-        JTextField rateIn = new JTextField(20);
+        rateIn = new JTextField(20);
         rateIn.setBounds(80, 240, 80, 25);
         panel.add(rateIn);
         
         String[] rateTypes = {"per hour", "per session"};
-        JComboBox allRates = new JComboBox(rateTypes);
+        allRates = new JComboBox(rateTypes);
         allRates.setBounds(180, 240, 100, 25);
         panel.add(allRates);
         
@@ -157,6 +161,7 @@ public class StudentGUI implements ActionListener {
 	          saveRequest();	
 	}
 	
+	/* Method to make a web request to GET some data */
 	private  HttpResponse<String> initiateWebApiGET(String endpoint) {
 		String Url = "https://fit3077.com/api/v1/"+endpoint;
 		
@@ -177,7 +182,11 @@ public class StudentGUI implements ActionListener {
 	}
 	
 	
-	private void webApiPOST(String endpoint) {
+	/* Method to create a new class instances in db.
+	 * For now: new subject can be created and new bid can be created */
+	
+	private String webApiPOST(String endpoint, String subID) {
+		String refId = null;  // id value to get the subject or bid
 		String jsonString = null;
 		// set the endpoint types to be false
 		boolean isSubject = false;
@@ -196,16 +205,34 @@ public class StudentGUI implements ActionListener {
 		
 		// endpoint.contains is used since we can have subject or subject/subjectID
 		else if(endpoint.contains("bid")) {
-			// create a new JSON object for bid
-			jsonString = "{" +
-					"\"type\":\"" + subjectText.getText() + "\"," +
-					"\"initiatorId\":\"" + subjectText.getText() + "\"," +
-					"\"dateCreated\":\"" + subjectText.getText() + "\"," +
-					"\"subjectId\":\"" + subjectText.getText() + "\"," +
-					"\"additionalInfo\":\"" + descText.getText()+ "\"" +
-				"}";
+			
+			// find today's date and time
+			String dateAndTime = new Date().toInstant().toString();
+			System.out.println(dateAndTime);
+			
+			JSONObject additionalInfo=new JSONObject(); 
+			
+			// create the additional info
+			additionalInfo.put("qualificationLevel", qualList.getSelectedItem().toString());
+			additionalInfo.put("weeklySessions", sessionNum.getText());
+			String sessionTimeAndDay = timeInput.getText()+" "+timeList.getSelectedItem().toString()+" "+ daysBox.getSelectedItem().toString();
+			additionalInfo.put("sessionTimeAndDay", sessionTimeAndDay);
+			String rate = rateIn.getText()+" "+ allRates.getSelectedItem().toString();
+			additionalInfo.put("rate", rate);
+			System.out.println("Additional Info: "+additionalInfo.toString());
+			
+			// create the bid
+			JSONObject bidInfo=new JSONObject();
+			bidInfo.put("type", "open");
+			bidInfo.put("initiatorId", userId);
+			bidInfo.put("dateCreated", dateAndTime);
+			bidInfo.put("subjectId", subID);
+			bidInfo.put("additionalInfo", additionalInfo);
+			jsonString = bidInfo.toString(); // convert to bid
+			System.out.println("Bid/Request Info: "+jsonString);
 			isBid = true;
 		}
+		
 		
 		// create a new subject or bid in the database 
 		String Url = "https://fit3077.com/api/v1/"+endpoint;
@@ -219,33 +246,49 @@ public class StudentGUI implements ActionListener {
 		
 		try {
 			HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-			System.out.println("Created new subject in database");
+			if(isSubject) {
+				System.out.println("Created new subject in database");
+			}
+			else if(isBid) {
+				System.out.println("Created new bid in database");
+			}
+			
+			// get the id of the newly created object
+			ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
+			refId = jsonNode.get("id").asText();
+			return refId;
+		
 		}
 		catch(Exception e){
 			System.out.println(e.getCause());
 			System.out.println(e.getMessage());
 			
 		}
-		/*
-		if(isSubject) {
-			findSubject();
-		}
-		*/
-		
+		return refId;
 	}
 	
 	
 	private void saveRequest() {
 		
-		System.out.println("Submit button clicked");
-		System.out.println(userId);
-		findSubject();
+		System.out.println("Tutor Request process started");
+		// user id of the logged in user
+		System.out.println("User ID: " + userId);
+		
+		// subject id of the subject that student wants
+		String subId = findSubject();
+		System.out.println("Subject ID: " + subId);
+		
+		// bid id of the new request
+		String newBidID = webApiPOST("bid", subId);
+		System.out.println("Bid ID: " + newBidID);
+		System.out.println("Successfully created a tutor bid/request");
 	}
 	
 	
 	/* Method to get the subject id for the subject given as input by the user */
 	private String findSubject() {
 		String subjectID = null;
+		boolean subjectFound = false;
 		// get the user inputs
 		String userSub = subjectText.getText();
 		String userDesc = descText.getText();
@@ -255,25 +298,28 @@ public class StudentGUI implements ActionListener {
 			
 			// look for the subject and description in the database
 			for (ObjectNode node: jsonNodes) {
-				System.out.println(node.toString());
 		      	String subFromDB = node.get("name").asText();
 		      	String descFromDB = node.get("description").asText();
 				if (subFromDB.equals(userSub) & descFromDB.equals(userDesc) ) {
-					System.out.println("Match found");
+					System.out.println("Subject found in database");
+					subjectFound = true;
 					subjectID = node.get("id").asText();
-					System.out.println(node.toString());
 					return subjectID;
 				}	
 			}
+			
+			if (subjectFound==false) {
+				// if the subject is not found in database, then create new subject
+				System.out.println("Subject not found, so creating new subject ");
+				subjectID = webApiPOST("subject", null);
+				return subjectID;
+			}
+			
+			
 		}
 		catch(Exception e) {
 			System.out.println(e.getCause());
 		}
-		
-		// if the subject is not found in database, then create new subject
-		System.out.println("Match not found, so creating new subject ");
-		webApiPOST("subject");
-		
 		return subjectID;	
 	}
 }
