@@ -35,6 +35,9 @@ public class OnlineMatchingClient implements ActionListener {
     
     // the type of user that logged in: Student or Tutor
     private static String userType;
+    
+    // userID needed for initializing bids and messages
+    public String userID;
 
     public static void main(String[] args){
         JFrame logInFrame=new JFrame();
@@ -148,10 +151,11 @@ public class OnlineMatchingClient implements ActionListener {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode actualObj = mapper.readValue(payload, JsonNode.class);
-
+           
             // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
             if(actualObj.get("isStudent").asBoolean()==true){
                 userType="Student";
+                userID = actualObj.get("sub").asText();
             }
             else{userType="Tutor";}
             }
@@ -185,8 +189,10 @@ public class OnlineMatchingClient implements ActionListener {
                     StudentGUI studentUI = new StudentGUI();
                     JLabel name = new JLabel("Welcome: " + usernameEntered);
                     studentUI.name = name;
+                    studentUI.userId = userID;
                     studentUI.name.setBounds(10, 20, 150, 25);
                     studentUI.panel.add(name);
+                    
                 }
             }
         }

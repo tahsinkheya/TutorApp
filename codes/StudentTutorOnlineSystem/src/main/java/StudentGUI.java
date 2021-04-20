@@ -3,6 +3,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.text.NumberFormat;
 
 import javax.swing.JButton;
@@ -14,12 +18,19 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 
 public class StudentGUI implements ActionListener {
 	public JLabel name;
 	public JPanel panel;
 	
 	JButton submitButton;
+	public String userId;
+	private static final String myApiKey = "";
+	
+	private static JTextField subjectText, descText;
 	
 	public StudentGUI() {
 		// Creating instance of JFrame
@@ -54,9 +65,9 @@ public class StudentGUI implements ActionListener {
         qualification.setBounds(10, 100, 100, 25);
         panel.add(qualification);
         
-        JTextField qualText = new JTextField(20);
-        qualText.setBounds(100,100,165,25);
-        panel.add(qualText);
+        subjectText = new JTextField(20);
+        subjectText.setBounds(100,100,165,25);
+        panel.add(subjectText);
         
         // Types of qualification
         String[] qualificationTypes = {"Bachelor's Degree", "Master's Degree", "Doctoral Degree","Secondary Education"};
@@ -71,9 +82,9 @@ public class StudentGUI implements ActionListener {
         lesson.setBounds(10, 140, 80, 25);
         panel.add(lesson);
         
-        JTextField lessText = new JTextField(20);
-        lessText.setBounds(100,140,165,25);
-        panel.add(lessText);
+        descText = new JTextField(20);
+        descText.setBounds(100,140,165,25);
+        panel.add(descText);
         
         
         // Time and Day 
@@ -134,12 +145,6 @@ public class StudentGUI implements ActionListener {
         submitButton.addActionListener(this);
         panel.add(submitButton);
         
-        /*
-        submitButton2 = new JButton("Test button");
-        submitButton2.setBounds(10, 300, 120, 25);
-        submitButton2.addActionListener(this);
-        panel.add(submitButton2);
-        */
         
         // Setting the frame visibility to true
         frame.setVisible(true);
@@ -152,10 +157,125 @@ public class StudentGUI implements ActionListener {
 	          saveRequest();	
 	}
 	
-	private void saveRequest() {
-		System.out.println("Submit button clicked");
+	private  HttpResponse<String> initiateWebApiGET(String endpoint) {
+		String Url = "https://fit3077.com/api/v1/"+endpoint;
+		
+		HttpClient client = HttpClient.newHttpClient();
+		HttpRequest request = HttpRequest
+		.newBuilder(URI.create(Url))
+		.setHeader("Authorization", myApiKey)
+		.GET()
+		.build();
+		HttpResponse<String> response = null;
+		try {
+		 response = client.send(request, HttpResponse.BodyHandlers.ofString());
+		}
+		catch (Exception e){
+            System.out.println(e.getCause());
+        }
+		return response;
 	}
 	
+	
+	private void webApiPOST(String endpoint) {
+		String jsonString = null;
+		// set the endpoint types to be false
+		boolean isSubject = false;
+		boolean isBid = false;
+		
+		// endpoint.contains is used since we can have subject or subject/subjectID
+		if(endpoint.contains("subject")) {
+			System.out.println("Need to make subject JSON for: "+ endpoint);
+			// create a new JSON object for subject
+			jsonString = "{" + 
+					"\"name\":\"" + subjectText.getText() + "\"," +
+					"\"description\":\"" + descText.getText()+ "\"" +
+				"}";
+			isSubject = true;
+		}
+		
+		// endpoint.contains is used since we can have subject or subject/subjectID
+		else if(endpoint.contains("bid")) {
+			// create a new JSON object for bid
+			jsonString = "{" +
+					"\"type\":\"" + subjectText.getText() + "\"," +
+					"\"initiatorId\":\"" + subjectText.getText() + "\"," +
+					"\"dateCreated\":\"" + subjectText.getText() + "\"," +
+					"\"subjectId\":\"" + subjectText.getText() + "\"," +
+					"\"additionalInfo\":\"" + descText.getText()+ "\"" +
+				"}";
+			isBid = true;
+		}
+		
+		// create a new subject or bid in the database 
+		String Url = "https://fit3077.com/api/v1/"+endpoint;
+		HttpClient client = HttpClient.newHttpClient();
+		HttpRequest request = HttpRequest
+		.newBuilder(URI.create(Url))
+		.setHeader("Authorization", myApiKey)
+		.header("Content-Type","application/json") // This header needs to be set when sending a JSON request body.
+	    .POST(HttpRequest.BodyPublishers.ofString(jsonString))
+		.build();
+		
+		try {
+			HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+			System.out.println("Created new subject in database");
+		}
+		catch(Exception e){
+			System.out.println(e.getCause());
+			System.out.println(e.getMessage());
+			
+		}
+		/*
+		if(isSubject) {
+			findSubject();
+		}
+		*/
+		
+	}
+	
+	
+	private void saveRequest() {
+		
+		System.out.println("Submit button clicked");
+		System.out.println(userId);
+		findSubject();
+	}
+	
+	
+	/* Method to get the subject id for the subject given as input by the user */
+	private String findSubject() {
+		String subjectID = null;
+		// get the user inputs
+		String userSub = subjectText.getText();
+		String userDesc = descText.getText();
+		HttpResponse<String> subResponse = initiateWebApiGET("subject");
+		try {
+			ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
+			
+			// look for the subject and description in the database
+			for (ObjectNode node: jsonNodes) {
+				System.out.println(node.toString());
+		      	String subFromDB = node.get("name").asText();
+		      	String descFromDB = node.get("description").asText();
+				if (subFromDB.equals(userSub) & descFromDB.equals(userDesc) ) {
+					System.out.println("Match found");
+					subjectID = node.get("id").asText();
+					System.out.println(node.toString());
+					return subjectID;
+				}	
+			}
+		}
+		catch(Exception e) {
+			System.out.println(e.getCause());
+		}
+		
+		// if the subject is not found in database, then create new subject
+		System.out.println("Match not found, so creating new subject ");
+		webApiPOST("subject");
+		
+		return subjectID;	
+	}
 }
 
 
