@@ -192,6 +192,7 @@ public class OnlineMatchingClient implements ActionListener {
                     studentUI.userId = userID;
                     studentUI.name.setBounds(10, 20, 150, 25);
                     studentUI.panel.add(name);
+                    studentUI.showAllBids();
                     
                 }
             }
