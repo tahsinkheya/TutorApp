@@ -37,7 +37,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	public JLabel name;
 	public JPanel panel;
 	
-	JButton submitButton, showRequests;
+	JButton submitButton, selectBtn;
 	public String userId;
 	private static final String myApiKey = "";
 	
@@ -157,30 +157,27 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         submitButton.addActionListener(this);
         panel.add(submitButton);
         
-        // show bid details
-        
-        /*
-        showRequests = new JButton("Show Current Requests");
-        showRequests.setBounds(10, 300, 120, 25);
-        showRequests.addActionListener(this);
-        panel.add(showRequests);
-        */
         
         // show the current bids
         JLabel bidSectionHeader = new JLabel("Your current requests: ");
         bidSectionHeader.setBounds(10, 330, 300, 25);
         panel.add(bidSectionHeader);
         
+        JLabel instruction = new JLabel("Select a request/bid and click on 'Select Bidder' to close bid");
+        instruction.setBounds(10, 350,1200,25);
+        instruction.setForeground(Color.red);
+        panel.add(instruction);
+        
         allRequests = new JComboBox();
-        allRequests.setBounds(10, 360, 1000, 25);
+        allRequests.setBounds(10, 380, 800, 25);
         panel.add(allRequests);
         
-        /*
-        showRequests = new JButton("Time");
-        showRequests.setBounds(10, 400, 120, 25);
-        showRequests.addActionListener(this);
-        panel.add(showRequests);
-        */
+        
+        selectBtn = new JButton("Select Bidder");
+        selectBtn.setBounds(10, 420, 120, 25);
+        selectBtn.addActionListener(this);
+        panel.add(selectBtn);
+       
         
         // Setting the frame visibility to true
         frame.setVisible(true);
@@ -351,34 +348,52 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	
 	/* Method to show the current bids opened by the student  */
 	protected void showAllRequests() {
-		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("user/"+userId+"?fields=initiatedBids", myApiKey);
+		// get all the bids with messages
+		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("bid?fields=messages", myApiKey);
 		try {
-			ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
-			String outputLine1="";
-			String outputLine2="";
+			ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
 			String output="";
-			
 			allRequests.removeAllItems();
-			// loop since each student can have multiple requests
-			for (JsonNode node : userNode.get("initiatedBids")) {
-				// get the bid status
-				String bidType = node.get("type").toString();
-				String subjectName = node.get("subject").get("name").toString();
-				String desc = node.get("subject").get("description").toString();
-				String closingTime = node.get("additionalInfo").get("requestClosesAt").toString();
-				String reqQualification = node.get("additionalInfo").get("qualificationLevel").toString();
-				outputLine1 = "Status: " + bidType +"    "+  "Closes on: "+ closingTime; 
-				outputLine2 = "Subject: "+subjectName  +"    "+ "Topic: "+ desc + "    " + "Qualification: "+ reqQualification;
-				output = outputLine1+"    "+outputLine2;
-				allRequests.addItem(output);	// update the UI to show each bid 
-			}
+			for (ObjectNode node : userNodes) {
+				// process the initiator id to remove extra quotations
+				String idRaw = node.get("initiator").get("id").toString();
+				int idRawLen = idRaw.length();
+				String initiatorId = idRaw.substring(1, idRawLen-1);
 			
+				// find requests made by student by comparing userId and initiatorId
+				if(initiatorId.equals(userId)) {
+					System.out.println("Found user's bids");
+					String subjectName = node.get("subject").get("name").toString();
+					String desc = node.get("subject").get("description").toString();
+					
+					// each bid can have multiple messages so loop 
+					String msg = "";
+					String msgSender="";
+					int msgNum = 0; // number of bids/messages received on the bid
+					for (JsonNode msgNode : node.get("messages")) {
+						System.out.println(msgNode.toString());
+						msg += msgNode.get("content").toString();
+						System.out.println("Bid Msg: "+ msg);
+						msgSender += msgNode.get("poster").get("userName").toString();
+						msgNum += 1;
+					}
+					
+					// if bid has more than 0 messages, then show who sent them and what was sent
+					if(msgNum>0) {
+						output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"Bid: "+ msg+"    "+ "From: "+ msgSender;
+					}
+					else {
+						output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"Bid: No tutors made any bids yet";
+					}
+					
+					allRequests.addItem(output);	// update the UI to show each bid 
+				}
+			}
 		}
 		catch(Exception e) {
 			System.out.println(e.getCause());
 		}
 	}
-
 }
 
 
