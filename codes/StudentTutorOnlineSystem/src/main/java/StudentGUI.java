@@ -8,10 +8,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -172,8 +174,15 @@ public class StudentGUI implements ActionListener {
         panel.add(bidSectionHeader);
         
         allRequests = new JComboBox();
-        allRequests.setBounds(10, 360, 500, 25);
+        allRequests.setBounds(10, 360, 750, 25);
         panel.add(allRequests);
+        
+        /*
+        showRequests = new JButton("Time");
+        showRequests.setBounds(10, 400, 120, 25);
+        showRequests.addActionListener(this);
+        panel.add(showRequests);
+        */
         
         // Setting the frame visibility to true
         frame.setVisible(true);
@@ -185,8 +194,8 @@ public class StudentGUI implements ActionListener {
 		// TODO Auto-generated method stub
 		if (e.getSource() == submitButton)
 			requestTutor();
-		
 	}
+	
 	
 	private void requestTutor() {
 		
@@ -202,6 +211,7 @@ public class StudentGUI implements ActionListener {
 		String newBidID = webApiPOST("bid", subId);
 		System.out.println("Bid ID: " + newBidID);
 		System.out.println("Successfully created a tutor bid/request");
+		showAllBids();
 	}
 	
 	
@@ -251,8 +261,13 @@ public class StudentGUI implements ActionListener {
 		else if(endpoint.contains("bid")) {
 			
 			// find today's date and time
-			String dateAndTime = new Date().toInstant().toString();
-			System.out.println(dateAndTime);
+			String bidStartTime = new Date().toInstant().toString();
+			System.out.println("Bid Started at: " + bidStartTime);
+			
+			Calendar date = Calendar.getInstance();
+			long timeInSecs = date.getTimeInMillis();
+			String bidEndTime = new Date(timeInSecs + (30*60*1000)).toInstant().toString();
+			System.out.println("Bid will close at: " + bidEndTime);
 			
 			JSONObject additionalInfo=new JSONObject(); 
 			
@@ -263,13 +278,16 @@ public class StudentGUI implements ActionListener {
 			additionalInfo.put("sessionTimeAndDay", sessionTimeAndDay);
 			String rate = "RM"+rateIn.getText()+" "+ allRates.getSelectedItem().toString();
 			additionalInfo.put("rate", rate);
+			
+			// the web api does not accept "dateClosedDown" value when making POST 
+			additionalInfo.put("requestClosesAt", bidEndTime);
 			System.out.println("Additional Info: "+additionalInfo.toString());
 			
 			// create the bid
 			JSONObject bidInfo=new JSONObject();
 			bidInfo.put("type", "open");
 			bidInfo.put("initiatorId", userId);
-			bidInfo.put("dateCreated", dateAndTime);
+			bidInfo.put("dateCreated", bidStartTime);
 			bidInfo.put("subjectId", subID);
 			bidInfo.put("additionalInfo", additionalInfo);
 			jsonString = bidInfo.toString(); // convert to string
@@ -358,13 +376,16 @@ public class StudentGUI implements ActionListener {
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
 			String output="";
+			
+			allRequests.removeAllItems();
 			// loop since each student can have multiple requests
 			for (JsonNode node : userNode.get("initiatedBids")) {
 				// get the bid status
 				String bidType = node.get("type").toString();
 				String subjectName = node.get("subject").get("name").toString();
 				String desc = node.get("subject").get("description").toString();
-				output = "Bid Status: " + bidType +""+ "\nSubject: "+subjectName +"  Topic of Interest: "+ desc + "\n\n"; 
+				String closingTime = node.get("additionalInfo").get("requestClosesAt").toString();
+				output = "Bid Status: " + bidType +"   "+ "\nSubject: "+subjectName +"  Topic of Interest: "+ desc +" " +"Bid closes at: "+ closingTime +"\n\n"; 
 				allRequests.addItem(output);	// update the UI to show each bid 
 			}
 			
