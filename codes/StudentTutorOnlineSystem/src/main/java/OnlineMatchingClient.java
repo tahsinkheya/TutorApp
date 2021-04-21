@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 public class OnlineMatchingClient implements ActionListener {
+    private UserFacade facadeUser= new UserFacade();
     /*
     NOTE: In order to access the web service, you will need to include your API key in the Authorization header of all requests you make.
     Your personal API key can be obtained here: https://fit3077.com
@@ -99,32 +100,6 @@ public class OnlineMatchingClient implements ActionListener {
                 .GET()
                 .build();
         HttpResponse<String> response = null;
-        
-        
-        // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
-//        try {
-//        	response=client.send(request, HttpResponse.BodyHandlers.ofString());
-//        	//System.out.println("Full JSON response: " + response.body());
-//
-//        	// The GET /user endpoint returns a JSON array, so we can loop through the response as we could with a normal array/list.
-//            ObjectNode[] jsonNodes = new ObjectMapper().readValue(response.body(), ObjectNode[].class);
-//            String usernameEntered= usernameText.getText(); // input username
-//            for (ObjectNode node: jsonNodes) {
-//              String usernameFromDB = node.get("userName").asText();
-//              if(usernameFromDB.equals(usernameEntered)) { // if user name matches, then check usertype
-//            	  if (node.get("isStudent").booleanValue()) {
-//            		  userType = "Student";
-//            	  }
-//            	  else {
-//            		  userType = "Tutor";
-//            	  }
-//              }
-//            }
-//        }
-//        catch(Exception e) {
-//        	System.out.println(e.getCause());
-//        }
-
 
         // A request body needs to be supplied to this endpoint, otherwise a 400 Bad Request error will be returned.
         String usersLoginUrl = usersUrl + "/login";
@@ -158,7 +133,9 @@ public class OnlineMatchingClient implements ActionListener {
                 userID = actualObj.get("sub").asText();
             }
             else{userType="Tutor";}
-            }
+            facadeUser.createUser(actualObj.get("userName").asText(),actualObj.get("givenName").asText(),actualObj.get("familyname").asText(),userType);
+
+        }
         catch (Exception e){
             System.out.println(e.getCause());
         }
