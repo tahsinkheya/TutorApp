@@ -7,13 +7,11 @@
  * @author Rafaquat
  *
  */
-public class Student implements User {
+public class Student extends StudentGUI implements User {
 	String userName;
 	String givenName;
 	String familyName;
-	public static void main(String[] args) {
-		StudentGUI studentUI = new StudentGUI();
-	}
+	
 
 	@Override
 	public boolean signContract() {

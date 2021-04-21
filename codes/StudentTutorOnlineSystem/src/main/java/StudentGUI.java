@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class StudentGUI implements ActionListener, User {
+public class StudentGUI extends GraphicalUserInterface implements ActionListener {
 	public JLabel name;
 	public JPanel panel;
 	
@@ -209,7 +209,7 @@ public class StudentGUI implements ActionListener, User {
 		String newBidID = webApiPOST("bid", subId);
 		System.out.println("Bid ID: " + newBidID);
 		System.out.println("Successfully created a tutor bid/request");
-		showAllBids();
+		showAllRequests();
 	}
 	
 	
@@ -218,7 +218,7 @@ public class StudentGUI implements ActionListener, User {
 	/* Method to create a new class instances in db.
 	 * For now: new subject can be created and new bid can be created */
 	
-	private String webApiPOST(String endpoint, String subID) {
+	protected String webApiPOST(String endpoint, String subID) {
 		String refId = null;  // id value to get the subject or bid
 		String jsonString = null;
 		// set the endpoint types to be false
@@ -318,7 +318,7 @@ public class StudentGUI implements ActionListener, User {
 		// get the user inputs
 		String userSub = subjectText.getText();
 		String userDesc = descText.getText();
-		HttpResponse<String> subResponse = User.initiateWebApiGET("subject", myApiKey);
+		HttpResponse<String> subResponse = GraphicalUserInterface.initiateWebApiGET("subject", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
 			
@@ -350,8 +350,8 @@ public class StudentGUI implements ActionListener, User {
 	}
 	
 	/* Method to show the current bids opened by the student  */
-	protected void showAllBids() {
-		HttpResponse<String> userResponse = User.initiateWebApiGET("user/"+userId+"?fields=initiatedBids", myApiKey);
+	protected void showAllRequests() {
+		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("user/"+userId+"?fields=initiatedBids", myApiKey);
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
 			String output="";
@@ -364,7 +364,7 @@ public class StudentGUI implements ActionListener, User {
 				String subjectName = node.get("subject").get("name").toString();
 				String desc = node.get("subject").get("description").toString();
 				String closingTime = node.get("additionalInfo").get("requestClosesAt").toString();
-				output = "Bid Status: " + bidType +"   "+ "\nSubject: "+subjectName +"  Topic of Interest: "+ desc +" " +"Request closes at: "+ closingTime +"\n\n"; 
+				output = "Bid Status: " + bidType +"    "+ "Subject: "+subjectName  +"    "+ "Topic of Interest: "+ desc + "    " +"Request closes at: "+ closingTime +"\n\n"; 
 				allRequests.addItem(output);	// update the UI to show each bid 
 			}
 			
@@ -374,17 +374,6 @@ public class StudentGUI implements ActionListener, User {
 		}
 	}
 
-	@Override
-	public boolean signContract() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void create(String uName, String gName, String fName) {
-		// TODO Auto-generated method stub
-		
-	}
 }
 
 

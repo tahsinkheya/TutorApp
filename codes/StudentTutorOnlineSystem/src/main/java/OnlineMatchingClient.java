@@ -163,13 +163,13 @@ public class OnlineMatchingClient implements ActionListener {
             } else {
                 // open the student homepage after login
                 if (userType.equals("Student")) {
-                    StudentGUI studentUI = new StudentGUI();
+                    Student student = new Student();
                     JLabel name = new JLabel("Welcome: " + usernameEntered);
-                    studentUI.name = name;
-                    studentUI.userId = userID;
-                    studentUI.name.setBounds(10, 20, 150, 25);
-                    studentUI.panel.add(name);
-                    studentUI.showAllBids();
+                    student.name = name;
+                    student.userId = userID;
+                    student.name.setBounds(10, 20, 150, 25);
+                    student.panel.add(name);
+                    student.showAllRequests();
                     
                 }
             }
