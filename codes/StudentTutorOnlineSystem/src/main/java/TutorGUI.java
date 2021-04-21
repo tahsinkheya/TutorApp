@@ -66,8 +66,8 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
         panel.add(relListTitle);
         
         
-        JLabel instruction = new JLabel("Select a request and then click on 'bid' to make a bid");
-        instruction.setBounds(10,80,1000,25);
+        JLabel instruction = new JLabel("Select a request and then click on either 'Buy Out' or 'Place Bid' to make a bid");
+        instruction.setBounds(10,80,1200,25);
         instruction.setForeground(Color.red);
         panel.add(instruction);
         
@@ -82,9 +82,16 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
         panel.add(buyOutBtn);
         
         
+        JLabel msgLabel = new JLabel("Your Message");
+        msgLabel.setBounds(10, 220,200,25);
+        panel.add(msgLabel);
+        
+        msgContent = new JTextField(20);
+        msgContent.setBounds(100, 220,165,25);
+        panel.add(msgContent);
         
         msgBtn = new JButton("Place Bid");
-        msgBtn.setBounds(100, 180, 100, 25);
+        msgBtn.setBounds(100, 250, 100, 25);
         msgBtn.addActionListener(this);
         panel.add(msgBtn);
         
@@ -95,23 +102,39 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buyOutBtn) {
-			buyOut();
+			//buyOut();
+			sendMsg("Buy Out");
 		}
 		else if(e.getSource() == msgBtn){
-			placeBid();
+			//placeBid();
+			sendMsg("Place Bid");
 		}
 	}
 	
-	
-	private void buyOut() {
+	/* Method to get the bid id of the request selected from JComboBox */
+	private String getSelectedRequest() {
 		// get the index of the selected request
 		int selectedRequestPos = allRequests.getSelectedIndex();
 		// get the id of the selected request from list
 		String bidIdFromList = allStudentBidList.get(selectedRequestPos);
 		int bidLength = bidIdFromList.length();
 		String selectedBidId = bidIdFromList.substring(1, bidLength-1); // remove additional quotations
+		return selectedBidId;
+	}
+	
+	/* Method to send the message for both buy out and placing bids */
+	private void sendMsg(String intent) {
+		String selectedBidId = getSelectedRequest();
 		//System.out.println("Bid Id: " + selectedBidId);
 		String msgPostDate = new Date().toInstant().toString(); // date of posting message
+		String content = null;
+		
+		if(intent.equals("Buy Out")) {
+			content = "I agree on all terms";
+		}
+		else if(intent.equals("Place Bid")) {
+			content = msgContent.getText();
+		}
 		
 		String jsonString = null;
 		// create the message object
@@ -119,7 +142,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 		msgInfo.put("bidId", selectedBidId);
 		msgInfo.put("posterId", userId);
 		msgInfo.put("datePosted", msgPostDate);
-		msgInfo.put("content", "I agree all terms");
+		msgInfo.put("content", content);
 		JSONObject additionalInfo=new JSONObject();
 		msgInfo.put("additionalInfo", additionalInfo);
 		
@@ -127,11 +150,8 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 		jsonString = msgInfo.toString(); 
 		System.out.println("Message: "+jsonString);
 		storeMsgInDB("message", jsonString);
-	
 		
 	}
-	
-	private void placeBid() {}
 	
 	/* Method to create a new class instances in db.
 	 * For now: new subject can be created and new bid can be created */

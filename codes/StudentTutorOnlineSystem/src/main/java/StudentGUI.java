@@ -39,7 +39,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	
 	JButton submitButton, showRequests;
 	public String userId;
-	private static final String myApiKey = "tNmpdQMptfJqqJfTHGHW9nB6P8dHWP";
+	private static final String myApiKey = "";
 	
 	// user inputs for subject, lesson(description), session time, rate and number of sessions
 	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
