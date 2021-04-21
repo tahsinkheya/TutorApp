@@ -172,6 +172,16 @@ public class OnlineMatchingClient implements ActionListener {
                     student.showAllRequests();
                     
                 }
+                else if(userType.equals("Tutor")) {
+                	Tutor tutor = new Tutor();
+                    JLabel name = new JLabel("Welcome: " + usernameEntered);
+                    tutor.name = name;
+                    tutor.userId = userID;
+                    tutor.name.setBounds(10, 20, 150, 25);
+                    tutor.panel.add(name);
+                    tutor.showAllStudentRequests();
+                    
+                }
             }
         }
         

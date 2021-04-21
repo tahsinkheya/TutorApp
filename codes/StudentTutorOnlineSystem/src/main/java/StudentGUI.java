@@ -39,7 +39,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	
 	JButton submitButton, showRequests;
 	public String userId;
-	private static final String myApiKey = "";
+	private static final String myApiKey = "tNmpdQMptfJqqJfTHGHW9nB6P8dHWP";
 	
 	// user inputs for subject, lesson(description), session time, rate and number of sessions
 	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
@@ -172,7 +172,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         panel.add(bidSectionHeader);
         
         allRequests = new JComboBox();
-        allRequests.setBounds(10, 360, 850, 25);
+        allRequests.setBounds(10, 360, 1000, 25);
         panel.add(allRequests);
         
         /*
@@ -354,6 +354,8 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("user/"+userId+"?fields=initiatedBids", myApiKey);
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
+			String outputLine1="";
+			String outputLine2="";
 			String output="";
 			
 			allRequests.removeAllItems();
@@ -364,7 +366,10 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 				String subjectName = node.get("subject").get("name").toString();
 				String desc = node.get("subject").get("description").toString();
 				String closingTime = node.get("additionalInfo").get("requestClosesAt").toString();
-				output = "Bid Status: " + bidType +"    "+ "Subject: "+subjectName  +"    "+ "Topic of Interest: "+ desc + "    " +"Request closes at: "+ closingTime +"\n\n"; 
+				String reqQualification = node.get("additionalInfo").get("qualificationLevel").toString();
+				outputLine1 = "Status: " + bidType +"    "+  "Closes on: "+ closingTime; 
+				outputLine2 = "Subject: "+subjectName  +"    "+ "Topic: "+ desc + "    " + "Qualification: "+ reqQualification;
+				output = outputLine1+"    "+outputLine2;
 				allRequests.addItem(output);	// update the UI to show each bid 
 			}
 			
