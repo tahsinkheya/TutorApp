@@ -172,7 +172,7 @@ public class StudentGUI implements ActionListener, User {
         panel.add(bidSectionHeader);
         
         allRequests = new JComboBox();
-        allRequests.setBounds(10, 360, 750, 25);
+        allRequests.setBounds(10, 360, 850, 25);
         panel.add(allRequests);
         
         /*
@@ -318,7 +318,7 @@ public class StudentGUI implements ActionListener, User {
 		// get the user inputs
 		String userSub = subjectText.getText();
 		String userDesc = descText.getText();
-		HttpResponse<String> subResponse = User.initiateWebApiGET("subject");
+		HttpResponse<String> subResponse = User.initiateWebApiGET("subject", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
 			
@@ -351,7 +351,7 @@ public class StudentGUI implements ActionListener, User {
 	
 	/* Method to show the current bids opened by the student  */
 	protected void showAllBids() {
-		HttpResponse<String> userResponse = User.initiateWebApiGET("user/"+userId+"?fields=initiatedBids");
+		HttpResponse<String> userResponse = User.initiateWebApiGET("user/"+userId+"?fields=initiatedBids", myApiKey);
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
 			String output="";

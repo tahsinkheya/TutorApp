@@ -15,17 +15,16 @@ public interface User {
     public boolean signContract();
     public void create(String uName, String gName,String fName);
     
-	public static final String myApiKey = "";
 
     
     /* Method to make a web request to GET some data */
-	static  HttpResponse<String> initiateWebApiGET(String endpoint) {
+	static  HttpResponse<String> initiateWebApiGET(String endpoint, String apiKey) {
 		String Url = "https://fit3077.com/api/v1/"+endpoint;
 		
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest
 		.newBuilder(URI.create(Url))
-		.setHeader("Authorization", myApiKey)
+		.setHeader("Authorization", apiKey)
 		.GET()
 		.build();
 		HttpResponse<String> response = null;
