@@ -132,7 +132,10 @@ public class OnlineMatchingClient implements ActionListener {
                 userType="Student";
                 userID = actualObj.get("sub").asText();
             }
-            else{userType="Tutor";}
+            else{
+            	userType="Tutor";
+            	userID = actualObj.get("sub").asText();
+            }
             facadeUser.createUser(actualObj.get("userName").asText(),actualObj.get("givenName").asText(),actualObj.get("familyname").asText(),userType);
 
         }
