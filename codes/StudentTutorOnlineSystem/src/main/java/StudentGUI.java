@@ -385,7 +385,7 @@ public class StudentGUI implements ActionListener {
 				String subjectName = node.get("subject").get("name").toString();
 				String desc = node.get("subject").get("description").toString();
 				String closingTime = node.get("additionalInfo").get("requestClosesAt").toString();
-				output = "Bid Status: " + bidType +"   "+ "\nSubject: "+subjectName +"  Topic of Interest: "+ desc +" " +"Bid closes at: "+ closingTime +"\n\n"; 
+				output = "Bid Status: " + bidType +"   "+ "\nSubject: "+subjectName +"  Topic of Interest: "+ desc +" " +"Request closes at: "+ closingTime +"\n\n"; 
 				allRequests.addItem(output);	// update the UI to show each bid 
 			}
 			
