@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class StudentGUI implements ActionListener {
+public class StudentGUI implements ActionListener, User {
 	public JLabel name;
 	public JPanel panel;
 	
@@ -45,8 +45,6 @@ public class StudentGUI implements ActionListener {
 	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
 	// chosen qualification level
 	private static JComboBox qualList, timeList, daysBox, allRates, allRequests;
-	
-
 
 	
 	public StudentGUI() {
@@ -215,25 +213,6 @@ public class StudentGUI implements ActionListener {
 	}
 	
 	
-	/* Method to make a web request to GET some data */
-	private  HttpResponse<String> initiateWebApiGET(String endpoint) {
-		String Url = "https://fit3077.com/api/v1/"+endpoint;
-		
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest
-		.newBuilder(URI.create(Url))
-		.setHeader("Authorization", myApiKey)
-		.GET()
-		.build();
-		HttpResponse<String> response = null;
-		try {
-		 response = client.send(request, HttpResponse.BodyHandlers.ofString());
-		}
-		catch (Exception e){
-            System.out.println(e.getCause());
-        }
-		return response;
-	}
 	
 	
 	/* Method to create a new class instances in db.
@@ -339,7 +318,7 @@ public class StudentGUI implements ActionListener {
 		// get the user inputs
 		String userSub = subjectText.getText();
 		String userDesc = descText.getText();
-		HttpResponse<String> subResponse = initiateWebApiGET("subject");
+		HttpResponse<String> subResponse = User.initiateWebApiGET("subject");
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
 			
@@ -372,7 +351,7 @@ public class StudentGUI implements ActionListener {
 	
 	/* Method to show the current bids opened by the student  */
 	protected void showAllBids() {
-		HttpResponse<String> userResponse = initiateWebApiGET("user/"+userId+"?fields=initiatedBids");
+		HttpResponse<String> userResponse = User.initiateWebApiGET("user/"+userId+"?fields=initiatedBids");
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
 			String output="";
@@ -393,6 +372,18 @@ public class StudentGUI implements ActionListener {
 		catch(Exception e) {
 			System.out.println(e.getCause());
 		}
+	}
+
+	@Override
+	public boolean signContract() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void create(String uName, String gName, String fName) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
