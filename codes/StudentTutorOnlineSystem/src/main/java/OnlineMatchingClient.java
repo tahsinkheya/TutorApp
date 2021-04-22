@@ -172,7 +172,7 @@ public class OnlineMatchingClient implements ActionListener {
                     student.userId = userID;
                     student.name.setBounds(10, 20, 150, 25);
                     student.panel.add(name);
-                    student.showAllRequests();
+                    //student.showAllRequests();
                     
                 }
                 else if(userType.equals("Tutor")) {

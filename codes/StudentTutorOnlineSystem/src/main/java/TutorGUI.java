@@ -44,7 +44,6 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	private ArrayList<String> allStudentBidList = new ArrayList<String>();
 
 	
-	
 	public TutorGUI() {
 
 		// Creating instance of JFrame
@@ -183,7 +182,6 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			System.out.println(e.getMessage());
 			
 		}
-		
 		//return refId;
 	}
 	
@@ -199,6 +197,14 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			for (ObjectNode node: jsonNodes) {
 				
 				for (JsonNode bidNode : node.get("initiatedBids")) {
+					if(bidNode.get("dateClosedDown").toString().equals("null") ) {}
+					String currentTime = new Date().toInstant().toString(); // date of posting message
+					String closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
+					String bidCloseTime = GraphicalUserInterface.removeQuotations(closeTimeDb); 
+					System.out.println("Current time: "+currentTime);
+					System.out.println("Bid close time: "+bidCloseTime);
+					
+					
 					String status = bidNode.get("type").toString();
 					String requester = node.get("userName").toString();
 					String subject = bidNode.get("subject").get("name").toString();
@@ -216,12 +222,13 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			System.out.println(e.getCause());
 		}
 	}
-	
-	
+
 	@Override
 	String webApiPOST(String endpoint, String subID) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
 
 }

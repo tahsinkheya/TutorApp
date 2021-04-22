@@ -378,17 +378,18 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 			for (ObjectNode node : userNodes) {
 				// process the initiator id to remove extra quotations
 				String idRaw = node.get("initiator").get("id").toString();
+				
+				
 				int idRawLen = idRaw.length();
 				String initiatorId = idRaw.substring(1, idRawLen-1);
-				
-				String bidStatusRaw = node.get("type").toString();
-				int bidStatusRawLen = bidStatusRaw.length();
-				String bidStatus = bidStatusRaw.substring(1, bidStatusRawLen-1);
-				System.out.println("The bid is: " + bidStatus);
-				
+			
 				// find requests made by student by comparing userId and initiatorId
-				if(initiatorId.equals(userId) & bidStatus.equals("open")) {
+				if(initiatorId.equals(userId) & node.get("dateClosedDown").toString().equals("null") ) {
 					System.out.println("Found user's bids");
+					String bidId = GraphicalUserInterface.removeQuotations(node.get("id").toString());
+					System.out.println("The bid id is: " + bidId);
+					
+					String closeTime = node.get("additionalInfo").get("requestClosesAt").toString();
 					String subjectName = node.get("subject").get("name").toString();
 					String desc = node.get("subject").get("description").toString();
 					
@@ -411,11 +412,14 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 					else {
 						output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"Bid: No tutors made any bids yet";
 					}
+					String bidStatusRaw = node.get("type").toString();
+					int bidStatusRawLen = bidStatusRaw.length();
+					String bidStatus = bidStatusRaw.substring(1, bidStatusRawLen-1);
 					
 					requestMade.setText("Your Request: "+ output);
 					requestStatus.setText("Status: "+ bidStatus);
-					closeBid();
-					System.out.println("Now we need to close the bid");
+					closeBid(bidId, closeTime);
+					//System.out.println("Now we need to close the bid");
 					//allRequests.addItem(output);	// update the UI to show each bid 
 				}
 			}
@@ -425,8 +429,8 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		}
 	}
 	
-	private void closeBid() {
-		new RequestCloser(60);
+	private void closeBid(String bidId, String closeTime) {
+		new RequestCloser(10, bidId, myApiKey, closeTime);
         System.out.println("Bid open for 30 minutes.");
 	}		
 }
