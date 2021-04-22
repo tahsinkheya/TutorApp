@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -45,8 +47,12 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
 	// chosen qualification level
 	private static JComboBox qualList, timeList, daysBox, allRates, allRequests;
-
 	
+	private static JLabel requestMade, requestStatus;
+	
+	// time to close the bid
+	private Timer timer;
+
 	public StudentGUI() {
 		// Creating instance of JFrame
         JFrame frame = new JFrame("Student Homepage");
@@ -168,17 +174,33 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         instruction.setForeground(Color.red);
         panel.add(instruction);
         
+        
+        requestMade = new JLabel("Your Request: ");
+        requestMade.setBounds(10, 380, 800, 25);
+        panel.add(requestMade);
+        
+        // Weekly Sessions
+        JLabel responseLabel = new JLabel("All Responses: ");
+        responseLabel.setBounds(10, 420, 200, 25);
+        panel.add(responseLabel);
+        
+        
+        // all responses
         allRequests = new JComboBox();
-        allRequests.setBounds(10, 380, 800, 25);
+        allRequests.setBounds(130, 420, 800, 25);
         panel.add(allRequests);
+        
+        requestStatus = new JLabel("Status: ");
+        requestStatus.setBounds(10, 450, 300, 25);
+        panel.add(requestStatus);
         
         
         selectBtn = new JButton("Select Bidder");
-        selectBtn.setBounds(10, 420, 120, 25);
+        selectBtn.setBounds(10, 490, 120, 25);
         selectBtn.addActionListener(this);
-        panel.add(selectBtn);
-       
-        
+        panel.add(selectBtn); 		
+        		
+        		
         // Setting the frame visibility to true
         frame.setVisible(true);
         
@@ -353,15 +375,19 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		try {
 			ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
 			String output="";
-			allRequests.removeAllItems();
 			for (ObjectNode node : userNodes) {
 				// process the initiator id to remove extra quotations
 				String idRaw = node.get("initiator").get("id").toString();
 				int idRawLen = idRaw.length();
 				String initiatorId = idRaw.substring(1, idRawLen-1);
-			
+				
+				String bidStatusRaw = node.get("type").toString();
+				int bidStatusRawLen = bidStatusRaw.length();
+				String bidStatus = bidStatusRaw.substring(1, bidStatusRawLen-1);
+				System.out.println("The bid is: " + bidStatus);
+				
 				// find requests made by student by comparing userId and initiatorId
-				if(initiatorId.equals(userId)) {
+				if(initiatorId.equals(userId) & bidStatus.equals("open")) {
 					System.out.println("Found user's bids");
 					String subjectName = node.get("subject").get("name").toString();
 					String desc = node.get("subject").get("description").toString();
@@ -386,7 +412,11 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 						output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"Bid: No tutors made any bids yet";
 					}
 					
-					allRequests.addItem(output);	// update the UI to show each bid 
+					requestMade.setText("Your Request: "+ output);
+					requestStatus.setText("Status: "+ bidStatus);
+					closeBid();
+					System.out.println("Now we need to close the bid");
+					//allRequests.addItem(output);	// update the UI to show each bid 
 				}
 			}
 		}
@@ -394,6 +424,9 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 			System.out.println(e.getCause());
 		}
 	}
+	
+	private void closeBid() {
+		new RequestCloser(60);
+        System.out.println("Bid open for 30 minutes.");
+	}		
 }
-
-
