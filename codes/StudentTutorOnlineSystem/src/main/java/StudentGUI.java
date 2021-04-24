@@ -40,7 +40,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	public JPanel panel;
 	
 	JButton submitButton, selectBtn;
-	public String userId;
+	public static String userId;
 	private static final String myApiKey = "";
 	
 	// user inputs for subject, lesson(description), session time, rate and number of sessions
@@ -50,8 +50,8 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	
 	private static JLabel requestMade, requestStatus;
 	
-	// time to close the bid
-	private Timer timer;
+	// create the bid only once.
+	private static boolean bidCreated = false;
 
 	public StudentGUI() {
 		// Creating instance of JFrame
@@ -191,7 +191,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         panel.add(allRequests);
         
         requestStatus = new JLabel("Status: ");
-        requestStatus.setBounds(10, 450, 300, 25);
+        requestStatus.setBounds(10, 450, 600, 25);
         panel.add(requestStatus);
         
         
@@ -199,7 +199,6 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         selectBtn.setBounds(10, 490, 120, 25);
         selectBtn.addActionListener(this);
         panel.add(selectBtn); 		
-        		
         		
         // Setting the frame visibility to true
         frame.setVisible(true);
@@ -209,16 +208,16 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		if (e.getSource() == submitButton)
+		if (e.getSource() == submitButton) {
 			requestTutor();
+		}
+			
 	}
 	
 	
 	private void requestTutor() {
 		
 		System.out.println("Tutor Request process started");
-		// user id of the logged in user
-		System.out.println("User ID: " + userId);
 		
 		// subject id of the subject that student wants
 		String subId = findSubject();
@@ -238,15 +237,16 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	 * For now: new subject can be created and new bid can be created */
 	
 	protected String webApiPOST(String endpoint, String subID) {
+
 		String refId = null;  // id value to get the subject or bid
 		String jsonString = null;
+		String closeTime = null;
 		// set the endpoint types to be false
 		boolean isSubject = false;
 		boolean isBid = false;
 		
 		// endpoint.contains is used since we can have subject or subject/subjectID
 		if(endpoint.contains("subject")) {
-			System.out.println("Need to make subject JSON for: "+ endpoint);
 			// create a new JSON object for subject
 			jsonString = "{" + 
 					"\"name\":\"" + subjectText.getText() + "\"," +
@@ -259,16 +259,13 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		else if(endpoint.contains("bid")) {
 			
 			// find today's date and time
-			String bidStartTime = new Date().toInstant().toString();
-			System.out.println("Bid Started at: " + bidStartTime);
-			
+			String bidStartTime = new Date().toInstant().toString();			
 			Calendar date = Calendar.getInstance();
 			long timeInSecs = date.getTimeInMillis();
 			String bidEndTime = new Date(timeInSecs + (30*60*1000)).toInstant().toString();
-			System.out.println("Bid will close at: " + bidEndTime);
+			
 			
 			JSONObject additionalInfo=new JSONObject(); 
-			
 			// create the additional info
 			additionalInfo.put("qualificationLevel", qualList.getSelectedItem().toString());
 			additionalInfo.put("weeklySessions", sessionNum.getText());
@@ -279,7 +276,8 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 			
 			// the web api does not accept "dateClosedDown" value when making POST 
 			additionalInfo.put("requestClosesAt", bidEndTime);
-			System.out.println("Additional Info: "+additionalInfo.toString());
+			closeTime = bidEndTime;
+			
 			
 			// create the bid
 			JSONObject bidInfo=new JSONObject();
@@ -306,11 +304,13 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		
 		try {
 			HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+			
 			if(isSubject) {
 				System.out.println("Created new subject in database");
 			}
 			else if(isBid) {
 				System.out.println("Created new bid in database");
+				bidCreated = true;
 			}
 			
 			// get the id of the newly created object
@@ -355,12 +355,10 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 			
 			if (subjectFound==false) {
 				// if the subject is not found in database, then create new subject
-				System.out.println("Subject not found, so creating new subject ");
+				System.out.println("Subject not found, so creating new subject: " + userSub);
 				subjectID = webApiPOST("subject", null);
 				return subjectID;
-			}
-			
-			
+			}	
 		}
 		catch(Exception e) {
 			System.out.println(e.getCause());
@@ -369,23 +367,23 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	}
 	
 	/* Method to show the current bids opened by the student  */
-	protected void showAllRequests() {
+	protected static void showAllRequests() {
 		// get all the bids with messages
 		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("bid?fields=messages", myApiKey);
 		try {
 			ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
 			String output="";
+			String studentRequest  = "";
+			allRequests.removeAllItems();
+			requestMade.setText("");
 			for (ObjectNode node : userNodes) {
 				// process the initiator id to remove extra quotations
-				String idRaw = node.get("initiator").get("id").toString();
-				
-				
-				int idRawLen = idRaw.length();
-				String initiatorId = idRaw.substring(1, idRawLen-1);
+				String initId = node.get("initiator").get("id").toString();
+				String initiatorId = GraphicalUserInterface.removeQuotations(initId);
 			
 				// find requests made by student by comparing userId and initiatorId
 				if(initiatorId.equals(userId) & node.get("dateClosedDown").toString().equals("null") ) {
-					System.out.println("Found user's bids");
+					System.out.println("Found bid made by student");
 					String bidId = GraphicalUserInterface.removeQuotations(node.get("id").toString());
 					System.out.println("The bid id is: " + bidId);
 					
@@ -396,31 +394,23 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 					// each bid can have multiple messages so loop 
 					String msg = "";
 					String msgSender="";
-					int msgNum = 0; // number of bids/messages received on the bid
 					for (JsonNode msgNode : node.get("messages")) {
-						System.out.println(msgNode.toString());
-						msg += msgNode.get("content").toString();
-						System.out.println("Bid Msg: "+ msg);
-						msgSender += msgNode.get("poster").get("userName").toString();
-						msgNum += 1;
-					}
-					
-					// if bid has more than 0 messages, then show who sent them and what was sent
-					if(msgNum>0) {
+						msg = msgNode.get("content").toString();
+						msgSender = msgNode.get("poster").get("userName").toString();
+						// update the jcombo box as more tutors reply
 						output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"Bid: "+ msg+"    "+ "From: "+ msgSender;
+						allRequests.addItem(output);
 					}
-					else {
-						output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"Bid: No tutors made any bids yet";
-					}
-					String bidStatusRaw = node.get("type").toString();
-					int bidStatusRawLen = bidStatusRaw.length();
-					String bidStatus = bidStatusRaw.substring(1, bidStatusRawLen-1);
 					
-					requestMade.setText("Your Request: "+ output);
-					requestStatus.setText("Status: "+ bidStatus);
-					closeBid(bidId, closeTime);
-					//System.out.println("Now we need to close the bid");
-					//allRequests.addItem(output);	// update the UI to show each bid 
+					studentRequest = "Subject: "+subjectName  +"    "+ "Topic: "+ desc;
+					if(bidCreated) {
+						closeBid(bidId, closeTime);
+						bidCreated = false;
+					}
+
+					requestMade.setText("Your Request: "+ studentRequest);
+					requestStatus.setText("Tutor request will remain open for the next 30 minutes");
+					
 				}
 			}
 		}
@@ -429,8 +419,13 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		}
 	}
 	
-	private void closeBid(String bidId, String closeTime) {
-		new RequestCloser(10, bidId, myApiKey, closeTime);
-        System.out.println("Bid open for 30 minutes.");
-	}		
+	private static void closeBid(String bidId, String closeTime) {
+		// bid lasts for 10 seconds for now
+		int seconds = 300; // 10 minutes
+		new RequestCloser(seconds, bidId, myApiKey, closeTime);
+        System.out.println("Bid opened for 30 minutes.");
+	}
+
+	
+		
 }

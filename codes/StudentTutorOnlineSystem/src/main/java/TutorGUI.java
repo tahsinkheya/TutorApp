@@ -147,16 +147,15 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 		
 		// convert message to JSON string
 		jsonString = msgInfo.toString(); 
-		System.out.println("Message: "+jsonString);
-		storeMsgInDB("message", jsonString);
+		webApiPOST("message", jsonString);
 		
 	}
 	
+	
 	/* Method to create a new class instances in db.
 	 * For now: new subject can be created and new bid can be created */
-	
-	protected void storeMsgInDB(String endpoint, String jsonString) {
-		System.out.println("Input: "+jsonString);
+	@Override
+	protected String webApiPOST(String endpoint, String jsonString) {
 		String refId = null;  // id value to get the subject or bid
 
 		// create a new message in the database 
@@ -173,7 +172,8 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 			// get the id of the newly created object
 			ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
-			System.out.println("JsonNode: "+jsonNode.toString());
+			System.out.println("Bid/Message sent successfully");
+			Student.showAllRequests();
 		
 		}
 		catch(Exception e){
@@ -182,13 +182,12 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			System.out.println(e.getMessage());
 			
 		}
-		//return refId;
+		return refId;
 	}
 	
 	
 	/* Show the tutor all the requests made by students  */
 	protected void showAllStudentRequests() {
-		System.out.println("Function started");
 		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
@@ -197,24 +196,21 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			for (ObjectNode node: jsonNodes) {
 				
 				for (JsonNode bidNode : node.get("initiatedBids")) {
-					if(bidNode.get("dateClosedDown").toString().equals("null") ) {}
-					String currentTime = new Date().toInstant().toString(); // date of posting message
-					String closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
-					String bidCloseTime = GraphicalUserInterface.removeQuotations(closeTimeDb); 
-					System.out.println("Current time: "+currentTime);
-					System.out.println("Bid close time: "+bidCloseTime);
-					
-					
-					String status = bidNode.get("type").toString();
-					String requester = node.get("userName").toString();
-					String subject = bidNode.get("subject").get("name").toString();
-					String topic = bidNode.get("subject").get("description").toString();
-					output = "Status: "+status+"    "+"Requested by: "+requester+"    "+ "Subject: "+subject  +"    "+ "Topic: "+ topic;
-					allRequests.addItem(output);
-					
-					// store all bidIds in allStudentBidList
-					String bidId = bidNode.get("id").toString();
-					allStudentBidList.add(bidId);
+					// show bids that are not closed down
+					if(bidNode.get("dateClosedDown").toString().equals("null") ) {
+						String closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
+						String bidCloseTime = GraphicalUserInterface.removeQuotations(closeTimeDb); 
+						String status = bidNode.get("type").toString();
+						String requester = node.get("userName").toString();
+						String subject = bidNode.get("subject").get("name").toString();
+						String topic = bidNode.get("subject").get("description").toString();
+						output = "Status: "+status+"    "+"Requested by: "+requester+"    "+ "Subject: "+subject  +"    "+ "Topic: "+ topic+"    " + "Closes at: " + bidCloseTime;
+						allRequests.addItem(output);
+						
+						// store all bidIds in allStudentBidList
+						String bidId = bidNode.get("id").toString();
+						allStudentBidList.add(bidId);
+					}
 				}
 			}
 		}
@@ -222,13 +218,4 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			System.out.println(e.getCause());
 		}
 	}
-
-	@Override
-	String webApiPOST(String endpoint, String subID) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	
-
 }

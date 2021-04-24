@@ -29,7 +29,6 @@ public class RequestCloser {
 	class RequestCloserTask extends TimerTask {
         public void run() {
         	// change the status in db
-            System.out.println("cccc: "+bidEndTime);
             String endpoint = "bid/"+id+"/close-down";
             
             JSONObject bidInfo=new JSONObject();
@@ -39,7 +38,7 @@ public class RequestCloser {
     		String jsonString = bidInfo.toString();
             HttpResponse<String> updateResponse = GraphicalUserInterface.updateWebApi(endpoint, key, jsonString);
             System.out.println(updateResponse.toString());
-            System.out.println("BID CLOSED FINALLY");
+            System.out.println("BID CLOSED");
             timer.cancel(); //Terminate the timer thread
             
         }
