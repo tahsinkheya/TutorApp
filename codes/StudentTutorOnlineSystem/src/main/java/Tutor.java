@@ -1,4 +1,4 @@
-public class Tutor implements  User{
+public class Tutor extends TutorGUI implements  User{
     String userName;
     String givenName;
     String familyName;
