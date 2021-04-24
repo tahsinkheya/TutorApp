@@ -12,12 +12,14 @@ import org.json.simple.JSONObject;
 /*
  * @author Rafaquat
  *
+ *This class is used to handle the timer thread. When a new instance is made, the run method
+ *in RequestCloserTask is run, which closes the timer and closes the bid
  */
 public class RequestCloser {
-	Timer timer;
-	String id;
-	String key;
-	String bidEndTime;
+	private Timer timer;
+	private String id;
+	private String key;
+	private String bidEndTime;
 	public RequestCloser(int seconds, String bidId, String apiKey, String closeTime) {
 		key = apiKey;
 		id  = bidId;
@@ -28,7 +30,7 @@ public class RequestCloser {
 	
 	class RequestCloserTask extends TimerTask {
         public void run() {
-        	// change the status in db
+        	// change the status in db to close the bid
             String endpoint = "bid/"+id+"/close-down";
             
             JSONObject bidInfo=new JSONObject();

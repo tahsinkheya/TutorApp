@@ -31,7 +31,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	public JLabel name;
 	public JPanel panel;
 	
-	JButton msgBtn, buyOutBtn;
+	JButton msgBtn, buyOutBtn; 	//testBtn
 	public String userId;
 	private static final String myApiKey = "";
 	
@@ -39,6 +39,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	private static JTextField msgContent;
 	// container to hold all student requests
 	private static JComboBox allRequests;
+	private static JLabel competencyAlert;
 	
 	// list of all students' bid id since it is needed make message 
 	private ArrayList<String> allStudentBidList = new ArrayList<String>();
@@ -47,7 +48,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	public TutorGUI() {
 
 		// Creating instance of JFrame
-        JFrame frame = new JFrame("Student Homepage");
+        JFrame frame = new JFrame("Tutor Homepage");
         // Setting the width and height of frame
         frame.setSize(900, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -94,6 +95,18 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
         msgBtn.addActionListener(this);
         panel.add(msgBtn);
         
+        /*
+        testBtn = new JButton("Test");
+        testBtn.setBounds(10, 280, 80, 25);
+        testBtn.addActionListener(this);
+        panel.add(testBtn);
+        */
+        
+        // take user inputs over here
+        competencyAlert = new JLabel();
+        competencyAlert.setBounds(10,300,450,25);
+        panel.add(competencyAlert);
+        
         frame.setVisible(true);
 		
 	}
@@ -101,14 +114,120 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buyOutBtn) {
-			//buyOut();
-			sendMsg("Buy Out");
+			String bidId = getSelectedRequest();
+			String subName = getSubjectById(bidId);
+			int level = findTutorCompetency(subName);
+			isCompetent(bidId, level);
+			if(isCompetent(bidId, level)) {
+				sendMsg("Buy Out");
+			}
+			else {
+				competencyAlert.setText("You do not have the required competency to bid on this request");
+			}
 		}
 		else if(e.getSource() == msgBtn){
-			//placeBid();
-			sendMsg("Place Bid");
+			String bidId = getSelectedRequest();
+			String subName = getSubjectById(bidId);
+			int level = findTutorCompetency(subName);
+			isCompetent(bidId, level);
+			if(isCompetent(bidId, level)) {
+				sendMsg("Place Bid");
+			}
+			else {
+				competencyAlert.setText("You do not have the required competency to bid on this request");
+			}
 		}
+		/*
+		else if(e.getSource() == testBtn){
+			String bidId = getSelectedRequest();
+			String subName = getSubjectById(bidId);
+			int level = findTutorCompetency(subName);
+			isCompetent(bidId, level);
+		}
+		*/
 	}
+	
+	/*Method to get the subject name from the bid Id*/
+	private String getSubjectById(String bidId) {
+		String endpoint = "bid/"+bidId;
+		String subName = null;
+		HttpResponse<String> response = GraphicalUserInterface.initiateWebApiGET(endpoint, myApiKey);
+		try {
+			ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
+			
+			String nodeId = userNode.get("subject").get("name").toString();
+			subName = GraphicalUserInterface.removeQuotations(nodeId);
+			System.out.println("Subject in the bid: "+subName);
+			return subName;
+			
+		}
+		catch (Exception e){
+			System.out.println("Error!!!");
+            System.out.println(e.getCause());
+        }
+		return subName;
+	}
+	
+	
+	/* Method to find if the tutor's competency in the subject that they specialise in*/
+	private int findTutorCompetency(String subName) {
+		System.out.println("Inside the finding Competency function");
+		String endpoint = "user/"+userId+"?fields=competencies.subject";
+		int tutorcompetencyLevel = 0;
+		HttpResponse<String> compResponse = GraphicalUserInterface.initiateWebApiGET(endpoint, myApiKey);
+		try {
+			ObjectNode userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode.class);
+			
+			for (JsonNode node : userNode.get("competencies")) {
+				// get the subject name that the tutor teaches and compare it to the requested one.
+				String nodeSubName = node.get("subject").get("name").toString();
+				String tutorSubName = GraphicalUserInterface.removeQuotations(nodeSubName);
+				if(tutorSubName.equals(subName)) {
+					System.out.println("Found the subject for which competency is needed");
+					tutorcompetencyLevel = node.get("level").asInt();
+					System.out.println("Competency Level is: "+tutorcompetencyLevel);
+					return tutorcompetencyLevel;
+				}	
+			}
+		}
+		catch (Exception e){
+			System.out.println("Error!!!");
+            System.out.println(e.getCause());
+        }
+		
+		// competency level is zero
+		return tutorcompetencyLevel;
+	}
+	
+	
+	/* Method to find whether the tutor is competent enough to teach the subject in the bid
+	 * The required competency given in the request can be obtained using the bidId */
+	private boolean isCompetent(String bidId, int tutorCompetency) {
+		System.out.println("Inside the Competency check function");
+		String endpoint = "bid/"+bidId;
+		HttpResponse<String> compResponse = GraphicalUserInterface.initiateWebApiGET(endpoint, myApiKey);
+		try {
+			ObjectNode userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode.class);
+			// get the competency
+			String bidComepetency = userNode.get("additionalInfo").get("requiredCompetency").toString();
+			String requiredCompetency = GraphicalUserInterface.removeQuotations(bidComepetency);
+			// convert to integer
+			int reqCompetency = Integer.parseInt(requiredCompetency);
+			if(tutorCompetency>= reqCompetency) {
+				System.out.println("Tutor is elligible to teach the subject");
+				return true;
+			}
+			
+		}
+		catch (Exception e){
+			System.out.println("Error!!!");
+            System.out.println(e.getCause());
+        }
+		// tutor not elligible
+		return false;
+	}
+	
+	
 	
 	/* Method to get the bid id of the request selected from JComboBox */
 	private String getSelectedRequest() {
@@ -152,8 +271,8 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	}
 	
 	
-	/* Method to create a new class instances in db.
-	 * For now: new subject can be created and new bid can be created */
+	/* Method to create a new class instances in db
+	 * This is to store the message in the database */
 	@Override
 	protected String webApiPOST(String endpoint, String jsonString) {
 		String refId = null;  // id value to get the subject or bid
@@ -191,20 +310,32 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
-			String output="";
-			allRequests.removeAllItems();
+			//String output="";
+			//allRequests.removeAllItems();
 			for (ObjectNode node: jsonNodes) {
 				
 				for (JsonNode bidNode : node.get("initiatedBids")) {
+					System.out.println(bidNode.toString());
 					// show bids that are not closed down
 					if(bidNode.get("dateClosedDown").toString().equals("null") ) {
-						String closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
-						String bidCloseTime = GraphicalUserInterface.removeQuotations(closeTimeDb); 
+						String closeTimeDb = "";
+						String bidCloseTime = "";
+						// this will throw an exception. The requested bid always has additional info, so this exception will not cause any problem
+						if(bidNode.get("additionalInfo").equals(null)) {
+							System.out.println("Additional info is null");
+						}
+						else {
+							closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
+							bidCloseTime = GraphicalUserInterface.removeQuotations(closeTimeDb);
+						}
+						 
 						String status = bidNode.get("type").toString();
 						String requester = node.get("userName").toString();
 						String subject = bidNode.get("subject").get("name").toString();
 						String topic = bidNode.get("subject").get("description").toString();
-						output = "Status: "+status+"    "+"Requested by: "+requester+"    "+ "Subject: "+subject  +"    "+ "Topic: "+ topic+"    " + "Closes at: " + bidCloseTime;
+						String output = "Status: "+status+"    "+"Requested by: "+requester+"    "+ "Subject: "+subject  +"    "+ "Topic: "+ topic+"    " + "Closes at: " + bidCloseTime;
+						
+						// put all available bids in the JCombo Box
 						allRequests.addItem(output);
 						
 						// store all bidIds in allStudentBidList
@@ -215,6 +346,9 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			}
 		}
 		catch(Exception e) {
+			System.out.println("Error");
+			System.out.println(e.getMessage());
+			System.out.println(e.toString());
 			System.out.println(e.getCause());
 		}
 	}

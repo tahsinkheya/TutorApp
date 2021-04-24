@@ -46,7 +46,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	// user inputs for subject, lesson(description), session time, rate and number of sessions
 	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
 	// chosen qualification level
-	private static JComboBox qualList, timeList, daysBox, allRates, allRequests;
+	private static JComboBox qualList, compList, timeList, daysBox, allRates, allRequests;
 	
 	private static JLabel requestMade, requestStatus;
 	
@@ -96,6 +96,13 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         qualList.setSelectedIndex(0);
         qualList.setBounds(300, 100, 200, 25);
         panel.add(qualList);
+        
+        
+        String[] competencies = {"1","2","3","4","5","6","7","8","9","10"};
+        compList = new JComboBox(competencies);
+        compList.setSelectedIndex(0);
+        compList.setBounds(550, 100, 60, 25);
+        panel.add(compList);
         
         
         // Lesson 
@@ -187,7 +194,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         
         // all responses
         allRequests = new JComboBox();
-        allRequests.setBounds(130, 420, 800, 25);
+        allRequests.setBounds(130, 420, 750, 25);
         panel.add(allRequests);
         
         requestStatus = new JLabel("Status: ");
@@ -268,6 +275,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 			JSONObject additionalInfo=new JSONObject(); 
 			// create the additional info
 			additionalInfo.put("qualificationLevel", qualList.getSelectedItem().toString());
+			additionalInfo.put("requiredCompetency", compList.getSelectedItem().toString());
 			additionalInfo.put("weeklySessions", sessionNum.getText());
 			String sessionTimeAndDay = timeInput.getText()+" "+timeList.getSelectedItem().toString()+" "+ daysBox.getSelectedItem().toString();
 			additionalInfo.put("sessionTimeAndDay", sessionTimeAndDay);
@@ -419,9 +427,10 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		}
 	}
 	
+	/*Method to close the bid after 30 minutes it was created*/
 	private static void closeBid(String bidId, String closeTime) {
 		// bid lasts for 10 seconds for now
-		int seconds = 300; // 10 minutes
+		int seconds = 1800; 	// 30 minutes
 		new RequestCloser(seconds, bidId, myApiKey, closeTime);
         System.out.println("Bid opened for 30 minutes.");
 	}
