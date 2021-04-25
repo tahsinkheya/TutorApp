@@ -1,7 +1,8 @@
-public class Tutor extends TutorGUI implements  User{
+public class Tutor implements  User{
     String userName;
     String givenName;
     String familyName;
+    TutorGUI tutorGUI=new TutorGUI();
 
 
     @Override
@@ -18,6 +19,7 @@ public class Tutor extends TutorGUI implements  User{
 
     @Override
     public void showHomePage(String name) {
+        tutorGUI.showHome(userName);
 
     }
 }

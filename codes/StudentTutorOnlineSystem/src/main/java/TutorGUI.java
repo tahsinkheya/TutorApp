@@ -28,10 +28,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	
-	public JLabel name;
-	public JPanel panel;
+	public JLabel name,welcome;
+	public JPanel panel,homepage;
 	
-	JButton msgBtn, buyOutBtn; 	//testBtn
+	JButton msgBtn, buyOutBtn,viewContract,viewRequest; 	//testBtn
 	public String userId;
 	private static final String myApiKey = "";
 	
@@ -107,7 +107,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
         competencyAlert.setBounds(10,300,450,25);
         panel.add(competencyAlert);
         
-        frame.setVisible(true);
+        //frame.setVisible(true);
 		
 	}
 
@@ -136,6 +136,13 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			else {
 				competencyAlert.setText("You do not have the required competency to bid on this request");
 			}
+		}
+		else if (e.getSource()==viewContract){
+			System.out.println("c");
+		}
+		else if (e.getSource()==viewRequest){
+			System.out.println("r");
+
 		}
 		/*
 		else if(e.getSource() == testBtn){
@@ -351,5 +358,35 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 			System.out.println(e.toString());
 			System.out.println(e.getCause());
 		}
+	}
+
+	void showHome(String sId){
+		JFrame homeFrame = new JFrame();
+		// Setting the width and height of frame
+		homeFrame.setSize(900, 500);
+		homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		homepage= new JPanel();
+		homeFrame.add(homepage);
+		homepage.setBackground(new Color(172, 209, 233));
+		homepage.setLayout(null);
+
+		welcome = new JLabel("Welcome:"+sId);
+		welcome.setBounds(100,50,400,25);
+		homepage.add(welcome);
+
+		viewRequest = new JButton("View Student Requests");
+		viewRequest.setBounds(100, 100, 600, 25);
+		viewRequest.addActionListener(this);
+		homepage.add(viewRequest);
+
+		viewContract = new JButton("View Contracts");
+		viewContract.setBounds(100, 200, 600, 25);
+		viewContract.addActionListener(this);
+		homepage.add(viewContract);
+
+		homeFrame.setVisible(true);
+
+
 	}
 }

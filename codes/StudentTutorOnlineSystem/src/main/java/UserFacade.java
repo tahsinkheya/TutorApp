@@ -9,7 +9,6 @@ public class UserFacade {
         if (Type.equals("Student")){
             user=new Student();
             user.create(userName,givenName,familyName);
-            System.out.println("uo");
             //display homepage of Student
         }
         else{

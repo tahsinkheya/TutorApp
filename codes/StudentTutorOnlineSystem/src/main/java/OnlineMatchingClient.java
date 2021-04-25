@@ -129,18 +129,15 @@ public class OnlineMatchingClient implements ActionListener {
            System.out.println(actualObj);
             // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
             if(actualObj.get("isStudent").asBoolean()==true){
-
-                facadeUser= new UserFacade(actualObj.get("username").asText(),actualObj.get("givenName").asText(),actualObj.get("familyName").asText(),"Student");
-                
                 userType="Student";
                 userID = actualObj.get("sub").asText();
-
-
             }
             else{
             	userType="Tutor";
             	userID = actualObj.get("sub").asText();
             }
+            facadeUser= new UserFacade(actualObj.get("username").asText(),actualObj.get("givenName").asText(),actualObj.get("familyName").asText(),userType);
+
 
         }
         catch (Exception e){
@@ -150,6 +147,7 @@ public class OnlineMatchingClient implements ActionListener {
 
         if (response!=null & response.statusCode()==200){
             booleanVal=true;
+
         }
 
         return booleanVal;
@@ -167,10 +165,12 @@ public class OnlineMatchingClient implements ActionListener {
             boolean loggedIn = logInUser(usernameEntered, passwordEntered);
             if (loggedIn == false) {
                 loginNotSuccessful.setText("Login not successful.Username or password incorrect");
-            } else {
+            }
+            else {
+                facadeUser.displayHomePage();
                 // open the student homepage after login
-                if (userType.equals("Student")) {
-                    facadeUser.displayHomePage();
+//                if (userType.equals("Student")) {
+//                    facadeUser.displayHomePage();
                     //Student student = new Student();
                     //JLabel name = new JLabel("Welcome: " + usernameEntered);
 //                    student.name = name;
@@ -180,17 +180,18 @@ public class OnlineMatchingClient implements ActionListener {
                     //student.showAllRequests();
 
                     
-                }
-                else if(userType.equals("Tutor")) {
-                	Tutor tutor = new Tutor();
-                    JLabel name = new JLabel("Welcome: " + usernameEntered);
-                    tutor.name = name;
-                    tutor.userId = userID;
-                    tutor.name.setBounds(10, 20, 150, 25);
-                    tutor.panel.add(name);
-                    tutor.showAllStudentRequests();
+                //}
+//                else if(userType.equals("Tutor")) {
+//                    facadeUser.displayHomePage();
+//                	Tutor tutor = new Tutor();
+//                    JLabel name = new JLabel("Welcome: " + usernameEntered);
+//                    tutor.name = name;
+//                    tutor.userId = userID;
+//                    tutor.name.setBounds(10, 20, 150, 25);
+//                    tutor.panel.add(name);
+//                    tutor.showAllStudentRequests();
                     
-                }
+                //}
             }
         }
         
