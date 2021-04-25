@@ -38,20 +38,66 @@ import org.json.simple.JSONObject;
 public class StudentGUI extends GraphicalUserInterface implements ActionListener {
 	public JLabel name;
 	public JPanel panel;
-	
+
+	private JButton requestTbutton, viewCbutton, ViewBbutton;
+	private JPanel homepagePanel;
+
 	JButton submitButton, selectBtn;
 	public static String userId;
-	private static final String myApiKey = "";
+	private static String myApiKey = "";
 	
 	// user inputs for subject, lesson(description), session time, rate and number of sessions
 	private static JTextField subjectText, descText, timeInput, rateIn, sessionNum;
 	// chosen qualification level
 	private static JComboBox qualList, compList, timeList, daysBox, allRates, allRequests;
 	
-	private static JLabel requestMade, requestStatus;
+	private static JLabel requestMade, requestStatus,welcome;
 	
 	// create the bid only once.
 	private static boolean bidCreated = false;
+
+//	private void setKey(String key){
+//		myApiKey=key;
+//	}
+	public void studentHomepage(String sId){
+
+
+
+		JFrame homeFrame = new JFrame();
+		// Setting the width and height of frame
+		homeFrame.setSize(900, 500);
+		homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		homepagePanel= new JPanel();
+		homeFrame.add(homepagePanel);
+		homepagePanel.setBackground(new Color(172, 209, 233));
+		homepagePanel.setLayout(null);
+
+		welcome = new JLabel("Welcome:"+sId);
+		welcome.setBounds(100,50,400,25);
+		homepagePanel.add(welcome);
+
+		requestTbutton = new JButton("Request Tutor");
+		requestTbutton.setBounds(100, 100, 600, 25);
+		requestTbutton.addActionListener(this);
+		homepagePanel.add(requestTbutton);
+
+		viewCbutton = new JButton("View Contracts");
+		viewCbutton.setBounds(100, 200, 600, 25);
+		viewCbutton.addActionListener(this);
+		homepagePanel.add(viewCbutton);
+
+		ViewBbutton = new JButton("View Requests and their Bids");
+		ViewBbutton.setBounds(100, 300, 600, 25);
+		ViewBbutton.addActionListener(this);
+		homepagePanel.add(ViewBbutton);
+
+		homeFrame.setVisible(true);
+
+
+
+
+	}
 
 	public StudentGUI() {
 		// Creating instance of JFrame
@@ -208,7 +254,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
         panel.add(selectBtn); 		
         		
         // Setting the frame visibility to true
-        frame.setVisible(true);
+        //frame.setVisible(true);
         
 	}
 
@@ -217,6 +263,20 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		// TODO Auto-generated method stub
 		if (e.getSource() == submitButton) {
 			requestTutor();
+		}
+		else if (e.getSource() == requestTbutton){
+			//show make request page
+			System.out.println("1");
+		}
+		else if (e.getSource()==viewCbutton){
+			//show all contracts page
+			System.out.println("2");
+
+		}
+		else if (e.getSource()==ViewBbutton){
+			//show bids of requests made
+			System.out.println("3");
+
 		}
 			
 	}
@@ -335,7 +395,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		return refId;
 	}
 	
-	
+
 	
 	
 	/* Method to get the subject id for the subject given as input by the user */

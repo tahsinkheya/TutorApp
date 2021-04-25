@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 public class OnlineMatchingClient implements ActionListener {
-    private UserFacade facadeUser= new UserFacade();
+    private UserFacade facadeUser;
     /*
     NOTE: In order to access the web service, you will need to include your API key in the Authorization header of all requests you make.
     Your personal API key can be obtained here: https://fit3077.com
@@ -126,17 +126,21 @@ public class OnlineMatchingClient implements ActionListener {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode actualObj = mapper.readValue(payload, JsonNode.class);
-           
+           System.out.println(actualObj);
             // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
             if(actualObj.get("isStudent").asBoolean()==true){
+
+                facadeUser= new UserFacade(actualObj.get("username").asText(),actualObj.get("givenName").asText(),actualObj.get("familyName").asText(),"Student");
+                
                 userType="Student";
                 userID = actualObj.get("sub").asText();
+
+
             }
             else{
             	userType="Tutor";
             	userID = actualObj.get("sub").asText();
             }
-            facadeUser.createUser(actualObj.get("userName").asText(),actualObj.get("givenName").asText(),actualObj.get("familyname").asText(),userType);
 
         }
         catch (Exception e){
@@ -166,13 +170,15 @@ public class OnlineMatchingClient implements ActionListener {
             } else {
                 // open the student homepage after login
                 if (userType.equals("Student")) {
-                    Student student = new Student();
-                    JLabel name = new JLabel("Welcome: " + usernameEntered);
-                    student.name = name;
-                    student.userId = userID;
-                    student.name.setBounds(10, 20, 150, 25);
-                    student.panel.add(name);
+                    facadeUser.displayHomePage();
+                    //Student student = new Student();
+                    //JLabel name = new JLabel("Welcome: " + usernameEntered);
+//                    student.name = name;
+//                    student.userId = userID;
+//                    student.name.setBounds(10, 20, 150, 25);
+//                    student.panel.add(name);
                     //student.showAllRequests();
+
                     
                 }
                 else if(userType.equals("Tutor")) {

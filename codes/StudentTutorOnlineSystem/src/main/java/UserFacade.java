@@ -5,10 +5,11 @@
 
 public class UserFacade {
     private User user;
-    public void createUser(String userName, String givenName,String familyName,String Type){
-        if (Type.contains("Student")){
+    public UserFacade(String userName, String givenName, String familyName, String Type){
+        if (Type.equals("Student")){
             user=new Student();
             user.create(userName,givenName,familyName);
+            System.out.println("uo");
             //display homepage of Student
         }
         else{
@@ -16,5 +17,9 @@ public class UserFacade {
             user.create(userName,givenName,familyName);
             //display homepage of Tutor
         }
+    }
+
+    public void displayHomePage(){
+        user.showHomePage("");
     }
 }

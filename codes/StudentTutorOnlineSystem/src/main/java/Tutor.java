@@ -15,4 +15,9 @@ public class Tutor extends TutorGUI implements  User{
         this.givenName=gName;
         this.familyName=fName;
     }
+
+    @Override
+    public void showHomePage(String name) {
+
+    }
 }
