@@ -5,15 +5,15 @@
 
 public class UserFacade {
     private User user;
-    public UserFacade(String userName, String givenName, String familyName, String Type){
+    public UserFacade(String userName, String givenName, String familyName, String Type,String id){
         if (Type.equals("Student")){
             user=new Student();
-            user.create(userName,givenName,familyName);
+            user.create(userName,givenName,familyName,id);
             //display homepage of Student
         }
         else{
             user=new Tutor();
-            user.create(userName,givenName,familyName);
+            user.create(userName,givenName,familyName,id);
             //display homepage of Tutor
         }
     }

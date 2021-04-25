@@ -2,6 +2,7 @@ public class Tutor implements  User{
     String userName;
     String givenName;
     String familyName;
+    String userId;
     TutorGUI tutorGUI=new TutorGUI();
 
 
@@ -11,10 +12,11 @@ public class Tutor implements  User{
     }
 
     @Override
-    public void create(String uName, String gName,String fName) {
+    public void create(String uName, String gName,String fName,String uId) {
         this.userName=uName;
         this.givenName=gName;
         this.familyName=fName;
+        this.userId=uId;
     }
 
     @Override

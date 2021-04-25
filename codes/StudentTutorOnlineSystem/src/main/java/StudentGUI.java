@@ -1,46 +1,28 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class StudentGUI extends GraphicalUserInterface implements ActionListener {
 	public JLabel name;
-	public JPanel panel;
-
-	private JButton requestTbutton, viewCbutton, ViewBbutton;
-	private JPanel homepagePanel;
 
 	JButton submitButton, selectBtn;
 	public static String userId;
@@ -51,7 +33,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	// chosen qualification level
 	private static JComboBox qualList, compList, timeList, daysBox, allRates, allRequests;
 	
-	private static JLabel requestMade, requestStatus,welcome;
+	private static JLabel requestMade, requestStatus;
 	
 	// create the bid only once.
 	private static boolean bidCreated = false;
@@ -59,204 +41,10 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 //	private void setKey(String key){
 //		myApiKey=key;
 //	}
-	public void studentHomepage(String sId){
 
 
+//	private void makeRequest() {
 
-		JFrame homeFrame = new JFrame();
-		// Setting the width and height of frame
-		homeFrame.setSize(900, 500);
-		homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		homepagePanel= new JPanel();
-		homeFrame.add(homepagePanel);
-		homepagePanel.setBackground(new Color(172, 209, 233));
-		homepagePanel.setLayout(null);
-
-		welcome = new JLabel("Welcome:"+sId);
-		welcome.setBounds(100,50,400,25);
-		homepagePanel.add(welcome);
-
-		requestTbutton = new JButton("Request Tutor");
-		requestTbutton.setBounds(100, 100, 600, 25);
-		requestTbutton.addActionListener(this);
-		homepagePanel.add(requestTbutton);
-
-		viewCbutton = new JButton("View Contracts");
-		viewCbutton.setBounds(100, 200, 600, 25);
-		viewCbutton.addActionListener(this);
-		homepagePanel.add(viewCbutton);
-
-		ViewBbutton = new JButton("View Requests and their Bids");
-		ViewBbutton.setBounds(100, 300, 600, 25);
-		ViewBbutton.addActionListener(this);
-		homepagePanel.add(ViewBbutton);
-
-		homeFrame.setVisible(true);
-
-
-
-
-	}
-
-	public StudentGUI() {
-		// Creating instance of JFrame
-        JFrame frame = new JFrame("Student Homepage");
-        // Setting the width and height of frame
-        frame.setSize(900, 700);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-      
-        panel = new JPanel();    
-        // adding panel to frame
-        frame.add(panel);
-        panel.setLayout(null);
-        
-        
-        // take user inputs over here
-        JLabel actionLabel = new JLabel("Make a matching request");
-        actionLabel.setBounds(10,50,300,25);
-        panel.add(actionLabel);
-        
-        
-        
-        JLabel desc = new JLabel("Specify tutor details");
-        desc.setBounds(10,70,300,25);
-        desc.setForeground(Color.red);
-        panel.add(desc);
-        
-        
-        
-        // Required qualification
-        JLabel qualification = new JLabel("Specialisation: ");
-        qualification.setBounds(10, 100, 100, 25);
-        panel.add(qualification);
-        
-        subjectText = new JTextField(20);
-        subjectText.setBounds(100,100,165,25);
-        panel.add(subjectText);
-        
-        // Types of qualification
-        String[] qualificationTypes = {"Bachelor's Degree", "Master's Degree", "Doctoral Degree","Secondary Education"};
-        qualList = new JComboBox(qualificationTypes);
-        qualList.setSelectedIndex(0);
-        qualList.setBounds(300, 100, 200, 25);
-        panel.add(qualList);
-        
-        
-        String[] competencies = {"1","2","3","4","5","6","7","8","9","10"};
-        compList = new JComboBox(competencies);
-        compList.setSelectedIndex(0);
-        compList.setBounds(550, 100, 60, 25);
-        panel.add(compList);
-        
-        
-        // Lesson 
-        JLabel lesson = new JLabel("Lesson: ");
-        lesson.setBounds(10, 140, 80, 25);
-        panel.add(lesson);
-        
-        descText = new JTextField(20);
-        descText.setBounds(100,140,165,25);
-        panel.add(descText);
-        
-        
-        // Time and Day 
-        JLabel timeAndDay = new JLabel("Time and Day: ");
-        timeAndDay.setBounds(10, 170, 100, 25);
-        panel.add(timeAndDay);
-        
-        // Time Selection
-        timeInput = new JTextField(20);
-        timeInput.setBounds(100,170,50,25);
-        panel.add(timeInput);
-        
-        String[] allTimes = {"AM", "PM"};
-        timeList = new JComboBox(allTimes);
-        timeList.setBounds(150, 170, 70, 25);
-        panel.add(timeList);
-        
-        // Day selection
-        String[] days = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-        daysBox = new JComboBox(days);
-        daysBox.setSelectedIndex(0);
-        daysBox.setBounds(250, 170, 200, 25);
-        panel.add(daysBox);
-        
-        // Weekly Sessions
-        JLabel session = new JLabel("Weekly Sessions: ");
-        session.setBounds(10, 200, 200, 25);
-        panel.add(session);
-        
-     
-        sessionNum= new JTextField(20);
-        sessionNum.setBounds(150,200,50,25);
-        panel.add(sessionNum);
-        
-        
-        // Payment Rate
-     
-        JLabel rate = new JLabel("Rate (RM): ");
-        rate.setBounds(10, 240, 100, 25);
-        panel.add(rate);
-        
-        rateIn = new JTextField(20);
-        rateIn.setBounds(80, 240, 80, 25);
-        panel.add(rateIn);
-        
-        String[] rateTypes = {"per hour", "per session"};
-        allRates = new JComboBox(rateTypes);
-        allRates.setBounds(180, 240, 100, 25);
-        panel.add(allRates);
-        
-        // Creating request button
-        
-        submitButton = new JButton("Make Request");
-        submitButton.setBounds(10, 270, 120, 25);
-        submitButton.addActionListener(this);
-        panel.add(submitButton);
-        
-        
-        // show the current bids
-        JLabel bidSectionHeader = new JLabel("Your current requests: ");
-        bidSectionHeader.setBounds(10, 330, 300, 25);
-        panel.add(bidSectionHeader);
-        
-        JLabel instruction = new JLabel("Select a request/bid and click on 'Select Bidder' to close bid");
-        instruction.setBounds(10, 350,1200,25);
-        instruction.setForeground(Color.red);
-        panel.add(instruction);
-        
-        
-        requestMade = new JLabel("Your Request: ");
-        requestMade.setBounds(10, 380, 800, 25);
-        panel.add(requestMade);
-        
-        // Weekly Sessions
-        JLabel responseLabel = new JLabel("All Responses: ");
-        responseLabel.setBounds(10, 420, 200, 25);
-        panel.add(responseLabel);
-        
-        
-        // all responses
-        allRequests = new JComboBox();
-        allRequests.setBounds(130, 420, 750, 25);
-        panel.add(allRequests);
-        
-        requestStatus = new JLabel("Status: ");
-        requestStatus.setBounds(10, 450, 600, 25);
-        panel.add(requestStatus);
-        
-        
-        selectBtn = new JButton("Select Bidder");
-        selectBtn.setBounds(10, 490, 120, 25);
-        selectBtn.addActionListener(this);
-        panel.add(selectBtn); 		
-        		
-        // Setting the frame visibility to true
-        //frame.setVisible(true);
-        
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -264,27 +52,14 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		if (e.getSource() == submitButton) {
 			requestTutor();
 		}
-		else if (e.getSource() == requestTbutton){
-			//show make request page
-			System.out.println("1");
-		}
-		else if (e.getSource()==viewCbutton){
-			//show all contracts page
-			System.out.println("2");
 
-		}
-		else if (e.getSource()==ViewBbutton){
-			//show bids of requests made
-			System.out.println("3");
-
-		}
 			
 	}
 	
 	
 	private void requestTutor() {
 		
-		System.out.println("Tutor Request process started");
+
 		
 		// subject id of the subject that student wants
 		String subId = findSubject();
@@ -408,7 +183,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		HttpResponse<String> subResponse = GraphicalUserInterface.initiateWebApiGET("subject", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
-			
+			userSub="maths";
 			// look for the subject and description in the database
 			for (ObjectNode node: jsonNodes) {
 		      	String subFromDB = node.get("name").asText();
@@ -418,22 +193,22 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 					subjectFound = true;
 					subjectID = node.get("id").asText();
 					return subjectID;
-				}	
+				}
 			}
-			
+
 			if (subjectFound==false) {
 				// if the subject is not found in database, then create new subject
 				System.out.println("Subject not found, so creating new subject: " + userSub);
 				subjectID = webApiPOST("subject", null);
 				return subjectID;
-			}	
+			}
 		}
 		catch(Exception e) {
 			System.out.println(e.getCause());
 		}
-		return subjectID;	
+		return subjectID;
 	}
-	
+
 	/* Method to show the current bids opened by the student  */
 	protected static void showAllRequests() {
 		// get all the bids with messages
