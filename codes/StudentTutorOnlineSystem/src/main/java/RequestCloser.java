@@ -1,9 +1,4 @@
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,19 +25,21 @@ public class RequestCloser {
 	
 	class RequestCloserTask extends TimerTask {
         public void run() {
+        	System.out.println(bidEndTime);
         	// change the status in db to close the bid
             String endpoint = "bid/"+id+"/close-down";
             
             JSONObject bidInfo=new JSONObject();
-            String close = GraphicalUserInterface.removeQuotations(bidEndTime);
-    		bidInfo.put("dateClosedDown", close);
+//            String close = GuiAction.removeQuotations(bidEndTime);
+//            System.out.println(close);
+			bidInfo.put("dateClosedDown", bidEndTime);
     	
     		String jsonString = bidInfo.toString();
-            HttpResponse<String> updateResponse = GraphicalUserInterface.updateWebApi(endpoint, key, jsonString);
+            HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, key, jsonString);
             System.out.println(updateResponse.toString());
             System.out.println("BID CLOSED");
             timer.cancel(); //Terminate the timer thread
-            
+            //patch
         }
     }
 	

@@ -8,7 +8,7 @@ import java.net.http.HttpResponse;
  * This class represents the GUI for both students and tutors
  * 
  */
-public abstract class GraphicalUserInterface {
+public abstract class APIRequester {
 	
 	/* This method is used to add data to the database. StudentGUI uses this
 	 * to search for subjects they need help with and to show their current requests  */
@@ -18,6 +18,7 @@ public abstract class GraphicalUserInterface {
 	/* Method to make a web request to GET some data. Concrete implementation since both 
 	 * StudentGUI and TutorGUI will need this method */
 	static  HttpResponse<String> initiateWebApiGET(String endpoint, String apiKey) {
+
 		String Url = "https://fit3077.com/api/v1/"+endpoint;
 		
 		HttpClient client = HttpClient.newHttpClient();

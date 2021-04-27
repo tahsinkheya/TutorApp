@@ -46,7 +46,7 @@ public class Student implements User, ActionListener {
 	}
 
 	@Override
-	public void showHomePage(String name) {
+	public void showHomePage() {
 
 			JFrame homeFrame = new JFrame();
 			// Setting the width and height of frame

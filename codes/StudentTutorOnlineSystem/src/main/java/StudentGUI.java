@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -10,9 +9,7 @@ import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.json.simple.JSONObject;
 
-public class StudentGUI extends GraphicalUserInterface implements ActionListener {
+public class StudentGUI extends APIRequester implements ActionListener {
 	public JLabel name;
 
 	JButton submitButton, selectBtn;
@@ -180,7 +177,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 		// get the user inputs
 		String userSub = subjectText.getText();
 		String userDesc = descText.getText();
-		HttpResponse<String> subResponse = GraphicalUserInterface.initiateWebApiGET("subject", myApiKey);
+		HttpResponse<String> subResponse = APIRequester.initiateWebApiGET("subject", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
 			userSub="maths";
@@ -212,7 +209,7 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 	/* Method to show the current bids opened by the student  */
 	protected static void showAllRequests() {
 		// get all the bids with messages
-		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("bid?fields=messages", myApiKey);
+		HttpResponse<String> userResponse = APIRequester.initiateWebApiGET("bid?fields=messages", myApiKey);
 		try {
 			ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
 			String output="";
@@ -222,12 +219,12 @@ public class StudentGUI extends GraphicalUserInterface implements ActionListener
 			for (ObjectNode node : userNodes) {
 				// process the initiator id to remove extra quotations
 				String initId = node.get("initiator").get("id").toString();
-				String initiatorId = GraphicalUserInterface.removeQuotations(initId);
+				String initiatorId = APIRequester.removeQuotations(initId);
 			
 				// find requests made by student by comparing userId and initiatorId
 				if(initiatorId.equals(userId) & node.get("dateClosedDown").toString().equals("null") ) {
 					System.out.println("Found bid made by student");
-					String bidId = GraphicalUserInterface.removeQuotations(node.get("id").toString());
+					String bidId = APIRequester.removeQuotations(node.get("id").toString());
 					System.out.println("The bid id is: " + bidId);
 					
 					String closeTime = node.get("additionalInfo").get("requestClosesAt").toString();

@@ -12,7 +12,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 public class createRequestAction implements GuiAction, ActionListener {
     //public createRequestAction(){}
@@ -22,6 +21,8 @@ public class createRequestAction implements GuiAction, ActionListener {
     private JButton submitButton;
     private static JTextField subjectText, descText,timeInput,sessionNum,rateIn;
     private boolean bidCreated;
+    private String closeTime = null;
+
 
 
     private String userId,givenName,familyName;
@@ -226,6 +227,10 @@ public class createRequestAction implements GuiAction, ActionListener {
         String newBidID = webApiPOST("bid", subId);
         System.out.println("Bid ID: " + newBidID);
         System.out.println("Successfully created a tutor bid/request");
+        if(bidCreated) {
+            closeBid(newBidID, closeTime);
+            bidCreated = false;
+        }
         //showAllRequests();
     }
 
@@ -238,7 +243,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         String userDesc = descText.getText();
         userSub= userSub.substring(0, 1).toUpperCase() + userSub.substring(1);
         System.out.println(userSub);
-        HttpResponse<String> subResponse = GraphicalUserInterface.initiateWebApiGET("subject", myApiKey);
+        HttpResponse<String> subResponse = APIRequester.initiateWebApiGET("subject", myApiKey);
         try {
             ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
 
@@ -275,7 +280,6 @@ public class createRequestAction implements GuiAction, ActionListener {
 
         String refId = null;  // id value to get the subject or bid
         String jsonString = null;
-        String closeTime = null;
         // set the endpoint types to be false
         boolean isSubject = false;
         boolean isBid = false;
@@ -293,8 +297,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         // endpoint.contains is used since we can have subject or subject/subjectID
         else if(endpoint.contains("bid")) {
             //bid type
-            String bidT=bidTypes.getSelectedItem().toString();// rate
-
+            String bidT=bidTypes.getSelectedItem().toString();// bidtype
             // find today's date and time
             String bidStartTime = new Date().toInstant().toString();
 
@@ -321,7 +324,7 @@ public class createRequestAction implements GuiAction, ActionListener {
 
             // the web api does not accept "dateClosedDown" value when making POST
             additionalInfo.put("requestClosesAt", bidEndTime);
-            //closeTime = bidEndTime;
+            closeTime = bidEndTime;
 
             // create the bid
             JSONObject bidInfo=new JSONObject();
@@ -333,6 +336,7 @@ public class createRequestAction implements GuiAction, ActionListener {
             jsonString = bidInfo.toString(); // convert to string
             System.out.println("Bid/Request Info: "+jsonString);
             isBid = true;
+
         }
 
 
@@ -371,7 +375,20 @@ public class createRequestAction implements GuiAction, ActionListener {
         return refId;
     }
 
-
+    /*Method to close the bid after 30 minutes or 10080 mins it was created*/
+    private void closeBid(String bidId, String closeTime) {
+        // bid lasts for 10 seconds for now
+        Integer seconds;
+        if (bidTypes.getSelectedItem().toString().contains("Open")){
+            seconds=10;
+//            seconds=10;
+        }
+        else{
+            seconds=7*24*60*60;
+        }
+        new RequestCloser(seconds, bidId, myApiKey, closeTime);
+        System.out.println("Bid opened for 30 minutes.");
+    }
 
 
 

@@ -6,7 +6,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.JButton;
@@ -26,7 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * @author Rafaquat
  *
  */
-public class TutorGUI extends GraphicalUserInterface implements ActionListener {
+public class TutorGUI extends APIRequester implements ActionListener {
 	
 	public JLabel name,welcome;
 	public JPanel panel,homepage;
@@ -107,7 +106,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
         competencyAlert.setBounds(10,300,450,25);
         panel.add(competencyAlert);
         
-        //frame.setVisible(true);
+        frame.setVisible(true);
 		
 	}
 
@@ -137,13 +136,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 				competencyAlert.setText("You do not have the required competency to bid on this request");
 			}
 		}
-		else if (e.getSource()==viewContract){
-			System.out.println("c");
-		}
-		else if (e.getSource()==viewRequest){
-			System.out.println("r");
 
-		}
 		/*
 		else if(e.getSource() == testBtn){
 			String bidId = getSelectedRequest();
@@ -158,12 +151,12 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	private String getSubjectById(String bidId) {
 		String endpoint = "bid/"+bidId;
 		String subName = null;
-		HttpResponse<String> response = GraphicalUserInterface.initiateWebApiGET(endpoint, myApiKey);
+		HttpResponse<String> response = APIRequester.initiateWebApiGET(endpoint, myApiKey);
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
 			
 			String nodeId = userNode.get("subject").get("name").toString();
-			subName = GraphicalUserInterface.removeQuotations(nodeId);
+			subName = APIRequester.removeQuotations(nodeId);
 			System.out.println("Subject in the bid: "+subName);
 			return subName;
 			
@@ -181,14 +174,14 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 		System.out.println("Inside the finding Competency function");
 		String endpoint = "user/"+userId+"?fields=competencies.subject";
 		int tutorcompetencyLevel = 0;
-		HttpResponse<String> compResponse = GraphicalUserInterface.initiateWebApiGET(endpoint, myApiKey);
+		HttpResponse<String> compResponse = APIRequester.initiateWebApiGET(endpoint, myApiKey);
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode.class);
 			
 			for (JsonNode node : userNode.get("competencies")) {
 				// get the subject name that the tutor teaches and compare it to the requested one.
 				String nodeSubName = node.get("subject").get("name").toString();
-				String tutorSubName = GraphicalUserInterface.removeQuotations(nodeSubName);
+				String tutorSubName = APIRequester.removeQuotations(nodeSubName);
 				if(tutorSubName.equals(subName)) {
 					System.out.println("Found the subject for which competency is needed");
 					tutorcompetencyLevel = node.get("level").asInt();
@@ -212,12 +205,12 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	private boolean isCompetent(String bidId, int tutorCompetency) {
 		System.out.println("Inside the Competency check function");
 		String endpoint = "bid/"+bidId;
-		HttpResponse<String> compResponse = GraphicalUserInterface.initiateWebApiGET(endpoint, myApiKey);
+		HttpResponse<String> compResponse = APIRequester.initiateWebApiGET(endpoint, myApiKey);
 		try {
 			ObjectNode userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode.class);
 			// get the competency
 			String bidComepetency = userNode.get("additionalInfo").get("requiredCompetency").toString();
-			String requiredCompetency = GraphicalUserInterface.removeQuotations(bidComepetency);
+			String requiredCompetency = APIRequester.removeQuotations(bidComepetency);
 			// convert to integer
 			int reqCompetency = Integer.parseInt(requiredCompetency);
 			if(tutorCompetency>= reqCompetency) {
@@ -314,7 +307,7 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 	
 	/* Show the tutor all the requests made by students  */
 	protected void showAllStudentRequests() {
-		HttpResponse<String> userResponse = GraphicalUserInterface.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
+		HttpResponse<String> userResponse = APIRequester.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
 			//String output="";
@@ -333,7 +326,8 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 						}
 						else {
 							closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
-							bidCloseTime = GraphicalUserInterface.removeQuotations(closeTimeDb);
+							bidCloseTime = APIRequester.removeQuotations(closeTimeDb);
+							System.out.println(bidCloseTime);
 						}
 						 
 						String status = bidNode.get("type").toString();
@@ -360,33 +354,5 @@ public class TutorGUI extends GraphicalUserInterface implements ActionListener {
 		}
 	}
 
-	void showHome(String sId){
-		JFrame homeFrame = new JFrame();
-		// Setting the width and height of frame
-		homeFrame.setSize(900, 500);
-		homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		homepage= new JPanel();
-		homeFrame.add(homepage);
-		homepage.setBackground(new Color(172, 209, 233));
-		homepage.setLayout(null);
-
-		welcome = new JLabel("Welcome:"+sId);
-		welcome.setBounds(100,50,400,25);
-		homepage.add(welcome);
-
-		viewRequest = new JButton("View Student Requests");
-		viewRequest.setBounds(100, 100, 600, 25);
-		viewRequest.addActionListener(this);
-		homepage.add(viewRequest);
-
-		viewContract = new JButton("View Contracts");
-		viewContract.setBounds(100, 200, 600, 25);
-		viewContract.addActionListener(this);
-		homepage.add(viewContract);
-
-		homeFrame.setVisible(true);
-
-
-	}
 }

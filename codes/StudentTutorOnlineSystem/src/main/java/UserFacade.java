@@ -19,6 +19,6 @@ public class UserFacade {
     }
 
     public void displayHomePage(){
-        user.showHomePage("");
+        user.showHomePage();
     }
 }
