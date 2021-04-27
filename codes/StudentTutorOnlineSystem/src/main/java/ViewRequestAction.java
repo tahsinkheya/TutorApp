@@ -14,7 +14,7 @@ import java.util.Vector;
 
 public class ViewRequestAction implements GuiAction, ActionListener {
 
-
+    private String userId,fullName;
     private static JComboBox allRequests;
     // list of all students' bid id since it is needed make message
     private ArrayList<String> allStudentBidList = new ArrayList<String>();
@@ -24,7 +24,11 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     JButton viewDetails;
     Vector comboBoxItems=new Vector();
 
+    public ViewRequestAction(String uId,String name){
+        userId=uId;
+        fullName=name;
 
+    }
     /* Show the tutor all the requests made by students  */
     @Override
     public void show() {
@@ -89,15 +93,15 @@ public class ViewRequestAction implements GuiAction, ActionListener {
             System.out.println(bidTypeOfselected);
             if (bidTypeOfselected.contains("open")){
                 //create open bid action
-                BidAction b=new OpenBid(bidid);
+                BidAction b=new OpenBid(bidid,userId,fullName);
             }
-            else{CloseBid c=new CloseBid(bidid);}
+            else{CloseBid c=new CloseBid(bidid,userId);}
 
         }
     }
 
     private void showAllStudentRequests(){
-        HttpResponse<String> userResponse = APIRequester.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
+        HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
         try {
             ObjectNode[] jsonNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
             //String output="";
@@ -121,7 +125,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                                 System.out.println(closeTimeDb);
                                 System.out.println(bidCloseTime);
                             }
-                            catch(Exception e){System.out.println("error at line 113");}
+                            catch(Exception e){System.out.println("requestClosesAt not found");}
 //                            System.out.println("heu");
 //                            System.out.println(bidNode.get("additionalInfo"));
 //                            System.out.println(bidNode.get("additionalInfo").get("requestClosesAt"));

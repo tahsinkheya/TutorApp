@@ -25,7 +25,7 @@ public class OnlineMatchingClient implements ActionListener {
     NOTE: In order to access the web service, you will need to include your API key in the Authorization header of all requests you make.
     Your personal API key can be obtained here: https://fit3077.com
    */
-    protected static final String myApiKey = "T9fwzrc6ktqT7cb6H7F8wHmJWnfCtk";
+    protected static final String myApiKey = "";
 
     // Provide the root URL for the web service. All web service request URLs start with this root URL.
     private static final String rootUrl = "https://fit3077.com/api/v1";
@@ -169,6 +169,7 @@ public class OnlineMatchingClient implements ActionListener {
                 loginNotSuccessful.setText("Login not successful.Username or password incorrect");
             }
             else {
+                loginNotSuccessful.setText("Loading...");
                 facadeUser.displayHomePage();
                 // open the student homepage after login
 //                if (userType.equals("Student")) {

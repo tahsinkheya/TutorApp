@@ -27,6 +27,8 @@ public class Tutor implements  User, ActionListener {
         this.givenName=gName;
         this.familyName=fName;
         this.userId=uId;
+        System.out.println(givenName);
+        System.out.println(familyName);
     }
 
     @Override
@@ -64,7 +66,8 @@ public class Tutor implements  User, ActionListener {
            // context=new GUIcontext(new createContractAction())
         }
         else if (e.getSource()==viewRequest){
-            context= new GUIcontext(new ViewRequestAction());
+            //
+            context= new GUIcontext(new ViewRequestAction(userId,givenName+" "+familyName));
             context.showUI();
             //TutorGUI t=new TutorGUI();
         }
