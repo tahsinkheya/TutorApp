@@ -33,15 +33,16 @@ public class OnlineMatchingClient implements ActionListener {
     private static JLabel user,usernameLabel,passwordLabel,loginNotSuccessful;
     private static JTextField usernameText;
     private static JPasswordField passwordText;
-    
+    private static JFrame logInFrame;
     // the type of user that logged in: Student or Tutor
     private static String userType;
     
     // userID needed for initializing bids and messages
     public String userID;
 
+
     public static void main(String[] args){
-        JFrame logInFrame=new JFrame();
+        logInFrame=new JFrame();
         logInFrame.setSize(350,250);
         logInFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -93,12 +94,8 @@ public class OnlineMatchingClient implements ActionListener {
                 "\"password\":\"" + password + "\"" +
                 "}";
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder(URI.create(usersUrl))
-                .setHeader("Authorization", myApiKey)
-                .GET()
-                .build();
+        HttpClient client;
+        HttpRequest request;
         HttpResponse<String> response = null;
 
         // A request body needs to be supplied to this endpoint, otherwise a 400 Bad Request error will be returned.
@@ -138,6 +135,7 @@ public class OnlineMatchingClient implements ActionListener {
             	userID = actualObj.get("sub").asText();
 
             }
+            loginNotSuccessful.setText("Loading...");
             facadeUser= new UserFacade(actualObj.get("username").asText(),actualObj.get("givenName").asText(),actualObj.get("familyName").asText(),userType,userID);
 
 
@@ -169,7 +167,7 @@ public class OnlineMatchingClient implements ActionListener {
                 loginNotSuccessful.setText("Login not successful.Username or password incorrect");
             }
             else {
-                loginNotSuccessful.setText("Loading...");
+                logInFrame.setVisible(false);
                 facadeUser.displayHomePage();
                 // open the student homepage after login
 //                if (userType.equals("Student")) {

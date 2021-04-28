@@ -55,9 +55,9 @@ public class StudentGUI extends APIRequester implements ActionListener {
 	
 	
 	private void requestTutor() {
-		
 
-		
+
+
 		// subject id of the subject that student wants
 		String subId = findSubject();
 		System.out.println("Subject ID: " + subId);

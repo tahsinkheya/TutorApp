@@ -14,18 +14,22 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+/**
+ * Base class for tutor to view bid info abt an open bid request. the tutor can buyout the bid, view other bid offers and
+ */
 
-public class OpenBid extends BidAction implements ActionListener {
+public class OpenBidAction extends BidAction implements ActionListener {
     private String bidid;
     private String userId;
 
     private JPanel panel;
     private JLabel subName,subDesc,requiredComp,weekSess,Hlp,rate;
     private JButton viewOtherBids,makeBidOffer,buyOutBtn;
+    private JFrame frame;
     private static JLabel competencyAlert;
     private ArrayList<String> bidInfo;
     private String userFullName;
-    public OpenBid(String bidId,String uId,String fname){
+    public OpenBidAction(String bidId, String uId, String fname){
         bidid=bidId;
         userId=uId;
         userFullName=fname;
@@ -34,9 +38,9 @@ public class OpenBid extends BidAction implements ActionListener {
 
     private void showUI(){
         bidInfo=getBidInfo(bidid);
-        System.out.println("hdjh");
+
         // Creating instance of JFrame
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         // Setting the width and height of frame
         frame.setSize(900, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -49,7 +53,7 @@ public class OpenBid extends BidAction implements ActionListener {
         frame.add(panel);
         panel.setLayout(null);
 
-        // take user inputs over here
+        // show title
         JLabel actionLabel = new JLabel("Bid Details");
         actionLabel.setBounds(350,10,300,25);
         actionLabel.setFont(new Font("Serif", Font.BOLD, 20));
@@ -112,14 +116,14 @@ public class OpenBid extends BidAction implements ActionListener {
         System.out.println("Inside the finding Competency function");
         String endpoint = "user/"+userId+"?fields=competencies.subject";
         int tutorcompetencyLevel = 0;
-        HttpResponse<String> compResponse = APIRequester.initiateWebApiGET(endpoint, myApiKey);
+        HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
         try {
             ObjectNode userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode.class);
 
             for (JsonNode node : userNode.get("competencies")) {
                 // get the subject name that the tutor teaches and compare it to the requested one.
                 String nodeSubName = node.get("subject").get("name").toString();
-                String tutorSubName = APIRequester.removeQuotations(nodeSubName);
+                String tutorSubName = GuiAction.removeQuotations(nodeSubName);
                 if(tutorSubName.equals(subName)) {
                     System.out.println("Found the subject for which competency is needed");
                     tutorcompetencyLevel = node.get("level").asInt();
@@ -163,14 +167,14 @@ public class OpenBid extends BidAction implements ActionListener {
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
             if (isCompetent(level)==false){
-                System.out.println("sdghsd");
                 competencyAlert.setText("You do not have the required competency to bid on this request");
                 competencyAlert.setForeground(Color.RED);
             }
 
             else{
                 //can bid
-                System.out.println("bod,bid!");
+                frame.setVisible(false);
+                MakeOpenBidOffer newBid=new MakeOpenBidOffer(bidid,userId);
             }
 
 //            String jsonString = null;
@@ -279,37 +283,5 @@ public class OpenBid extends BidAction implements ActionListener {
 
     }
 
-    private String webApiPOST(String endpoint, String jsonString) {
-        String refId = null;  // id value to get the subject or bid
 
-        // create a new message in the database
-        String Url = "https://fit3077.com/api/v1/"+endpoint;
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder(URI.create(Url))
-                .setHeader("Authorization", myApiKey)
-                .header("Content-Type","application/json") // This header needs to be set when sending a JSON request body.
-                .POST(HttpRequest.BodyPublishers.ofString(jsonString))
-                .build();
-
-        try {
-
-            HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            // get the id of the newly created object
-            System.out.println(postResponse.statusCode());
-            ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
-            System.out.println("Bid/Message sent successfully");
-            //Student.showAllRequests();
-
-        }
-        catch(Exception e){
-            System.out.println("Error !!!!");
-            System.out.println(e.getCause());
-            System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace()[0].getLineNumber());
-
-
-        }
-        return refId;
-    }
 }

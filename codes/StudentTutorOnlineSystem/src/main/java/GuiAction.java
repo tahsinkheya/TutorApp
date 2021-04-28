@@ -44,7 +44,7 @@ public interface GuiAction {
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println(response.statusCode());
-            //System.out.println("FROM GUI: " + response.toString());
+            System.out.println("FROM GUI: " + response.toString());
         }
         catch (Exception e){
             System.out.println("Error!!!");

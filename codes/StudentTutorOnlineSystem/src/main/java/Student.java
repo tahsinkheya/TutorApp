@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * @author Rafaquat
@@ -30,9 +31,13 @@ public class Student implements User, ActionListener {
 
 
 	//ui components
-	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract;
+	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract,viewDetails;
 	private JPanel homepagePanel,contractPanel;
 	private  JLabel welcome,contractNotif;
+	Vector comboBoxItems=new Vector();
+	private static JComboBox allContracts;
+
+
 
 
 
@@ -41,35 +46,68 @@ public class Student implements User, ActionListener {
 
 	@Override
 	public boolean signContract() {
-		ArrayList <String> output=new ArrayList<>();
-		ArrayList<JsonNode> contractDetails=new ArrayList<>();
-		for (String c: contractIds) {
-			String endpoint = "contract/"+c;
-			HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
-			try {
-				ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
-				String contract=userNode.get("subject").get("name").toString()+" , "+userNode.get("subject").get("description").toString()+
-						" , "+userNode.get("additionalInfo").get("tutorName").toString();
-				output.add(contract);
-				contractDetails.add(userNode.get("addtionalInfo"));
+		// Creating instance of JFrame
+		JFrame frame = new JFrame();
+		// Setting the width and height of frame
+		frame.setSize(900, 500);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-			} catch (Exception e) {
-				System.out.println("Error!!!");
-				System.out.println(e.getCause());
-			}
-		}
+		contractPanel = new JPanel();
+		// adding panel to frame
+		frame.add(contractPanel);
+		contractPanel.setLayout(null);
 
-		// take user inputs over here
+
 		JLabel relListTitle = new JLabel("All Contracts Pending Confimation");
 		relListTitle.setBounds(10,50,450,25);
 		contractPanel.add(relListTitle);
 
 
 		JLabel instruction = new JLabel("Select a contract and then click on view details");
-		instruction.setBounds(10,80,1200,25);
+		instruction.setBounds(10,80,400,25);
 		instruction.setForeground(Color.red);
 		contractPanel.add(instruction);
+
+		final DefaultComboBoxModel model = new DefaultComboBoxModel(comboBoxItems);
+		allContracts = new JComboBox(model);
+		allContracts.setBounds(10, 120, 700, 25);
+		contractPanel.add(allContracts);
+
+
+
+		viewDetails = new JButton("View details");
+		viewDetails.setBounds(10, 180, 180, 25);
+		viewDetails.addActionListener(this);
+		contractPanel.add(viewDetails);
+
+		frame.setVisible(true);
+
+
+
+
+
+
+
+
+//		ArrayList <String> output=new ArrayList<>();
+//		ArrayList<JsonNode> contractDetails=new ArrayList<>();
+//		for (String c: contractIds) {
+//			String endpoint = "contract/"+c;
+//			HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
+//			try {
+//				ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
+//				String contract=userNode.get("subject").get("name").toString()+" , "+userNode.get("subject").get("description").toString()+
+//						" , "+userNode.get("additionalInfo").get("tutorName").toString();
+//				output.add(contract);
+//				contractDetails.add(userNode.get("addtionalInfo"));
+//
+//
+//			} catch (Exception e) {
+//				System.out.println("Error!!!");
+//				System.out.println(e.getCause());
+//			}
+//		}
 
 
 		return false;
@@ -83,7 +121,6 @@ public class Student implements User, ActionListener {
 		this.familyName=fName;
 		this.userId=uId;
 		checkContract();
-		System.out.println("len of clist"+contractIds.size());
 
 	}
 
@@ -154,12 +191,18 @@ public class Student implements User, ActionListener {
 		}
 		else if (e.getSource()==ViewBbutton){
 			//show bids of requests made
-			System.out.println("3");
+			context=new GUIcontext(new ViewBidOfferAction(userId));
+			context.showUI();
 
 		}
 		else if(e.getSource()==signContract){
 			//show contracts to be signed
 			signContract();
+		}
+		else if (e.getSource()==viewDetails){
+			context=new GUIcontext(new createContractAction(contractIds.get(allContracts.getSelectedIndex())));
+			context.showUI();
+
 		}
 
 	}
@@ -175,14 +218,24 @@ public class Student implements User, ActionListener {
 				String firstId=node.get("firstParty").get("id").toString();
 				String secondId=node.get("secondParty").get("id").toString();
 
-
 				if(firstId.contains(userId) || secondId.contains(userId)){
 					//check if there are any unsigned contract created by tutor when open bid was done
 					if(node.get("dateSigned").toString().equals("null")){
 						String cId=node.get("id").toString();
 						int lenCid=cId.length();
 						contractIds.add(cId.substring(1, lenCid-1));
+						String contract="";
+						System.out.println(node.get("additionalInfo"));
+						try{contract=node.get("subject").get("name").toString()+" , "+node.get("subject").get("description").toString()+
+								" , "+node.get("additionalInfo").get("tutorName").toString();}
+						catch(Exception e){
+							contract=node.get("subject").get("name").toString()+" , "+node.get("subject").get("description").toString()+
+									" contract between"+node.get("firstParty").get("givenName").toString()+" and "+node.get("secondParty").get("givenName").toString();
+						}
+
+						comboBoxItems.add(contract);
 					}
+
 				}
 
 			}

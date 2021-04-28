@@ -243,7 +243,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         String userDesc = descText.getText();
         userSub= userSub.substring(0, 1).toUpperCase() + userSub.substring(1);
         System.out.println(userSub);
-        HttpResponse<String> subResponse = APIRequester.initiateWebApiGET("subject", myApiKey);
+        HttpResponse<String> subResponse = GuiAction.initiateWebApiGET("subject", myApiKey);
         try {
             ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
 

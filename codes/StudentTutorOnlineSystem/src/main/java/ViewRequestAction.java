@@ -21,8 +21,8 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     private ArrayList<String> bidType = new ArrayList<String>();
 
     public JPanel panel;
-    JButton viewDetails;
-    Vector comboBoxItems=new Vector();
+    private JButton viewDetails;
+    private Vector comboBoxItems=new Vector();
 
     public ViewRequestAction(String uId,String name){
         userId=uId;
@@ -89,13 +89,12 @@ public class ViewRequestAction implements GuiAction, ActionListener {
         if (e.getSource() == viewDetails) {
             String bidid=getSelectedRequest();
             String bidTypeOfselected=getSelectedBidType();
-            System.out.println(bidid);
-            System.out.println(bidTypeOfselected);
             if (bidTypeOfselected.contains("open")){
                 //create open bid action
-                BidAction b=new OpenBid(bidid,userId,fullName);
+                BidAction b=new OpenBidAction(bidid,userId,fullName);
             }
-            else{CloseBid c=new CloseBid(bidid,userId);}
+            else{
+                CloseBidAction c=new CloseBidAction(bidid,userId);}
 
         }
     }
@@ -111,7 +110,6 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                 for (JsonNode bidNode : node.get("initiatedBids")) {
                     // show bids that are not closed down
                     if(bidNode.get("dateClosedDown").toString().equals("null") ) {
-                        System.out.println(bidNode);
                         String closeTimeDb = "";
                         String bidCloseTime = "";
                         // this will throw an exception. The requested bid always has additional info, so this exception will not cause any problem
@@ -122,8 +120,6 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                             try{
                                 closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
                                 bidCloseTime = GuiAction.removeQuotations(closeTimeDb);
-                                System.out.println(closeTimeDb);
-                                System.out.println(bidCloseTime);
                             }
                             catch(Exception e){System.out.println("requestClosesAt not found");}
 //                            System.out.println("heu");
@@ -161,9 +157,6 @@ public class ViewRequestAction implements GuiAction, ActionListener {
             }
         }
         catch(Exception e) {
-            System.out.println("Error");
-            System.out.println(e.getMessage());
-            System.out.println(e.toString());
             System.out.println(e.getCause());
             System.out.println(e.getStackTrace()[0].getLineNumber());
         }
