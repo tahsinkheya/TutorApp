@@ -49,6 +49,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         frame.add(panel);
         panel.setLayout(null);
 
+        panel.setBackground(new Color(172, 209, 233));
 
         // take user inputs over here
         JLabel actionLabel = new JLabel("Make a matching request");
@@ -380,7 +381,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         // bid lasts for 10 seconds for now
         Integer seconds;
         if (bidTypes.getSelectedItem().toString().contains("Open")){
-            seconds=10;
+            seconds=30*60;
 //            seconds=10;
         }
         else{

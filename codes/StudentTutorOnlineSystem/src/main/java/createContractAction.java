@@ -1,19 +1,24 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.json.simple.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 
 public class createContractAction implements GuiAction, ActionListener {
     private String contractId;
-    // this list contains(subname, subdesc,competency,weekly sess, hours per lesson, rate)
+    // this list contains(subname, subdesc,competency,weekly sess, hours per lesson, rate,tutorqualification)
     private ArrayList<String> contractDetails=new ArrayList<>();
     private JPanel panel;
     private String studentName,tutorName;
@@ -22,10 +27,59 @@ public class createContractAction implements GuiAction, ActionListener {
 
 
     private JButton button;
+    /* 1st constructor for students and tutors to aign contracts when contract has already been created by buy
+    * out process or select tutor process and bid closed process*/
     public createContractAction(String contractid){
         contractId=contractid;
-        System.out.println(contractId);
         findContractDetails();
+    }
+    /*2nd constructor for student to use to create a contract when selecting a tutor
+    * */
+    public createContractAction(OpenBidOffer acceptedOffer,String studentSign,String tutorSign){
+        String endpoint="contract";
+        Calendar date = Calendar.getInstance();
+        long timeInSecs = date.getTimeInMillis();
+        String contractEndTime;
+        String jsonString="";
+        //set a contract end time
+        contractEndTime = new Date(timeInSecs + (365*24*60*60*1000)).toInstant().toString();
+
+        // create the contract
+        JSONObject contractInfo=new JSONObject();
+        //lets make tuor first party
+        System.out.println(acceptedOffer.getFirstPartyId());
+        System.out.println(acceptedOffer.getSecondPartyId());
+        System.out.println(acceptedOffer.getSubjectId());
+        contractInfo.put("firstPartyId", acceptedOffer.getFirstPartyId());
+        contractInfo.put("secondPartyId", acceptedOffer.getSecondPartyId());
+        contractInfo.put("subjectId", acceptedOffer.getSubjectId());
+        contractInfo.put("dateCreated", new Date().toInstant().toString());
+        contractInfo.put("expiryDate",contractEndTime );
+
+        JSONObject additionalInfo=new JSONObject();
+        // create the additional info
+        additionalInfo.put("subjectName", acceptedOffer.getStudentName());
+        additionalInfo.put("subjectDesc", acceptedOffer.getSubjectDesc());
+        additionalInfo.put("competency", acceptedOffer.getCompetency());
+        additionalInfo.put("weeklySession", acceptedOffer.getWeeklySession());
+        additionalInfo.put("hoursPerLesson", acceptedOffer.getHoursPerLesson());
+        additionalInfo.put("rate", acceptedOffer.getRate());
+        additionalInfo.put("studentName", acceptedOffer.getStudentName());
+        additionalInfo.put("tutorName", acceptedOffer.getTutorName());
+        additionalInfo.put("tutorQualification", acceptedOffer.getTutorQualification());
+        additionalInfo.put("tutorSign", tutorSign);
+        additionalInfo.put("studentSign", studentSign);
+
+
+        contractInfo.put("additionalInfo", additionalInfo);
+
+        jsonString=contractInfo.toString();
+        HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
+        System.out.println("status"+updateResponse.statusCode());
+
+
+
+
     }
     private void findContractDetails(){
         String endpoint = "contract/"+contractId;
@@ -46,7 +100,7 @@ public class createContractAction implements GuiAction, ActionListener {
                    //set tutot and student name for the contract details
                    tutorName=firstGname+" "+firstFname;
                    studentName=secondGname+" "+secondFname;
-                   contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown"));
+                   contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown","unknown"));
                }
                else{
 
@@ -68,10 +122,10 @@ public class createContractAction implements GuiAction, ActionListener {
 			} catch (Exception e) {
                 e.printStackTrace();
             }
-			for (String d:contractDetails)
-			{
-			    System.out.println(d);
-            }
+//			for (String d:contractDetails)
+//			{
+//			    System.out.println(d);
+//            }
     }
     @Override
     public void show() {
@@ -124,25 +178,27 @@ public class createContractAction implements GuiAction, ActionListener {
         panel.add(rate);
 
 
+        JLabel qualification=new JLabel("Tutor Qualification/s: "+contractDetails.get(6) );
+        rate.setBounds(10,230,340,25);
+        panel.add(rate);
+
+
         c1 = new JCheckBox("");
-        c1.setBounds(10,250,20,20);
+        c1.setBounds(10,270,20,20);
         panel.add(c1);
 
         JLabel confirmText= new JLabel("I agree to this contract content");
-        confirmText.setBounds(30,250,380,25);
+        confirmText.setBounds(30,270,380,25);
         panel.add(confirmText);
 
         warning= new JLabel();
-        warning.setBounds(10,270,380,25);
+        warning.setBounds(10,300,380,25);
         panel.add(warning);
 
         button= new JButton("Confirm and Proceed");
-        button.setBounds(60,330,320,25);
+        button.setBounds(60,400,320,25);
         button.addActionListener(this);
         panel.add(button);
-        System.out.println(c1.isSelected());
-
-        System.out.println(c1.isSelected());
         frame.setVisible(true);
 
     }
@@ -150,8 +206,6 @@ public class createContractAction implements GuiAction, ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==button){
-            System.out.println(c1.isSelected());
-            System.out.println(contractId);
             if (c1.isSelected()==true){
                 //proceed to confirming contract
                 new ContractSigner(contractId,"");

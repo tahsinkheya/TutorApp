@@ -23,6 +23,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     public JPanel panel;
     private JButton viewDetails;
     private Vector comboBoxItems=new Vector();
+    private JLabel warning;
 
     public ViewRequestAction(String uId,String name){
         userId=uId;
@@ -69,6 +70,10 @@ public class ViewRequestAction implements GuiAction, ActionListener {
         viewDetails.addActionListener(this);
         panel.add(viewDetails);
 
+        warning=new JLabel();
+        warning.setBounds(10,240,1200,25);
+        panel.add(warning);
+
 
         /*
         testBtn = new JButton("Test");
@@ -87,14 +92,22 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == viewDetails) {
-            String bidid=getSelectedRequest();
-            String bidTypeOfselected=getSelectedBidType();
-            if (bidTypeOfselected.contains("open")){
-                //create open bid action
-                BidAction b=new OpenBidAction(bidid,userId,fullName);
+            if (bidType.size()!=0) {
+                String bidid = getSelectedRequest();
+                String bidTypeOfselected = getSelectedBidType();
+
+                if (bidTypeOfselected.contains("open")) {
+                    //create open bid action
+                    BidAction b = new OpenBidAction(bidid, userId, fullName);
+                } else {
+                    //TODO close bid for tutor
+                    CloseBidAction c = new CloseBidAction(bidid, userId);
+                }
             }
             else{
-                CloseBidAction c=new CloseBidAction(bidid,userId);}
+                warning.setText("there are no active requests available");
+                warning.setForeground(Color.red);
+            }
 
         }
     }

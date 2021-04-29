@@ -22,15 +22,18 @@ public class MakeOpenBidOffer implements ActionListener {
     private JComboBox allRates, lessonInfo;
     private JButton makeOffer,closeBtn;
     private JLabel warning;
-    private String bidid,userId;
+    private String bidid,userId,tutorQ;
+    private int tutorComp;
 
     /**
      * @param bidId: a string that represents the bid id
      */
 
-    public  MakeOpenBidOffer(String bidId,String userid){
+    public  MakeOpenBidOffer(String bidId,String userid,int comp,String tutorQuali){
         bidid=bidId;
         userId=userid;
+        tutorComp=comp;
+        tutorQ=tutorQuali;
         frame = new JFrame();
         // Setting the width and height of frame
         frame.setSize(900, 600);
@@ -146,6 +149,8 @@ public class MakeOpenBidOffer implements ActionListener {
                 additionalInfo.put("numberOfSession",sess);
                 additionalInfo.put("extraInfo",extra);
                 additionalInfo.put("freeLesson",freeLess);
+                additionalInfo.put("tutorComp",String.valueOf(tutorComp));
+                additionalInfo.put("tutorQualification",tutorQ);
                 msgInfo.put("additionalInfo", additionalInfo);
 
                 // convert message to JSON string

@@ -111,9 +111,31 @@ public class OpenBidAction extends BidAction implements ActionListener {
 
     }
 
+    private String TutorQualification() {
+        String endpoint = "user?fields=qualifications";
+        String tutorQ = "";
+        HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
+        try{
+            ObjectNode[] userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode[].class);
+            for (JsonNode node : userNode) {
+                if(node.get("id").toString().contains(userId)){
+                    for(JsonNode n:node.get("qualifications")){
+                        tutorQ+=GuiAction.removeQuotations(n.get("title").toString())+" | ";
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (tutorQ.equals("")){
+            tutorQ="unknown";
+        }
+        return tutorQ;
+
+    }
     /* Method to find if the tutor's competency in the subject that they specialise in*/
     private int findTutorCompetency(String subName) {
-        System.out.println("Inside the finding Competency function");
         String endpoint = "user/"+userId+"?fields=competencies.subject";
         int tutorcompetencyLevel = 0;
         HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
@@ -163,7 +185,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==makeBidOffer){
-            System.out.println("make");
+            String tutorQualification=TutorQualification();
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
             if (isCompetent(level)==false){
@@ -173,26 +195,15 @@ public class OpenBidAction extends BidAction implements ActionListener {
 
             else{
                 //can bid
+                //String tutorQualification=TutorQualification();
                 frame.setVisible(false);
-                MakeOpenBidOffer newBid=new MakeOpenBidOffer(bidid,userId);
+                MakeOpenBidOffer newBid=new MakeOpenBidOffer(bidid,userId,level,tutorQualification);
             }
 
-//            String jsonString = null;
-//            // create the message object
-//            JSONObject msgInfo=new JSONObject();
-//            msgInfo.put("bidId","a62e7937-ed0f-428d-ad1e-b8066242db4f" );
-//            msgInfo.put("posterId","a753826d-3c66-4f89-8136-9af896b5bfd9" );
-//            msgInfo.put("datePosted", new Date().toInstant().toString());
-//            msgInfo.put("content", "this is a test");
-//            JSONObject additionalInfo=new JSONObject();
-//            msgInfo.put("additionalInfo", additionalInfo);
-//
-//            // convert message to JSON string
-//            jsonString = msgInfo.toString();
-//            webApiPOST("message", jsonString);
         }
         else if (e.getSource()==viewOtherBids){
-            System.out.println("view");
+            frame.setVisible(false);
+            ViewOtherTutorBids offer=new ViewOtherTutorBids(bidid,userId);
         }
         else if (e.getSource()==buyOutBtn){
             String subName = bidInfo.get(0);
@@ -229,6 +240,8 @@ public class OpenBidAction extends BidAction implements ActionListener {
         contractInfo.put("dateCreated", new Date().toInstant().toString());
         contractInfo.put("expiryDate",contractEndTime );
 
+        String tutorQualification=TutorQualification();
+
         JSONObject additionalInfo=new JSONObject();
         // create the additional info
         additionalInfo.put("subjectName", bidInfo.get(0));
@@ -239,6 +252,9 @@ public class OpenBidAction extends BidAction implements ActionListener {
         additionalInfo.put("rate", bidInfo.get(5));
         additionalInfo.put("studentName", bidInfo.get(8));
         additionalInfo.put("tutorName", userFullName);
+        additionalInfo.put("tutorQualification", tutorQualification);
+        additionalInfo.put("tutorSign", "true");
+        additionalInfo.put("studentSign", "false");
 
         contractInfo.put("additionalInfo", additionalInfo);
 
@@ -258,7 +274,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
                 .build();
         try {
             HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+            System.out.println(postResponse.statusCode());
             if (postResponse.statusCode()==201){
                 competencyAlert.setText("Contract creation is in process. Waiting for student to confirm");
                 competencyAlert.setForeground(new Color(0,102,0));
