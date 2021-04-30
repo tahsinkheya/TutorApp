@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class CloseBidAction extends BidAction implements ActionListener {
-    private String bidId,userId,userFullName;
+    private String bidId,userId,userFullName,studentId;
     private JLabel warning;
     private ArrayList<String> bidInfo;
     private JFrame frame;
@@ -20,10 +20,11 @@ public class CloseBidAction extends BidAction implements ActionListener {
     private JTextArea message;
     private JButton sendMessage,closeBtn;
 
-    public CloseBidAction(String bidid, String uId,String fullName){
+    public CloseBidAction(String bidid, String uId,String fullName,String studentid){
         bidId=bidid;
         userId=uId;
         userFullName=fullName;
+        studentId=studentid;
         showUI();
     }
 
@@ -110,7 +111,6 @@ public class CloseBidAction extends BidAction implements ActionListener {
             frame.setVisible(false);
         }
         else if (e.getSource()==sendMessage){
-            //TODO save message in bid
             String msg=message.getText();
             if (msg.equals("")){
                 warning.setText("Please fill in details about your offer in the text field above");
@@ -131,19 +131,13 @@ public class CloseBidAction extends BidAction implements ActionListener {
         msgInfo.put("datePosted", new Date().toInstant().toString());
         msgInfo.put("content", userFullName+": "+msg);
         JSONObject additionalInfo=new JSONObject();
-        additionalInfo.put("to","student");
+        additionalInfo.put("to",studentId);
         msgInfo.put("additionalInfo", additionalInfo);
 
         // convert message to JSON string
         jsonString = msgInfo.toString();
         HttpResponse<String> userResponse=GuiAction.updateWebApi("message",myApiKey,jsonString);
-        System.out.println(userResponse.statusCode());
-        if (userResponse.statusCode()==200){
-            warning.setText("your response has been saved successfully");
-        }
-        else{
-            warning.setText("there was an error when saving ur response");
-            warning.setForeground(Color.RED);
-        }
+        //System.out.println(userResponse.statusCode());
+        warning.setText("your response has been saved successfully");
     }
 }

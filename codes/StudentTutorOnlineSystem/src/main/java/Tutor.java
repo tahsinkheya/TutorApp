@@ -13,7 +13,7 @@ public class Tutor implements  User, ActionListener {
 
     private JPanel homepage;
     private JLabel welcome;
-    private JButton viewContract,viewRequest; 	//Btn
+    private JButton viewContract,viewRequest,viewMessage; 	//Btn
 
 
     @Override
@@ -54,6 +54,10 @@ public class Tutor implements  User, ActionListener {
         viewContract.addActionListener(this);
         homepage.add(viewContract);
 
+        viewMessage = new JButton("View Messages from Close bids");
+        viewMessage.setBounds(100, 300, 600, 25);
+        viewMessage.addActionListener(this);
+        homepage.add(viewMessage);
         homeFrame.setVisible(true);
     }
 
@@ -67,6 +71,11 @@ public class Tutor implements  User, ActionListener {
             context= new GUIcontext(new ViewRequestAction(userId,givenName+" "+familyName));
             context.showUI();
             //TutorGUI t=new TutorGUI();
+        }
+        else if (e.getSource()==viewMessage){
+            context=new GUIcontext(new ViewMessagesToTutorAction(userId));
+            context.showUI();
+
         }
 
     }

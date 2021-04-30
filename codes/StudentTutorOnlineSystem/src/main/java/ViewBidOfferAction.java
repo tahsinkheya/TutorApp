@@ -101,7 +101,9 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                 }
                 else{
                     //shiow close bid offer
-                    new ViewMessages(bidid,userId);
+                    ViewMessages v=new ViewMessages(bidid,userId);
+                    v.showSenders();
+
                 }
             }
         }

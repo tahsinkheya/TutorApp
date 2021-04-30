@@ -19,6 +19,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     // list of all students' bid id since it is needed make message
     private ArrayList<String> allStudentBidList = new ArrayList<String>();
     private ArrayList<String> bidType = new ArrayList<String>();
+    private ArrayList<String> studentId = new ArrayList<String>();
 
     public JPanel panel;
     private JButton viewDetails;
@@ -95,13 +96,16 @@ public class ViewRequestAction implements GuiAction, ActionListener {
             if (bidType.size()!=0) {
                 String bidid = getSelectedRequest();
                 String bidTypeOfselected = getSelectedBidType();
+                int selectedRequestPos = allRequests.getSelectedIndex();
+                System.out.println(selectedRequestPos);
+                String selectedStudentId=studentId.get(selectedRequestPos);
 
                 if (bidTypeOfselected.contains("open")) {
                     //create open bid action
                     BidAction b = new OpenBidAction(bidid, userId, fullName);
                 } else {
-                    //TODO close bid for tutor
-                    CloseBidAction c = new CloseBidAction(bidid, userId,fullName);
+                    System.out.println(selectedStudentId);
+                    CloseBidAction c = new CloseBidAction(bidid, userId,fullName,selectedStudentId);
                 }
             }
             else{
@@ -119,7 +123,6 @@ public class ViewRequestAction implements GuiAction, ActionListener {
             //String output="";
             //allRequests.removeAllItems();
             for (ObjectNode node: jsonNodes) {
-
                 for (JsonNode bidNode : node.get("initiatedBids")) {
                     // show bids that are not closed down
                     if(bidNode.get("dateClosedDown").toString().equals("null") ) {
@@ -160,6 +163,8 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                                 String bidId = bidNode.get("id").toString();
                                 allStudentBidList.add(bidId);
                                 bidType.add(status);
+                                String studId=node.get("id").toString();
+                                studentId.add(GuiAction.removeQuotations(studId));
                             }
 
                             //final DefaultComboBoxModel model = new DefaultComboBoxModel(comboBoxItems);
