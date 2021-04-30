@@ -29,8 +29,6 @@ public interface GuiAction {
     }
 
     static  HttpResponse<String> updateWebApi(String endpoint, String apiKey, String jsonString) {
-        System.out.println(apiKey);
-        //System.out.println("The abstract class has this: "+jsonString);
         String Url = "https://fit3077.com/api/v1/"+endpoint;
 
         HttpClient client = HttpClient.newHttpClient();
@@ -43,8 +41,6 @@ public interface GuiAction {
         HttpResponse<String> response = null;
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.statusCode());
-            System.out.println("FROM GUI: " + response.toString());
         }
         catch (Exception e){
             System.out.println("Error!!!");

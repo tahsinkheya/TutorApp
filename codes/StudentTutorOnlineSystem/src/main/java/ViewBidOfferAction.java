@@ -100,7 +100,8 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                     showOpenBidOffers(bidid);
                 }
                 else{
-                    //TODO add close bid viewing code here
+                    //shiow close bid offer
+                    new ViewMessages(bidid,userId);
                 }
             }
         }

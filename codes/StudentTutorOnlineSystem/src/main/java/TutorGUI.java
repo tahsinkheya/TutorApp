@@ -292,7 +292,7 @@ public class TutorGUI extends APIRequester implements ActionListener {
 			// get the id of the newly created object
 			ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
 			System.out.println("Bid/Message sent successfully");
-			Student.showAllRequests();
+			//Student.showAllRequests();
 		
 		}
 		catch(Exception e){

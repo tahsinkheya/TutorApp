@@ -17,8 +17,7 @@ public class Tutor implements  User, ActionListener {
 
 
     @Override
-    public boolean signContract() {
-        return false;
+    public void signContract() {
     }
 
     @Override
@@ -27,8 +26,6 @@ public class Tutor implements  User, ActionListener {
         this.givenName=gName;
         this.familyName=fName;
         this.userId=uId;
-        System.out.println(givenName);
-        System.out.println(familyName);
     }
 
     @Override

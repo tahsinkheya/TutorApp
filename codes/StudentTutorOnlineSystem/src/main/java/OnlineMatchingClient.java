@@ -25,20 +25,20 @@ public class OnlineMatchingClient implements ActionListener {
     NOTE: In order to access the web service, you will need to include your API key in the Authorization header of all requests you make.
     Your personal API key can be obtained here: https://fit3077.com
    */
-    protected static final String myApiKey = "";
+    protected static final String myApiKey = "T9fwzrc6ktqT7cb6H7F8wHmJWnfCtk";
 
     // Provide the root URL for the web service. All web service request URLs start with this root URL.
     private static final String rootUrl = "https://fit3077.com/api/v1";
-    String usersUrl = rootUrl + "/user";
+    private String usersUrl = rootUrl + "/user";
     private static JLabel user,usernameLabel,passwordLabel,loginNotSuccessful;
     private static JTextField usernameText;
     private static JPasswordField passwordText;
     private static JFrame logInFrame;
     // the type of user that logged in: Student or Tutor
-    private static String userType;
+    private String userType;
     
     // userID needed for initializing bids and messages
-    public String userID;
+    private String userID;
 
 
     public static void main(String[] args){

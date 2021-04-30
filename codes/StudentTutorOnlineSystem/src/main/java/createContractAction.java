@@ -20,6 +20,7 @@ public class createContractAction implements GuiAction, ActionListener {
     private String contractId;
     // this list contains(subname, subdesc,competency,weekly sess, hours per lesson, rate,tutorqualification)
     private ArrayList<String> contractDetails=new ArrayList<>();
+
     private JPanel panel;
     private String studentName,tutorName;
     private JLabel subName,subDesc,requiredComp,Hlp,rate,weekSess,warning;
@@ -110,10 +111,12 @@ public class createContractAction implements GuiAction, ActionListener {
                    String rate=userNode.get("additionalInfo").get("rate").toString();
                    String stuname=userNode.get("additionalInfo").get("studentName").toString();
                    String tutename=userNode.get("additionalInfo").get("tutorName").toString();
+                   String tuteQualification=userNode.get("additionalInfo").get("tutorQualification").toString();
                    contractDetails.add(GuiAction.removeQuotations(comp));
                    contractDetails.add(GuiAction.removeQuotations(weeklySession));
                    contractDetails.add(GuiAction.removeQuotations(hpl));
                    contractDetails.add(GuiAction.removeQuotations(rate));
+                   contractDetails.add(GuiAction.removeQuotations(tuteQualification));
                    studentName=GuiAction.removeQuotations(stuname);
                    tutorName=GuiAction.removeQuotations(tutename);
                }
@@ -179,8 +182,8 @@ public class createContractAction implements GuiAction, ActionListener {
 
 
         JLabel qualification=new JLabel("Tutor Qualification/s: "+contractDetails.get(6) );
-        rate.setBounds(10,230,340,25);
-        panel.add(rate);
+        qualification.setBounds(10,230,340,25);
+        panel.add(qualification);
 
 
         c1 = new JCheckBox("");

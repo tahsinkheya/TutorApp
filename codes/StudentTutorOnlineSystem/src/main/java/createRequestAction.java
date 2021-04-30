@@ -25,13 +25,11 @@ public class createRequestAction implements GuiAction, ActionListener {
 
 
 
-    private String userId,givenName,familyName;
+    private String userId;
 
 
-    public createRequestAction(String uId,String gname,String fname){
+    public createRequestAction(String uId){
         userId=uId;
-        givenName=gname;
-        familyName=fname;
     }
 
 

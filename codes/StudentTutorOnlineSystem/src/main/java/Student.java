@@ -20,12 +20,11 @@ import java.util.Vector;
  *
  */
 public class Student implements User, ActionListener {
-	private static StudentGUI studentGUI= new StudentGUI();
 	private String userName;
 	private String givenName;
 	private String familyName;
 	private GUIcontext context;
-	String userId;
+	private String userId;
 	private ArrayList <String> contractIds= new ArrayList<>();
 
 
@@ -34,7 +33,7 @@ public class Student implements User, ActionListener {
 	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract,viewDetails;
 	private JPanel homepagePanel,contractPanel;
 	private  JLabel welcome,contractNotif;
-	Vector comboBoxItems=new Vector();
+	private Vector comboBoxItems=new Vector();
 	private static JComboBox allContracts;
 
 
@@ -45,7 +44,7 @@ public class Student implements User, ActionListener {
 	
 
 	@Override
-	public boolean signContract() {
+	public void signContract() {
 		// Creating instance of JFrame
 		JFrame frame = new JFrame();
 		// Setting the width and height of frame
@@ -99,18 +98,7 @@ public class Student implements User, ActionListener {
 //				ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
 //				String contract=userNode.get("subject").get("name").toString()+" , "+userNode.get("subject").get("description").toString()+
 //						" , "+userNode.get("additionalInfo").get("tutorName").toString();
-//				output.add(contract);
-//				contractDetails.add(userNode.get("addtionalInfo"));
-//
-//
-//			} catch (Exception e) {
-//				System.out.println("Error!!!");
-//				System.out.println(e.getCause());
-//			}
-//		}
 
-
-		return false;
 
 	}
 
@@ -171,17 +159,17 @@ public class Student implements User, ActionListener {
 			homeFrame.setVisible(true);
 
 	}
-
-	static void showAllRequests(){
-		studentGUI.showAllRequests();
-	}
+//
+//	static void showAllRequests(){
+//		studentGUI.showAllRequests();
+//	}
 
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == requestTbutton){
 			//show make request page
-			context= new GUIcontext(new createRequestAction(userId,givenName,familyName));
+			context= new GUIcontext(new createRequestAction(userId));
 			context.showUI();
 		}
 		else if (e.getSource()==viewCbutton){

@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -57,6 +58,30 @@ public abstract class BidAction {
         bidInfo.add(GuiAction.removeQuotations(subId));
         bidInfo.add(studentFullName);
         return bidInfo;
+    }
+
+    public String TutorQualification(String userId) {
+        String endpoint = "user?fields=qualifications";
+        String tutorQ = "";
+        HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
+        try{
+            ObjectNode[] userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode[].class);
+            for (JsonNode node : userNode) {
+                if(node.get("id").toString().contains(userId)){
+                    for(JsonNode n:node.get("qualifications")){
+                        tutorQ+=GuiAction.removeQuotations(n.get("title").toString())+" | ";
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (tutorQ.equals("")){
+            tutorQ="unknown";
+        }
+        return tutorQ;
+
     }
 
 

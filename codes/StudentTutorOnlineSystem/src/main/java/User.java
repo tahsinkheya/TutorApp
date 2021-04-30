@@ -1,9 +1,9 @@
 
 public interface User {
     //public boolean logIn(String username, String password);
-    public boolean signContract();
-    public void create(String uName, String gName,String fName,String uId);
-    public void showHomePage();
+    void signContract();
+    void create(String uName, String gName, String fName, String uId);
+    void showHomePage();
    
 	
 }

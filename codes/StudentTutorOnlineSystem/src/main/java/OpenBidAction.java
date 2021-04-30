@@ -111,29 +111,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
 
     }
 
-    private String TutorQualification() {
-        String endpoint = "user?fields=qualifications";
-        String tutorQ = "";
-        HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
-        try{
-            ObjectNode[] userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode[].class);
-            for (JsonNode node : userNode) {
-                if(node.get("id").toString().contains(userId)){
-                    for(JsonNode n:node.get("qualifications")){
-                        tutorQ+=GuiAction.removeQuotations(n.get("title").toString())+" | ";
-                    }
 
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (tutorQ.equals("")){
-            tutorQ="unknown";
-        }
-        return tutorQ;
-
-    }
     /* Method to find if the tutor's competency in the subject that they specialise in*/
     private int findTutorCompetency(String subName) {
         String endpoint = "user/"+userId+"?fields=competencies.subject";
@@ -185,7 +163,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==makeBidOffer){
-            String tutorQualification=TutorQualification();
+            String tutorQualification=TutorQualification(userId);
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
             if (isCompetent(level)==false){
@@ -240,7 +218,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         contractInfo.put("dateCreated", new Date().toInstant().toString());
         contractInfo.put("expiryDate",contractEndTime );
 
-        String tutorQualification=TutorQualification();
+        String tutorQualification=TutorQualification(userId);
 
         JSONObject additionalInfo=new JSONObject();
         // create the additional info

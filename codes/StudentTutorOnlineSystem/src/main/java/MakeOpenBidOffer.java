@@ -189,6 +189,9 @@ public class MakeOpenBidOffer implements ActionListener {
             if (postResponse.statusCode()==201){
                 warning.setText("Your offer has been saved");
             }
+            else{
+                warning.setText("there was an error when saving ur response,please try again");
+            }
 //            Student.showAllRequests();
 
         }

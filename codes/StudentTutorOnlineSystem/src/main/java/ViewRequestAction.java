@@ -101,7 +101,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                     BidAction b = new OpenBidAction(bidid, userId, fullName);
                 } else {
                     //TODO close bid for tutor
-                    CloseBidAction c = new CloseBidAction(bidid, userId);
+                    CloseBidAction c = new CloseBidAction(bidid, userId,fullName);
                 }
             }
             else{
