@@ -6,13 +6,17 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.json.simple.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.TreeMap;
 import java.util.Vector;
 
 /**
@@ -39,8 +43,6 @@ public class Student implements User, ActionListener {
 
 
 
-
-	//StudentGUI studentGUI;
 	
 
 	@Override
@@ -92,6 +94,7 @@ public class Student implements User, ActionListener {
 		this.givenName=gName;
 		this.familyName=fName;
 		this.userId=uId;
+		checkRequestClosing();
 		checkContract();
 
 	}
@@ -163,7 +166,8 @@ public class Student implements User, ActionListener {
 		}
 		else if (e.getSource()==viewCbutton){
 			//show all contracts page
-			//context=new GUIcontext(new )
+			context=new GUIcontext(new viewContractAction(userId));
+			context.showUI();
 
 		}
 		else if (e.getSource()==ViewBbutton){
@@ -185,7 +189,42 @@ public class Student implements User, ActionListener {
 	}
 
 	private void checkRequestClosing(){
+		HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid?fields=messages", GuiAction.myApiKey);
+		try {
+			ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
 
+			for (ObjectNode node : userNodes) {
+				//check if bid is of type close
+				String bidType = node.get("type").asText();
+				String bidId = node.get("id").asText();
+				String subId = node.get("subject").get("id").asText();
+				System.out.println("sub "+subId);
+				//get todays date
+				String today = new Date().toInstant().toString();
+				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				String bidCloseTime = node.get("additionalInfo").get("requestClosesAt").asText();
+				Date todayDate = sourceFormat.parse(today);
+				Date endDate = sourceFormat.parse(bidCloseTime);
+				//we need to close all close bids if they have passed their expiry date
+				if (bidType.contains("close") && node.get("dateClosedDown").toString().equals("null")){
+					//check that todays date is  after closing date
+					if(todayDate.after(endDate)==true){
+						new RequestCloser(1,bidId,GuiAction.myApiKey,new Date().toInstant().toString());
+					}
+				}
+				else if(bidType.contains("open") && node.get("dateClosedDown").toString().equals("null")){
+					//select tutor and close request if one or more offers were receive
+					System.out.println(node.get("messages"));
+					if(node.get("messages").isEmpty()==false){
+						selectTutor(node.get("messages"),bidId,subId);
+					}
+				}
+
+
+
+			}
+		}
+		catch(Exception e){}
 	}
 	private void checkContract(){
 		HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("contract", GuiAction.myApiKey);
@@ -247,4 +286,32 @@ public class Student implements User, ActionListener {
 		}
 	}
 
+	private void selectTutor(JsonNode messages,String bidId,String subId) {
+		System.out.println("dhj");
+		TreeMap<Date,OpenBidOffer> map=new TreeMap<>();
+		for (JsonNode node : messages) {
+			try {
+				String datePosted = GuiAction.removeQuotations(node.get("datePosted").toString());
+				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				Date newDate = sourceFormat.parse(datePosted);
+				String tutorId=node.get("poster").get("id").asText();
+				String hrsperLesson=node.get("additionalInfo").get("duration").asText();
+				String weeklyS=node.get("additionalInfo").get("numberOfSession").asText();
+				String comp=node.get("additionalInfo").get("tutorComp").asText();
+				String rate=node.get("additionalInfo").get("rate").asText();
+				String tutorQ=node.get("additionalInfo").get("tutorQualification").asText();
+				OpenBidOffer offer=new OpenBidOffer( userId,tutorId,subId,"",comp,weeklyS,hrsperLesson,rate,userName,tutorId,"","",tutorQ);
+				map.put(newDate,offer);
+			} catch (Exception e) {
+				System.out.println(e.getCause());
+			}
+		}
+		System.out.println(bidId);
+		OpenBidOffer lastTutor=map.lastEntry().getValue();
+		createContractAction contract= new createContractAction(lastTutor,"",userId,bidId);
+		if(contract.checkContract()){
+			System.out.println(lastTutor.getSecondPartyId());
+			contract.storeContract();
+		}
+	}
 }

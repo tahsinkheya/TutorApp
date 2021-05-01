@@ -79,10 +79,9 @@ public class createContractAction implements GuiAction, ActionListener {
 
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
-        //get date 1 yr from now
-        cal.add(Calendar.YEAR, 1);
+        //get date 2 yr from now
+        cal.add(Calendar.MONTH, 9);
         String contractEndTime = cal.getTime().toInstant().toString();
-
         // create the contract
         JSONObject contractInfo=new JSONObject();
         contractInfo.put("firstPartyId", acceptedOffer.getFirstPartyId());
@@ -91,11 +90,9 @@ public class createContractAction implements GuiAction, ActionListener {
         contractInfo.put("dateCreated", new Date().toInstant().toString());
         contractInfo.put("expiryDate",contractEndTime );
 
-        System.out.println(acceptedOffer.getFirstPartyId());
-        System.out.println(acceptedOffer.getSecondPartyId());
-        System.out.println(acceptedOffer.getSubjectId());
-        System.out.println(new Date().toInstant().toString());
-        System.out.println(contractEndTime);
+
+        System.out.println(contractInfo.get("expiryDate").toString());
+
 
         JSONObject lessonInfo=new JSONObject();
         // create the lesson info
@@ -123,7 +120,7 @@ public class createContractAction implements GuiAction, ActionListener {
 
         jsonString=contractInfo.toString();
         HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
-        System.out.println("status"+updateResponse.statusCode());
+        System.out.println("status--"+updateResponse.statusCode());
         if (updateResponse.statusCode()==201){
             new RequestCloser(1, bidId, myApiKey, new Date().toInstant().toString());
         }

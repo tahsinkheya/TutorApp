@@ -138,12 +138,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                                 bidCloseTime = GuiAction.removeQuotations(closeTimeDb);
                             }
                             catch(Exception e){System.out.println("requestClosesAt not found");}
-//                            System.out.println("heu");
-//                            System.out.println(bidNode.get("additionalInfo"));
-//                            System.out.println(bidNode.get("additionalInfo").get("requestClosesAt"));
-
-                            //closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
-                            //bidCloseTime = APIRequester.removeQuotations(closeTimeDb);
+//
                         }
 
                         String status = bidNode.get("type").toString();

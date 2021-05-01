@@ -142,7 +142,8 @@ public class Tutor implements  User, ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==viewContract){
-           // context=new GUIcontext(new createContractAction())
+            context=new GUIcontext(new viewContractAction(userId));
+            context.showUI();
         }
         else if (e.getSource()==viewRequest){
             //
