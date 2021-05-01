@@ -193,6 +193,8 @@ public class OpenBidAction extends BidAction implements ActionListener {
             else{
                 //can create contract and wait for student to sign
                 createContract(userId,level);
+                competencyAlert.setText("contract creation in process. waiting for student");
+                competencyAlert.setForeground(Color.blue);
             }
 
         }
@@ -204,7 +206,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         String tutorQualification=TutorQualification(userId);
         String tutorCompetency=Integer.toString(tuteCompetency);
         OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(7),bidInfo.get(1),tutorCompetency,bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(8),userFullName,"no","",tutorQualification);
-        createContractAction contract=new createContractAction(offer,"yes",studentId,bidid);
+        createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid);
         contract.storeContract();
 
     }

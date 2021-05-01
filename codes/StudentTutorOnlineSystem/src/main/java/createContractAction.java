@@ -1,7 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.simple.JSONObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -25,19 +24,20 @@ public class createContractAction implements GuiAction, ActionListener {
     private String studentName,tutorName;
     private JLabel subName,subDesc,requiredComp,Hlp,rate,weekSess,warning;
     private JCheckBox c1;
-    private String studentId,firstPartySigned,bidId;
+    private String studentId,firstPartySigned,bidId,userType;
     private OpenBidOffer acceptedOffer;
 
 
     private JButton button;
-    /* 1st constructor for students and tutors to aign contracts when contract has already been created by buy
+    /* 1st constructor for students and tutors to sign contracts when contract has already been created by buy
     * out process or select tutor process and bid closed process*/
-    public createContractAction(String contractid){
+    public createContractAction(String contractid,String usertype){
         contractId=contractid;
+        userType=usertype;
         findContractDetails();
     }
 
-    /*2nd constructor for student to use to create a contract when selecting a tutor
+    /*2nd constructor for student/titor to use to create a contract when selecting a tutor our buying out bid
     * */
     public createContractAction(OpenBidOffer offer,String fps,String stuId,String bidid){
         acceptedOffer=offer;
@@ -149,7 +149,7 @@ public class createContractAction implements GuiAction, ActionListener {
                 }
                 //else one of the party has signed
                 else{
-                    firstPartySigned="yes";
+                    firstPartySigned=userType;
                 }
                 String firstGname=GuiAction.removeQuotations(userNode.get("firstParty").get("givenName").toString());
                 String firstFname=GuiAction.removeQuotations(userNode.get("firstParty").get("familyName").toString());
@@ -160,7 +160,6 @@ public class createContractAction implements GuiAction, ActionListener {
                 studentName=secondGname+" "+secondFname;
                 // if theres no additionl info we dont know abt competetncy,weekly session,hpl,rate so we will put unknown for contractInfo
                if (userNode.get("lessonInfo").toString().equals("{}")){
-
                    contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown","unknown"));
                }
                else{
@@ -288,7 +287,7 @@ public class createContractAction implements GuiAction, ActionListener {
         // create the contract object
         JSONObject contractInfo=new JSONObject();
         JSONObject additionalInfo=new JSONObject();
-        additionalInfo.put("firstPartySigned","check");
+        additionalInfo.put("firstPartySigned",userType);
         contractInfo.put("additionalInfo",additionalInfo);
         String jsonString = contractInfo.toString();
 

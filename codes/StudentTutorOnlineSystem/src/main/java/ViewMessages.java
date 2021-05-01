@@ -281,7 +281,8 @@ public class ViewMessages implements ActionListener {
 
 
         OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,subId,subName,Integer.toString(tutorcompetencyLevel),weeklySess,hrsperlsn,rate,"","","","",tutorQ);
-        createContractAction contract=new createContractAction(offer,"yes",userId,bidId);
+        //create contract with first party to sign as student
+        createContractAction contract=new createContractAction(offer,"student",userId,bidId);
         contract.storeContract();
     }
 

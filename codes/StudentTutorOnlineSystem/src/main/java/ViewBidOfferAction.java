@@ -135,7 +135,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
             int index=moreOffers.getSelectedIndex();
             OpenBidOffer dets=offerInfo.get(index);
             //create contract and set student signed to true since they selected the tutor
-            createContractAction c=new createContractAction(dets,"yes",userId,bidid);
+            createContractAction c=new createContractAction(dets,"student",userId,bidid);
             if (c.checkContract()==false){
                 newWarning.setText("you already have 5 one-to-one contracts");
                 newWarning.setForeground(Color.RED);
