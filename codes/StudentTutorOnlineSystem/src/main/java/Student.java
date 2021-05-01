@@ -166,7 +166,7 @@ public class Student implements User, ActionListener {
 		}
 		else if (e.getSource()==viewCbutton){
 			//show all contracts page
-			context=new GUIcontext(new viewContractAction(userId));
+			context=new GUIcontext(new viewContractAction(userId, "Student"));
 			context.showUI();
 
 		}
