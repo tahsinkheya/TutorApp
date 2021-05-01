@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.Date;
 
 /**
- * Base class for making offer to open bids.
+ * Base class for making offer to open bids for tutors.
  */
 
 public class MakeOpenBidOffer implements ActionListener {

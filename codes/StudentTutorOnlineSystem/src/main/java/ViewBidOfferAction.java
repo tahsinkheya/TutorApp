@@ -107,6 +107,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                 }
             }
         }
+        //view the student the details of the offer
         else if (e.getSource()==offerView){
             if (offerInfo.size()==0){
                 newWarning.setText("no offers have been made");
@@ -129,14 +130,20 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
 
             }
         }
+        //student choosing a tutor
         else if (e.getSource()==closeBid){
             int index=moreOffers.getSelectedIndex();
             OpenBidOffer dets=offerInfo.get(index);
             //create contract and set student signed to true since they selected the tutor
-            new createContractAction(dets,"true","false");
-            new RequestCloser(1,bidid,myApiKey,new Date().toInstant().toString());
-            newWarning.setText("You selection is noted.Contract creation in process, waiting for tutor to sign.");
-
+            createContractAction c=new createContractAction(dets,"yes",userId,bidid);
+            if (c.checkContract()==false){
+                newWarning.setText("you already have 5 one-to-one contracts");
+                newWarning.setForeground(Color.RED);
+            }
+            else {
+                c.storeContract();
+                newWarning.setText("Your selection is noted.Contract creation in process, waiting for tutor to sign.");
+            }
         }
         else if (e.getSource()==closeBtn){
             newFrame.setVisible(false);

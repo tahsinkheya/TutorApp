@@ -192,88 +192,20 @@ public class OpenBidAction extends BidAction implements ActionListener {
             }
             else{
                 //can create contract and wait for student to sign
-                createContract(userId);
+                createContract(userId,level);
             }
 
         }
     }
 
-    private void createContract(String userId){
+    private void createContract(String userId,int tuteCompetency){
+        //lets create a OpenBidOffer and pass it to the createcontractaction class
         String studentId=bidInfo.get(6);
-        String endpoint="contract";
-        Calendar date = Calendar.getInstance();
-        long timeInSecs = date.getTimeInMillis();
-        String contractEndTime;
-        String jsonString="";
-        //set a contract end time
-        contractEndTime = new Date(timeInSecs + (365*24*60*60*1000)).toInstant().toString();
-        String refId = null;  // id value to get the contract
-
-        // create the contract
-        JSONObject contractInfo=new JSONObject();
-        //lets make tuor first party
-        contractInfo.put("firstPartyId", userId);
-        contractInfo.put("secondPartyId", studentId);
-        contractInfo.put("subjectId", bidInfo.get(7));
-        contractInfo.put("dateCreated", new Date().toInstant().toString());
-        contractInfo.put("expiryDate",contractEndTime );
-
         String tutorQualification=TutorQualification(userId);
-
-        JSONObject additionalInfo=new JSONObject();
-        // create the additional info
-        additionalInfo.put("subjectName", bidInfo.get(0));
-        additionalInfo.put("subjectDesc", bidInfo.get(1));
-        additionalInfo.put("competency", bidInfo.get(2));
-        additionalInfo.put("weeklySession", bidInfo.get(3));
-        additionalInfo.put("hoursPerLesson", bidInfo.get(4));
-        additionalInfo.put("rate", bidInfo.get(5));
-        additionalInfo.put("studentName", bidInfo.get(8));
-        additionalInfo.put("tutorName", userFullName);
-        additionalInfo.put("tutorQualification", tutorQualification);
-        additionalInfo.put("tutorSign", "true");
-        additionalInfo.put("studentSign", "false");
-
-        contractInfo.put("additionalInfo", additionalInfo);
-
-        //additionalInfo.put();
-
-
-
-        jsonString = contractInfo.toString();
-        // create a new contract in the database
-        String Url = "https://fit3077.com/api/v1/"+endpoint;
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder(URI.create(Url))
-                .setHeader("Authorization", myApiKey)
-                .header("Content-Type","application/json") // This header needs to be set when sending a JSON request body.
-                .POST(HttpRequest.BodyPublishers.ofString(jsonString))
-                .build();
-        try {
-            HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(postResponse.statusCode());
-            if (postResponse.statusCode()==201){
-                competencyAlert.setText("Contract creation is in process. Waiting for student to confirm");
-                competencyAlert.setForeground(new Color(0,102,0));
-                new RequestCloser(5, bidid, myApiKey, new Date().toInstant().toString());
-                System.out.println("closing bid in 5 s");
-            }
-
-            // get the id of the newly created object
-            ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
-            refId = jsonNode.get("id").asText();
-            System.out.println(refId);
-            //refId;
-
-        }
-        catch(Exception e){
-            System.out.println(e.getCause());
-            System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace()[0].getLineNumber());
-
-
-        }
+        String tutorCompetency=Integer.toString(tuteCompetency);
+        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(7),bidInfo.get(1),tutorCompetency,bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(8),userFullName,"no","",tutorQualification);
+        createContractAction contract=new createContractAction(offer,"yes",studentId,bidid);
+        contract.storeContract();
 
     }
 

@@ -25,6 +25,8 @@ public class createContractAction implements GuiAction, ActionListener {
     private String studentName,tutorName;
     private JLabel subName,subDesc,requiredComp,Hlp,rate,weekSess,warning;
     private JCheckBox c1;
+    private String studentId,firstPartySigned,bidId;
+    private OpenBidOffer acceptedOffer;
 
 
     private JButton button;
@@ -34,54 +36,101 @@ public class createContractAction implements GuiAction, ActionListener {
         contractId=contractid;
         findContractDetails();
     }
+
     /*2nd constructor for student to use to create a contract when selecting a tutor
     * */
-    public createContractAction(OpenBidOffer acceptedOffer,String studentSign,String tutorSign){
+    public createContractAction(OpenBidOffer offer,String fps,String stuId,String bidid){
+        acceptedOffer=offer;
+        firstPartySigned=fps;
+        studentId=stuId;
+        bidId=bidid;
+    }
+
+    //method to check if student already has 5 contracts
+    public boolean checkContract(){
+        boolean retVal=false;
+        int count=0;
+        HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("contract", GuiAction.myApiKey);
+        try {
+            ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
+            for (ObjectNode node : userNodes) {
+                String firstParty=node.get("firstParty").toString();
+                String secondParty=node.get("secondParty").toString();
+                if (firstParty.contains(studentId) | secondParty.contains(studentId)){
+                    count+=1;
+                }
+
+            }
+        }
+        catch(Exception e){
+
+        }
+        System.out.println(count);
+        if (count<5){
+            retVal=true;
+        }
+        return retVal;
+    }
+
+    //method to stire contract
+    public void storeContract(){
         String endpoint="contract";
-        Calendar date = Calendar.getInstance();
-        long timeInSecs = date.getTimeInMillis();
-        String contractEndTime;
         String jsonString="";
-        //set a contract end time
-        contractEndTime = new Date(timeInSecs + (365*24*60*60*1000)).toInstant().toString();
+
+        Calendar cal = Calendar.getInstance();
+        Date today = cal.getTime();
+        //get date 1 yr from now
+        cal.add(Calendar.YEAR, 1);
+        String contractEndTime = cal.getTime().toInstant().toString();
 
         // create the contract
         JSONObject contractInfo=new JSONObject();
-        //lets make tuor first party
-        System.out.println(acceptedOffer.getFirstPartyId());
-        System.out.println(acceptedOffer.getSecondPartyId());
-        System.out.println(acceptedOffer.getSubjectId());
         contractInfo.put("firstPartyId", acceptedOffer.getFirstPartyId());
         contractInfo.put("secondPartyId", acceptedOffer.getSecondPartyId());
         contractInfo.put("subjectId", acceptedOffer.getSubjectId());
         contractInfo.put("dateCreated", new Date().toInstant().toString());
         contractInfo.put("expiryDate",contractEndTime );
 
+        System.out.println(acceptedOffer.getFirstPartyId());
+        System.out.println(acceptedOffer.getSecondPartyId());
+        System.out.println(acceptedOffer.getSubjectId());
+        System.out.println(new Date().toInstant().toString());
+        System.out.println(contractEndTime);
+
+        JSONObject lessonInfo=new JSONObject();
+        // create the lesson info
+        lessonInfo.put("subjectName", acceptedOffer.getSubjectId());
+        lessonInfo.put("subjectDesc", acceptedOffer.getSubjectDesc());
+        lessonInfo.put("competency", acceptedOffer.getCompetency());
+        lessonInfo.put("weeklySession", acceptedOffer.getWeeklySession());
+        lessonInfo.put("hoursPerLesson", acceptedOffer.getHoursPerLesson());
+        lessonInfo.put("rate", acceptedOffer.getRate());
+        lessonInfo.put("studentName", acceptedOffer.getStudentName());
+        lessonInfo.put("tutorName", acceptedOffer.getTutorName());
+        lessonInfo.put("tutorQualification", acceptedOffer.getTutorQualification());
+
         JSONObject additionalInfo=new JSONObject();
-        // create the additional info
-        additionalInfo.put("subjectName", acceptedOffer.getStudentName());
-        additionalInfo.put("subjectDesc", acceptedOffer.getSubjectDesc());
-        additionalInfo.put("competency", acceptedOffer.getCompetency());
-        additionalInfo.put("weeklySession", acceptedOffer.getWeeklySession());
-        additionalInfo.put("hoursPerLesson", acceptedOffer.getHoursPerLesson());
-        additionalInfo.put("rate", acceptedOffer.getRate());
-        additionalInfo.put("studentName", acceptedOffer.getStudentName());
-        additionalInfo.put("tutorName", acceptedOffer.getTutorName());
-        additionalInfo.put("tutorQualification", acceptedOffer.getTutorQualification());
-        additionalInfo.put("tutorSign", tutorSign);
-        additionalInfo.put("studentSign", studentSign);
+        //create additional info
+        additionalInfo.put("firstPartySigned",firstPartySigned);
 
+        contractInfo.put("lessonInfo", lessonInfo);
 
-        contractInfo.put("additionalInfo", additionalInfo);
+        //means that one of the party has signed
+        if (firstPartySigned!=""){
+            contractInfo.put("additionalInfo",additionalInfo);
+
+        }
 
         jsonString=contractInfo.toString();
         HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
         System.out.println("status"+updateResponse.statusCode());
-
-
+        if (updateResponse.statusCode()==201){
+            new RequestCloser(1, bidId, myApiKey, new Date().toInstant().toString());
+        }
 
 
     }
+
     private void findContractDetails(){
         String endpoint = "contract/"+contractId;
 		HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
@@ -92,33 +141,40 @@ public class createContractAction implements GuiAction, ActionListener {
                 //add the subject name and description by removing the quotation marks
                 contractDetails.add(GuiAction.removeQuotations(subName));
                 contractDetails.add(GuiAction.removeQuotations(subDesc));
+                //we need to check if for this contract any of the parties has already signed
+                String str=userNode.get("additionalInfo").toString();
+                //if none of the parties has signed then additionalInfo will be empty
+                if (str.equals("{}")){
+                    firstPartySigned=""; //if the student accepts we change the additionalInfo value using patch
+                }
+                //else one of the party has signed
+                else{
+                    firstPartySigned="yes";
+                }
+                String firstGname=GuiAction.removeQuotations(userNode.get("firstParty").get("givenName").toString());
+                String firstFname=GuiAction.removeQuotations(userNode.get("firstParty").get("familyName").toString());
+                String secondGname=GuiAction.removeQuotations(userNode.get("secondParty").get("givenName").toString());
+                String secondFname=GuiAction.removeQuotations(userNode.get("secondParty").get("familyName").toString());
+                //set tutot and student name for the contract details
+                tutorName=firstGname+" "+firstFname;
+                studentName=secondGname+" "+secondFname;
                 // if theres no additionl info we dont know abt competetncy,weekly session,hpl,rate so we will put unknown for contractInfo
-               if (userNode.get("additionalInfo").toString().equals("{}")){
-                   String firstGname=GuiAction.removeQuotations(userNode.get("firstParty").get("givenName").toString());
-                   String firstFname=GuiAction.removeQuotations(userNode.get("firstParty").get("familyName").toString());
-                   String secondGname=GuiAction.removeQuotations(userNode.get("secondParty").get("givenName").toString());
-                   String secondFname=GuiAction.removeQuotations(userNode.get("secondParty").get("familyName").toString());
-                   //set tutot and student name for the contract details
-                   tutorName=firstGname+" "+firstFname;
-                   studentName=secondGname+" "+secondFname;
+               if (userNode.get("lessonInfo").toString().equals("{}")){
+
                    contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown","unknown"));
                }
                else{
 
-                   String comp=userNode.get("additionalInfo").get("competency").toString();
-                   String weeklySession=userNode.get("additionalInfo").get("weeklySession").toString();
-                   String hpl=userNode.get("additionalInfo").get("hoursPerLesson").toString();
-                   String rate=userNode.get("additionalInfo").get("rate").toString();
-                   String stuname=userNode.get("additionalInfo").get("studentName").toString();
-                   String tutename=userNode.get("additionalInfo").get("tutorName").toString();
-                   String tuteQualification=userNode.get("additionalInfo").get("tutorQualification").toString();
+                   String comp=userNode.get("lessonInfo").get("competency").toString();
+                   String weeklySession=userNode.get("lessonInfo").get("weeklySession").toString();
+                   String hpl=userNode.get("lessonInfo").get("hoursPerLesson").toString();
+                   String rate=userNode.get("lessonInfo").get("rate").toString();
+                   String tuteQualification=userNode.get("lessonInfo").get("tutorQualification").toString();
                    contractDetails.add(GuiAction.removeQuotations(comp));
                    contractDetails.add(GuiAction.removeQuotations(weeklySession));
                    contractDetails.add(GuiAction.removeQuotations(hpl));
                    contractDetails.add(GuiAction.removeQuotations(rate));
                    contractDetails.add(GuiAction.removeQuotations(tuteQualification));
-                   studentName=GuiAction.removeQuotations(stuname);
-                   tutorName=GuiAction.removeQuotations(tutename);
                }
 
 
@@ -152,10 +208,6 @@ public class createContractAction implements GuiAction, ActionListener {
         agreementText.setFont(new Font("Serif", Font.BOLD, 20));
         panel.add(agreementText);
 
-
-
-
-//
         subName=new JLabel("subject Name: "+contractDetails.get(0) );
         subName.setBounds(10,50,340,25);
         panel.add(subName);
@@ -164,7 +216,7 @@ public class createContractAction implements GuiAction, ActionListener {
         subDesc.setBounds(10,80,340,25);
         panel.add(subDesc);
 
-        requiredComp=new JLabel("Required Competency: "+contractDetails.get(2) );
+        requiredComp=new JLabel("Tutor Competency: "+contractDetails.get(2) );
         requiredComp.setBounds(10,110,340,25);
         panel.add(requiredComp);
 
@@ -211,14 +263,53 @@ public class createContractAction implements GuiAction, ActionListener {
         if (e.getSource()==button){
             if (c1.isSelected()==true){
                 //proceed to confirming contract
-                new ContractSigner(contractId,"");
-                warning.setText("your contract has been finalised.");
+                if (firstPartySigned.equals("")) //since now one party has signed update that in the contract
+                {
+                    warning.setText("contract creation in process, waiting for other party");
+                    updateContract();
+                }
+                //both parties have now signed the contract
+                else{
+                    new ContractSigner(contractId,"");
+                    warning.setText("your contract has been finalised.");
+
+                }
                 warning.setForeground(Color.BLUE);
             }
             else{
                 warning.setText("please check the chekbox above");
                 warning.setForeground(Color.RED);
             }
+        }
+    }
+
+    private void updateContract(){
+        String endpoint="contract/"+contractId;
+        // create the contract object
+        JSONObject contractInfo=new JSONObject();
+        JSONObject additionalInfo=new JSONObject();
+        additionalInfo.put("firstPartySigned","check");
+        contractInfo.put("additionalInfo",additionalInfo);
+        String jsonString = contractInfo.toString();
+
+        //System.out.println("The abstract class has this: "+jsonString);
+        String Url = "https://fit3077.com/api/v1/"+endpoint;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest
+                .newBuilder(URI.create(Url))
+                .setHeader("Authorization", myApiKey)
+                .header("Content-Type","application/json")
+                .method("PATCH",HttpRequest.BodyPublishers.ofString(jsonString))
+                .build();
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.statusCode());
+        }
+        catch (Exception e){
+            System.out.println("Error!!!");
+            System.out.println(e.getCause());
         }
     }
 }
