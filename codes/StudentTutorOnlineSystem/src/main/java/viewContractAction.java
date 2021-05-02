@@ -149,6 +149,7 @@ public class viewContractAction implements GuiAction{
 						String tutorQualification = "";
 						String tutorCompetency = "";
 						
+						
 						// to handle some empty pre-existing contracts
 						if (!lessonStatus.equals("{}")) {
 							studyHrs =  GuiAction.removeQuotations(node.get("lessonInfo").get("hoursPerLesson").toString());
@@ -168,7 +169,7 @@ public class viewContractAction implements GuiAction{
 							twoParties = "Tutor: "+ studentFullName + "\n"+ "Student: "+ tutorFullName +"\n";
 						}
 						
-						String subjectInfo = "Subject: "+ subject + "\n" + "Subject Description: "+ lesson + "\n" + "Tutor Competency: "+ tutorCompetency + "\n";  
+						String subjectInfo = "Subject: "+ subject + "\n" + "Subject Description: "+ lesson + "\n" +"Tutor Qualification: "+tutorQualification +"\n"+ "Tutor Competency: "+ tutorCompetency + "\n";  
 						String sessionInfo  = "Number of Sessions per week: "+weeklySessions + "\n" + "Hours per lession: "+studyHrs +"\n" + "Rate: "+ rate + "\n";
 						String signDate = "Contract signed on: "+ dateFinalized + "\n";
 						String dottedLine = "--------------------------------------------------------------------------"+"\n";
