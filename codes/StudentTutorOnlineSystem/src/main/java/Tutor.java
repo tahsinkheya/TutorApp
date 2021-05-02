@@ -88,7 +88,7 @@ public class Tutor implements  User, ActionListener {
         this.userId=uId;
         checkContract();
     }
-
+    //a method to show the homepage
     @Override
     public void showHomePage() {
         JFrame homeFrame = new JFrame();
@@ -142,16 +142,17 @@ public class Tutor implements  User, ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==viewContract){
+            //show contracts
             context=new GUIcontext(new viewContractAction(userId, "Tutor"));
             context.showUI();
         }
         else if (e.getSource()==viewRequest){
-            //
+            //shoe student requets
             context= new GUIcontext(new ViewRequestAction(userId,givenName+" "+familyName));
             context.showUI();
-            //TutorGUI t=new TutorGUI();
         }
         else if (e.getSource()==viewMessage){
+            //show messages from close bid
             context=new GUIcontext(new ViewMessagesToTutorAction(userId));
             context.showUI();
 

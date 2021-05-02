@@ -65,7 +65,7 @@ public class createContractAction implements GuiAction, ActionListener {
         catch(Exception e){
 
         }
-        System.out.println(count);
+
         if (count<5){
             retVal=true;
         }
@@ -79,7 +79,7 @@ public class createContractAction implements GuiAction, ActionListener {
 
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
-        //get date 2 yr from now
+        //get date 9 mons from now
         cal.add(Calendar.MONTH, 9);
         String contractEndTime = cal.getTime().toInstant().toString();
         // create the contract
@@ -89,10 +89,6 @@ public class createContractAction implements GuiAction, ActionListener {
         contractInfo.put("subjectId", acceptedOffer.getSubjectId());
         contractInfo.put("dateCreated", new Date().toInstant().toString());
         contractInfo.put("expiryDate",contractEndTime );
-
-
-        System.out.println(contractInfo.get("expiryDate").toString());
-
 
         JSONObject lessonInfo=new JSONObject();
         // create the lesson info
@@ -120,7 +116,7 @@ public class createContractAction implements GuiAction, ActionListener {
 
         jsonString=contractInfo.toString();
         HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
-        System.out.println("status--"+updateResponse.statusCode());
+        //close the request
         if (updateResponse.statusCode()==201){
             new RequestCloser(1, bidId, myApiKey, new Date().toInstant().toString());
         }
@@ -160,7 +156,7 @@ public class createContractAction implements GuiAction, ActionListener {
                    contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown","unknown"));
                }
                else{
-
+                    //get details and store them
                    String comp=userNode.get("lessonInfo").get("competency").toString();
                    String weeklySession=userNode.get("lessonInfo").get("weeklySession").toString();
                    String hpl=userNode.get("lessonInfo").get("hoursPerLesson").toString();
@@ -177,11 +173,9 @@ public class createContractAction implements GuiAction, ActionListener {
 			} catch (Exception e) {
                 e.printStackTrace();
             }
-//			for (String d:contractDetails)
-//			{
-//			    System.out.println(d);
-//            }
+
     }
+    //method to show the ui
     @Override
     public void show() {
         // Creating instance of JFrame
@@ -197,7 +191,7 @@ public class createContractAction implements GuiAction, ActionListener {
         // adding panel to frame
         frame.add(panel);
         panel.setLayout(null);
-
+        //add jlabels and checkbox
         JLabel agreementText = new JLabel("This agreement made on "+new SimpleDateFormat("dd-MM-yyyy").format(new Date())+" between "+studentName+" and "+tutorName);
         agreementText.setBounds(50,20,800,30);
         agreementText.setForeground(Color.BLUE);
@@ -282,14 +276,13 @@ public class createContractAction implements GuiAction, ActionListener {
     // and one of the parties sign the contract
     private void updateContract(){
         String endpoint="contract/"+contractId;
-        // create the contract object
+        // update the contract object since one party has signed
         JSONObject contractInfo=new JSONObject();
         JSONObject additionalInfo=new JSONObject();
         additionalInfo.put("firstPartySigned",userType);
         contractInfo.put("additionalInfo",additionalInfo);
         String jsonString = contractInfo.toString();
 
-        //System.out.println("The abstract class has this: "+jsonString);
         String Url = "https://fit3077.com/api/v1/"+endpoint;
 
         HttpClient client = HttpClient.newHttpClient();
@@ -302,7 +295,6 @@ public class createContractAction implements GuiAction, ActionListener {
         HttpResponse<String> response = null;
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.statusCode());
         }
         catch (Exception e){
             System.out.println("Error!!!");

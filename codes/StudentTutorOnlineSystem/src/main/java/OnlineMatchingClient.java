@@ -36,11 +36,12 @@ public class OnlineMatchingClient implements ActionListener {
 
 //the main method this starts the program
     public static void main(String[] args){
+        //add a frame
         logInFrame=new JFrame();
         logInFrame.setSize(350,250);
         logInFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //add a panel
+        //add a panel and title
         JPanel loginPanel= new JPanel();
         logInFrame.add(loginPanel);
         loginPanel.setBackground(new Color(172, 209, 233));
@@ -48,7 +49,7 @@ public class OnlineMatchingClient implements ActionListener {
         user = new JLabel("User Login");
         user.setBounds(130,20,80,25);
         loginPanel.add(user);
-
+        //add labels and textfields for username and password
         usernameLabel = new JLabel("Username");
         usernameLabel.setBounds(10,50,80,25);
         loginPanel.add(usernameLabel);
@@ -66,12 +67,12 @@ public class OnlineMatchingClient implements ActionListener {
         passwordText=new JPasswordField(passwordLength);
         passwordText.setBounds(100,80,165,25);
         loginPanel.add(passwordText);
-
+        //add a button
         JButton button= new JButton("Log In");
         button.setBounds(130,110,80,25);
         button.addActionListener(new OnlineMatchingClient());
         loginPanel.add(button);
-
+        //a label for showing messages later
         loginNotSuccessful=new JLabel("");
         loginNotSuccessful.setBounds(10,150,340,25);
         loginPanel.add(loginNotSuccessful);
@@ -81,7 +82,7 @@ public class OnlineMatchingClient implements ActionListener {
 
 
     }
-    //a method for user to log in
+    //a method for user to log in returns true if the process is successful
     public boolean logInUser(String username,String password){
         boolean booleanVal=false;
         String jsonString = "{" +
@@ -130,6 +131,7 @@ public class OnlineMatchingClient implements ActionListener {
 
             }
             loginNotSuccessful.setText("Loading...");
+            //create facadeuser by using the type
             facadeUser= new UserFacade(actualObj.get("username").asText(),actualObj.get("givenName").asText(),actualObj.get("familyName").asText(),userType,userID);
 
 
@@ -138,7 +140,7 @@ public class OnlineMatchingClient implements ActionListener {
             System.out.println(e.getCause());
         }
 
-
+        //if the signin process is successful
         if (response!=null & response.statusCode()==200){
             booleanVal=true;
 
@@ -146,16 +148,20 @@ public class OnlineMatchingClient implements ActionListener {
 
         return booleanVal;
     }
+    //method for the button
     @Override
     public void actionPerformed(ActionEvent e) {
+        //get texts from the text field
         String usernameEntered= usernameText.getText();
         String passwordEntered= passwordText.getText();
+        //error handling
         if (usernameEntered.equals("") || passwordEntered.equals("")){
             loginNotSuccessful.setText("None of the fields can be left blank!");
         }
         else {
             boolean loggedIn = logInUser(usernameEntered, passwordEntered);
             if (loggedIn == false) {
+                //show error messages
                 loginNotSuccessful.setText("Login not successful.Username or password incorrect");
             }
             else {

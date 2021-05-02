@@ -25,7 +25,7 @@ public class ViewMessages implements ActionListener {
     private String studentName;
     private String acceptedTutor;
 
-
+//constructor
     public ViewMessages(String bidid, String userid) {
         bidId = bidid;
         userId = userid;
@@ -42,6 +42,7 @@ public class ViewMessages implements ActionListener {
                 if (bid.contains(bidId)) {
                     String username = node.get("poster").get("userName").asText();
                     String tutorId = node.get("poster").get("id").asText();
+                    //if the poster is not already added and not the student then addti th arrayList
                     if (senders.contains(tutorId) == false && tutorId.contains(userId)==false) {
                         senders.add(tutorId);
                         newComboBoxItems.add("from: " + username);
@@ -221,7 +222,7 @@ public class ViewMessages implements ActionListener {
         }
 
     }
-    //if the student chooses a tutor then a contract id created
+    //if the student chooses a tutor then a contract is created
     private void createContract(String weeklySess,String hrsperlsn,String rate){
         //get the subject id from the bid id and find tutor q and tutor competency
         //bid/gashd?fields=
@@ -379,7 +380,7 @@ public class ViewMessages implements ActionListener {
         catch(Exception e){
 
         }
-        System.out.println(count);
+
         if (count<5){
             retVal=true;
         }
@@ -388,6 +389,7 @@ public class ViewMessages implements ActionListener {
     }
     //a method that displays messgaes to the student
     private void viewMessages(String tutorId, String studentId, String bidid){
+        //get messages sorted by date
         TreeMap<Date,String> treeMap=getMessages(tutorId,studentId,bidid);
         Iterator itr=treeMap.values().iterator();
         String output="";
@@ -400,10 +402,10 @@ public class ViewMessages implements ActionListener {
     // a method that sorts messages acconrding to date
     public TreeMap<Date, String> getMessages(String tutorId, String studentId, String bidid) {
         TreeMap treeMap = new TreeMap<Date, String>();
-        //bid/jdgasjdh?fields=messages
+        //get all bid messages
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid/"+bidid+"?fields=messages", GuiAction.myApiKey);
         try {
-            System.out.println(userResponse.statusCode());
+
             ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
             String fname=GuiAction.removeQuotations(userNode.get("initiator").get("familyName").toString());
             String gname=GuiAction.removeQuotations(userNode.get("initiator").get("givenName").toString());

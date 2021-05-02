@@ -35,7 +35,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         userFullName=fname;
         showUI();
     }
-
+    //method to show ui to tutor abt the open bid request
     private void showUI(){
         bidInfo=getBidInfo(bidid);
 
@@ -125,9 +125,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
                 String nodeSubName = node.get("subject").get("name").toString();
                 String tutorSubName = GuiAction.removeQuotations(nodeSubName);
                 if(tutorSubName.equals(subName)) {
-                    System.out.println("Found the subject for which competency is needed");
                     tutorcompetencyLevel = node.get("level").asInt();
-                    System.out.println("Competency Level is: "+tutorcompetencyLevel);
                     return tutorcompetencyLevel;
                 }
             }
@@ -199,13 +197,14 @@ public class OpenBidAction extends BidAction implements ActionListener {
 
         }
     }
-
+    //method used by tutor to create contract when buying out a bid
     private void createContract(String userId,int tuteCompetency){
         //lets create a OpenBidOffer and pass it to the createcontractaction class
         String studentId=bidInfo.get(6);
         String tutorQualification=TutorQualification(userId);
         String tutorCompetency=Integer.toString(tuteCompetency);
         OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(7),bidInfo.get(1),tutorCompetency,bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(8),userFullName,"no","",tutorQualification);
+        //tutor is the first party to sign
         createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid);
         contract.storeContract();
 

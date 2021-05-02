@@ -30,7 +30,7 @@ public class createRequestAction implements GuiAction, ActionListener {
 
     private String userId;
 
-
+    //constructor
     public createRequestAction(String uId){
         userId=uId;
     }
@@ -200,12 +200,9 @@ public class createRequestAction implements GuiAction, ActionListener {
             // look for the subject and description in the database
             for (ObjectNode node: jsonNodes) {
                 String subFromDB = node.get("name").asText();
-                System.out.println(subFromDB);
                 String descFromDB = node.get("description").asText();
-                System.out.println(descFromDB);
 
                 if (subFromDB.equals(userSub) & descFromDB.equals(userDesc) ) {
-                    System.out.println("Subject found in database");
                     subjectFound = true;
                     subjectID = node.get("id").asText();
                     return subjectID;
@@ -225,7 +222,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         }
         return subjectID;
     }
-
+    //method to store a bid request
     protected String webApiPOST(String endpoint, String subID) {
 
         String refId = null;  // id value to get the subject or bid
@@ -264,7 +261,6 @@ public class createRequestAction implements GuiAction, ActionListener {
 
             JSONObject additionalInfo=new JSONObject();
             // create the additional info
-            //additionalInfo.put("qualificationLevel", qualList.getSelectedItem().toString());
             additionalInfo.put("requiredCompetency", compList.getSelectedItem().toString());
             additionalInfo.put("weeklySessions", sessionNum.getText());
             String sessionTime = timeInput.getText();
@@ -284,7 +280,6 @@ public class createRequestAction implements GuiAction, ActionListener {
             bidInfo.put("subjectId", subID);
             bidInfo.put("additionalInfo", additionalInfo);
             jsonString = bidInfo.toString(); // convert to string
-            System.out.println("Bid/Request Info: "+jsonString);
             isBid = true;
 
         }
@@ -337,7 +332,6 @@ public class createRequestAction implements GuiAction, ActionListener {
             seconds=7*24*60*60;
         }
         new RequestCloser(seconds, bidId, myApiKey, closeTime);
-        System.out.println("Bid opened for 30 minutes.");
     }
 
 

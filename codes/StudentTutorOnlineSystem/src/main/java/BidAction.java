@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 /*
-* base class for tutors to call when they can to view open and close bids*/
+* base class for tutors to call when they want to view open and close bids*/
 public abstract class BidAction {
     protected static String myApiKey=OnlineMatchingClient.myApiKey;
     //method called by subclasses to get info abt the bid
     public ArrayList<String> getBidInfo(String bidId){
         ArrayList<String> bidInfo = new ArrayList<String>();
-
+        //initialise strings
         String endpoint = "bid/"+bidId;
         String subName = "";
         String subDesc = "";
@@ -27,7 +27,7 @@ public abstract class BidAction {
         try {
             ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
 
-
+            //get all info abt bid and store them in the arraylist
             String subjectName = userNode.get("subject").get("name").toString();
             String subjectDesc = userNode.get("subject").get("description").toString();
             subId = userNode.get("subject").get("id").toString();
@@ -68,7 +68,7 @@ public abstract class BidAction {
         try{
             ObjectNode[] userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode[].class);
             for (JsonNode node : userNode) {
-                if(node.get("id").toString().contains(userId)){
+                if(node.get("id").toString().contains(userId)){//check that the tutorid=userid
                     for(JsonNode n:node.get("qualifications")){
                         tutorQ+=GuiAction.removeQuotations(n.get("title").toString())+" | ";
                     }
@@ -78,6 +78,7 @@ public abstract class BidAction {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //if tutor qualifictaion is not known then
         if (tutorQ.equals("")){
             tutorQ="unknown";
         }

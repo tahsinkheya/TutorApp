@@ -36,7 +36,7 @@ public class ViewOtherTutorBids implements ActionListener {
         // get all  messages of the bid
         String endpoint="bid/"+bidId+"?fields=messages";
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
-        System.out.println(userResponse.statusCode());
+
         try {
             ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
             for (JsonNode msgNode : userNode.get("messages")) {
@@ -62,7 +62,7 @@ public class ViewOtherTutorBids implements ActionListener {
                         String extra = (msgNode.get("additionalInfo").get("extraInfo").toString());
 
                         String tutor = GuiAction.removeQuotations(msgNode.get("poster").get("givenName").toString()) + " " + GuiAction.removeQuotations(msgNode.get("poster").get("familyName").toString());
-
+                        //since a tutor can bid multiple time we add a counter if its more than one in the option
                         String option = "";
                         if (occurrences != 0) {
                             option += (occurrences + 1) + " ";
@@ -88,7 +88,7 @@ public class ViewOtherTutorBids implements ActionListener {
 
         }
     }
-
+//method to show the ui to the tutors
     private void showUI(){
         //get all offers and put it in an arraylist
         getOffer();

@@ -25,8 +25,8 @@ public class MakeOpenBidOffer implements ActionListener {
     private String bidid,userId,tutorQ;
     private int tutorComp;
 
-    /**
-     * @param bidId: a string that represents the bid id
+    /**constructor
+     *
      */
 
     public  MakeOpenBidOffer(String bidId,String userid,int comp,String tutorQuali){
@@ -118,14 +118,12 @@ public class MakeOpenBidOffer implements ActionListener {
         frame.setVisible(true);
 
 
-
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==makeOffer){
-            //    private JTextField rateOffered,durationOffered,sessionOffered,extraInfo;
+            //get values
             String rate=rateOffered.getText();
             String duration=durationOffered.getText();
             String sess=sessionOffered.getText();
@@ -185,7 +183,7 @@ public class MakeOpenBidOffer implements ActionListener {
             HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             // get the id of the newly created object
             ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
-            System.out.println(postResponse.statusCode());
+
             if (postResponse.statusCode()==201){
                 warning.setText("Your offer has been saved");
             }

@@ -36,8 +36,7 @@ public class RequestCloser {
     	
     		String jsonString = bidInfo.toString();
             HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, key, jsonString);
-            System.out.println(updateResponse.toString());
-            System.out.println("BID CLOSED");
+
             timer.cancel(); //Terminate the timer thread
             //patch
         }

@@ -255,13 +255,13 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                 //get todays date
                 String today = new Date().toInstant().toString();
                 SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                //get closing date from additionalinfo and remove "" only if its null
+                //get closing date from additionalinfo and remove "" only if its not null
                 if (node.get("additionalInfo").toString().equals("{}")==false) {
                     String closeTimeDb = node.get("additionalInfo").get("requestClosesAt").toString();
                     String bidCloseTime = GuiAction.removeQuotations(closeTimeDb);
                     Date todayDate = sourceFormat.parse(today);
                     Date endDate = sourceFormat.parse(bidCloseTime);
-
+                    //show offer if not expired
                     if (initiatorId.contains(userId) && node.get("dateClosedDown").toString().equals("null") && todayDate.after(endDate) == false) {
                         String subjectName = node.get("subject").get("name").toString();
                         String desc = node.get("subject").get("description").toString();
@@ -291,9 +291,8 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
         System.out.println(userResponse.statusCode());
         try {
-            System.out.println(userResponse.statusCode());
             ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
-            System.out.println(userNode);
+
             for (JsonNode msgNode : userNode.get("messages")) {
                 if (userNode.get("additionalInfo").toString().equals("{}")==false){
                         //get all details
@@ -305,7 +304,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                             occurrences = (int) tutorids.stream().filter(tutor -> msgSenderId.equals(tutor)).count();
                         }
                         tutorids.add(msgSenderId);
-
+                        //get ll related info
 
                         String duration=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("duration").toString());
 
@@ -337,7 +336,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                         newComboBoxItems.add(option+"from: "+GuiAction.removeQuotations((msgSender)));
                         OpenBidOffer newOffer= new OpenBidOffer(msgSenderId,studId,subjectId,subjectName,competency,numberOfSession,duration,rate,student,tutor,freelesson,extra,qualification);
 
-
+                        //add the new offer in the arrayList
                         offerInfo.add(newOffer);
 
 //

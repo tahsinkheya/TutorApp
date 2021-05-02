@@ -10,8 +10,8 @@ public interface GuiAction {
     static String myApiKey=OnlineMatchingClient.myApiKey;
     public void show();
 
-    /* Method to make a web request to GET some data. Concrete implementation since both
-     * StudentGUI and TutorGUI will need this method */
+    /* Method to make a web request to GET some data. Concrete implementation since
+     * the subclasses will need this method */
     static HttpResponse<String> initiateWebApiGET(String endpoint, String apiKey) {
         String Url = "https://fit3077.com/api/v1/"+endpoint;
 
@@ -31,6 +31,8 @@ public interface GuiAction {
         return response;
     }
 
+    /* Method to update a web request to POST some data. Concrete implementation since
+     * the subclasses will need this method */
     static  HttpResponse<String> updateWebApi(String endpoint, String apiKey, String jsonString) {
         String Url = "https://fit3077.com/api/v1/"+endpoint;
 
@@ -51,7 +53,7 @@ public interface GuiAction {
         }
         return response;
     }
-
+    /* Method to remove "" from json get strings */
     static String removeQuotations(String str) {
         int strLen = str.length();
         String outputStr = str.substring(1, strLen-1);

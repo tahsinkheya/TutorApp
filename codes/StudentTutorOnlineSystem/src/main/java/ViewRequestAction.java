@@ -26,7 +26,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     private Vector comboBoxItems=new Vector();
     private JLabel warning;
     private JFrame frame;
-
+//constructor
     public ViewRequestAction(String uId,String name){
         userId=uId;
         fullName=name;
@@ -100,11 +100,11 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == viewDetails) {
+            //show request details
             if (bidType.size()!=0) {
                 String bidid = getSelectedRequest();
                 String bidTypeOfselected = getSelectedBidType();
                 int selectedRequestPos = allRequests.getSelectedIndex();
-                System.out.println(selectedRequestPos);
                 String selectedStudentId=studentId.get(selectedRequestPos);
 
                 if (bidTypeOfselected.contains("open")) {
@@ -130,8 +130,6 @@ public class ViewRequestAction implements GuiAction, ActionListener {
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
         try {
             ObjectNode[] jsonNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
-            //String output="";
-            //allRequests.removeAllItems();
             for (ObjectNode node: jsonNodes) {
                 for (JsonNode bidNode : node.get("initiatedBids")) {
                     // show bids that are not closed down
@@ -172,8 +170,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                                 studentId.add(GuiAction.removeQuotations(studId));
                             }
 
-                            //final DefaultComboBoxModel model = new DefaultComboBoxModel(comboBoxItems);
-                            // store all bidIds in allStudentBidList
+
                         }
                     }
                 }

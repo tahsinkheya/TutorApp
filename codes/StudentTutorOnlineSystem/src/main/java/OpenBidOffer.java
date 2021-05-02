@@ -2,6 +2,7 @@
 /*
 * a class that is used by viewBidOfferAction to view offers to student,
 * this instance is later used to create contract
+* it is also used by some other classes like student to create contracts
 * */
 public class OpenBidOffer {
     private String firstPartyId;

@@ -19,7 +19,7 @@ public class CloseBidAction extends BidAction implements ActionListener {
     private JPanel panel;
     private JTextArea message;
     private JButton sendMessage,closeBtn;
-
+    //constructor
     public CloseBidAction(String bidid, String uId,String fullName,String studentid){
         bidId=bidid;
         userId=uId;
@@ -104,12 +104,14 @@ public class CloseBidAction extends BidAction implements ActionListener {
         frame.setVisible(true);
 
     }
-
+    //method used by the buttons
     @Override
     public void actionPerformed(ActionEvent e) {
+        //close the frame
         if (e.getSource()==closeBtn){
             frame.setVisible(false);
         }
+        //for sending msg
         else if (e.getSource()==sendMessage){
             String msg=message.getText();
             if (msg.equals("")){

@@ -26,7 +26,7 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
     private ArrayList<String> students = new ArrayList<String>();
     private ArrayList<String> tutorNames = new ArrayList<String>();
 
-
+//CONSTRUCTOR
     public ViewMessagesToTutorAction(String userId) {
         tutorId=userId;
     }

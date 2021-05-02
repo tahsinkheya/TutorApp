@@ -93,7 +93,7 @@ public class Student implements User, ActionListener {
 		checkContract();
 
 	}
-
+//a method to show the homepage
 	@Override
 	public void showHomePage() {
 
@@ -173,6 +173,7 @@ public class Student implements User, ActionListener {
 			signContract();
 		}
 		else if (e.getSource()==viewDetails){
+			//show contract details and ask ythem to sign
 			context=new GUIcontext(new createContractAction(contractIds.get(allContracts.getSelectedIndex()),"student"));
 			context.showUI();
 
@@ -282,6 +283,7 @@ public class Student implements User, ActionListener {
 		TreeMap<Date,OpenBidOffer> map=new TreeMap<>();
 		for (JsonNode node : messages) {
 			try {
+				//get info abt offer
 				String datePosted = GuiAction.removeQuotations(node.get("datePosted").toString());
 				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				Date newDate = sourceFormat.parse(datePosted);
@@ -297,7 +299,9 @@ public class Student implements User, ActionListener {
 				System.out.println(e.getCause());
 			}
 		}
+		//get the last bid offer
 		OpenBidOffer lastTutor=map.lastEntry().getValue();
+		//create contract fps or first personed sign value is null becuase none of the parties signed this contract
 		createContractAction contract= new createContractAction(lastTutor,"",userId,bidId);
 		if(contract.checkContract()){
 			contract.storeContract();
