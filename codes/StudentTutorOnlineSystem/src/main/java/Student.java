@@ -196,6 +196,7 @@ public class Student implements User, ActionListener {
 				String bidCloseTime = node.get("additionalInfo").get("requestClosesAt").asText();
 				Date todayDate = sourceFormat.parse(today);
 				Date endDate = sourceFormat.parse(bidCloseTime);
+				boolean close=todayDate.after(endDate);
 				//we need to close all close bids if they have passed their expiry date
 				if (bidType.contains("close") && node.get("dateClosedDown").toString().equals("null")){
 					//check that todays date is  after closing date
@@ -203,7 +204,7 @@ public class Student implements User, ActionListener {
 						new RequestCloser(1,bidId,GuiAction.myApiKey,new Date().toInstant().toString());
 					}
 				}
-				else if(bidType.contains("open") && node.get("dateClosedDown").toString().equals("null")){
+				else if(close==true && bidType.contains("open") && node.get("dateClosedDown").toString().equals("null")){
 					//select tutor and close request if one or more offers were receive
 					if(node.get("messages").isEmpty()==false){
 						selectTutor(node.get("messages"),bidId,subId);

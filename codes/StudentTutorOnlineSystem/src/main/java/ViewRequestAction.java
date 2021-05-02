@@ -112,7 +112,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                     BidAction b = new OpenBidAction(bidid, userId, fullName);
                 } else {
                     System.out.println(selectedStudentId);
-                    CloseBidAction c = new CloseBidAction(bidid, userId,fullName,selectedStudentId);
+                    BidAction c = new CloseBidAction(bidid, userId,fullName,selectedStudentId);
                 }
             }
             else{
