@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Date;
-
+/*a class used by Tutor to view close bid request made by student and send message to the student*/
 public class CloseBidAction extends BidAction implements ActionListener {
     private String bidId,userId,userFullName,studentId;
     private JLabel warning;
@@ -27,7 +27,7 @@ public class CloseBidAction extends BidAction implements ActionListener {
         studentId=studentid;
         showUI();
     }
-
+//method to show ui
     private void showUI(){
         bidInfo=getBidInfo(bidId);
 
@@ -121,7 +121,7 @@ public class CloseBidAction extends BidAction implements ActionListener {
             }
         }
     }
-
+//methos to store message by tutor to student
     private void storeMessage(String msg){
         String jsonString = null;
         // create the message object
@@ -137,7 +137,7 @@ public class CloseBidAction extends BidAction implements ActionListener {
         // convert message to JSON string
         jsonString = msgInfo.toString();
         HttpResponse<String> userResponse=GuiAction.updateWebApi("message",myApiKey,jsonString);
-        //System.out.println(userResponse.statusCode());
+
         warning.setText("your response has been saved successfully");
     }
 }

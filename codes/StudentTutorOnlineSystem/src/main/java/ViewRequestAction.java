@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
-
+/*a class to show tutors the requests made by students*/
 public class ViewRequestAction implements GuiAction, ActionListener {
 
     private String userId,fullName;
@@ -20,11 +20,12 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     private ArrayList<String> allStudentBidList = new ArrayList<String>();
     private ArrayList<String> bidType = new ArrayList<String>();
     private ArrayList<String> studentId = new ArrayList<String>();
-
+    private JButton closeBtn;
     public JPanel panel;
     private JButton viewDetails;
     private Vector comboBoxItems=new Vector();
     private JLabel warning;
+    private JFrame frame;
 
     public ViewRequestAction(String uId,String name){
         userId=uId;
@@ -36,7 +37,7 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     public void show() {
         showAllStudentRequests();
         // Creating instance of JFrame
-        JFrame frame = new JFrame("Tutor Homepage");
+        frame = new JFrame("Tutor Homepage");
         // Setting the width and height of frame
         frame.setSize(900, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,7 +47,13 @@ public class ViewRequestAction implements GuiAction, ActionListener {
         // adding panel to frame
         frame.add(panel);
         panel.setLayout(null);
+        panel.setBackground(new Color(172, 209, 233));
 
+        //add a close button
+        closeBtn = new JButton("Close");
+        closeBtn.setBounds(800, 10, 100, 25);
+        closeBtn.addActionListener(this);
+        panel.add(closeBtn);
 
         // take user inputs over here
         JLabel relListTitle = new JLabel("All requests made by students");
@@ -114,8 +121,11 @@ public class ViewRequestAction implements GuiAction, ActionListener {
             }
 
         }
+        else if (e.getSource()==closeBtn){
+            frame.setVisible(false);
+        }
     }
-
+    //gets all student requests and put them in the drop down menu
     private void showAllStudentRequests(){
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("user?fields=initiatedBids", myApiKey);
         try {

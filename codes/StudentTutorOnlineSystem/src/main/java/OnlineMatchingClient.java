@@ -34,7 +34,7 @@ public class OnlineMatchingClient implements ActionListener {
     // userID needed for initializing bids and messages
     private String userID;
 
-
+//the main method this starts the program
     public static void main(String[] args){
         logInFrame=new JFrame();
         logInFrame.setSize(350,250);
@@ -81,6 +81,7 @@ public class OnlineMatchingClient implements ActionListener {
 
 
     }
+    //a method for user to log in
     public boolean logInUser(String username,String password){
         boolean booleanVal=false;
         String jsonString = "{" +
@@ -117,7 +118,6 @@ public class OnlineMatchingClient implements ActionListener {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode actualObj = mapper.readValue(payload, JsonNode.class);
-           System.out.println(actualObj);
             // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
             if(actualObj.get("isStudent").asBoolean()==true){
                 userType="Student";
@@ -150,8 +150,6 @@ public class OnlineMatchingClient implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String usernameEntered= usernameText.getText();
         String passwordEntered= passwordText.getText();
-        System.out.println(usernameEntered);
-        System.out.println(passwordEntered);
         if (usernameEntered.equals("") || passwordEntered.equals("")){
             loginNotSuccessful.setText("None of the fields can be left blank!");
         }
@@ -161,32 +159,10 @@ public class OnlineMatchingClient implements ActionListener {
                 loginNotSuccessful.setText("Login not successful.Username or password incorrect");
             }
             else {
+                //call facede method
                 logInFrame.setVisible(false);
                 facadeUser.displayHomePage();
-                // open the student homepage after login
-//                if (userType.equals("Student")) {
-//                    facadeUser.displayHomePage();
-                    //Student student = new Student();
-                    //JLabel name = new JLabel("Welcome: " + usernameEntered);
-//                    student.name = name;
-//                    student.userId = userID;
-//                    student.name.setBounds(10, 20, 150, 25);
-//                    student.panel.add(name);
-                    //student.showAllRequests();
 
-                    
-                //}
-//                else if(userType.equals("Tutor")) {
-//                    facadeUser.displayHomePage();
-//                	Tutor tutor = new Tutor();
-//                    JLabel name = new JLabel("Welcome: " + usernameEntered);
-//                    tutor.name = name;
-//                    tutor.userId = userID;
-//                    tutor.name.setBounds(10, 20, 150, 25);
-//                    tutor.panel.add(name);
-//                    tutor.showAllStudentRequests();
-                    
-                //}
             }
         }
         

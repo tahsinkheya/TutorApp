@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Vector;
-
+/*class that represents a tutor*/
 public class Tutor implements  User, ActionListener {
     String userName;
     String givenName;
@@ -28,7 +28,7 @@ public class Tutor implements  User, ActionListener {
 
 
 
-
+    //a method to display all unsigned contract of a user
     @Override
     public void signContract() {
         // Creating instance of JFrame
@@ -172,7 +172,7 @@ public class Tutor implements  User, ActionListener {
         }
 
     }
-
+    //a method that checks if there are any unsigned contract for the user
     private void checkContract(){
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("contract", GuiAction.myApiKey);
         try {

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-
+/*class to createcontract, show contract to already ctreated contracts to users for them to sign*/
 public class createContractAction implements GuiAction, ActionListener {
     private String contractId;
     // this list contains(subname, subdesc,competency,weekly sess, hours per lesson, rate,tutorqualification)
@@ -37,8 +37,8 @@ public class createContractAction implements GuiAction, ActionListener {
         findContractDetails();
     }
 
-    /*2nd constructor for student/titor to use to create a contract when selecting a tutor our buying out bid
-    * */
+    /*2nd constructor for student/tutor to use to create a contract when selecting a tutor our buying out bid
+    or automatic tutor slection* */
     public createContractAction(OpenBidOffer offer,String fps,String stuId,String bidid){
         acceptedOffer=offer;
         firstPartySigned=fps;
@@ -127,7 +127,7 @@ public class createContractAction implements GuiAction, ActionListener {
 
 
     }
-
+//method to find details of a contract to display to user
     private void findContractDetails(){
         String endpoint = "contract/"+contractId;
 		HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
@@ -278,7 +278,8 @@ public class createContractAction implements GuiAction, ActionListener {
             }
         }
     }
-
+//method to patch a contract this is done only when a contract was created by the system at the ened of an open bid and
+    // and one of the parties sign the contract
     private void updateContract(){
         String endpoint="contract/"+contractId;
         // create the contract object

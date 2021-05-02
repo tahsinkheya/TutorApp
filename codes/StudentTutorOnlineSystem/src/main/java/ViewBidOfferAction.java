@@ -14,13 +14,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
 
+
+/* a class to display offers of bid request made by student to student
+* */
 public class ViewBidOfferAction implements GuiAction, ActionListener {
     private JFrame frame,newFrame;
     private static JComboBox allOffers;
     private static JComboBox moreOffers;
     private Vector comboBoxItems=new Vector();
     private Vector newComboBoxItems=new Vector();
-    private JButton viewDetails,offerView,closeBid,closeBtn;
+    private JButton viewDetails,offerView,closeBid,closeBtn,close;
     private String userId;
     private ArrayList<String> bidType = new ArrayList<String>();
     private ArrayList<String> bidIds = new ArrayList<String>();
@@ -50,6 +53,13 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
         frame.add(panel);
         panel.setLayout(null);
         panel.setBackground(new Color(172, 209, 233));
+
+        //add a close buttond
+        //add a close button
+        close = new JButton("Close");
+        close.setBounds(800, 10, 100, 25);
+        close.addActionListener(this);
+        panel.add(close);
 
         //title
         JLabel actionLabel = new JLabel("All Requests You Made");
@@ -147,6 +157,9 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
         }
         else if (e.getSource()==closeBtn){
             newFrame.setVisible(false);
+        }
+        else if (e.getSource()==close){
+            frame.setVisible(false);
         }
 
 

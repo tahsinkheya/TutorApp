@@ -12,15 +12,18 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
 import java.util.Date;
-
+/*
+* class used by Student to create request for tutors
+* */
 public class createRequestAction implements GuiAction, ActionListener {
-    //public createRequestAction(){}
+
     public JPanel panel;
-    private  JLabel competencyT,bidType;
+    private  JLabel competencyT,bidType,message;
     private  JComboBox compList,  allRates, bidTypes;
-    private JButton submitButton;
+    private JButton submitButton,closeBtn;
     private static JTextField subjectText, descText,timeInput,sessionNum,rateIn;
     private boolean bidCreated;
+    private JFrame frame;
     private String closeTime = null;
 
 
@@ -32,11 +35,11 @@ public class createRequestAction implements GuiAction, ActionListener {
         userId=uId;
     }
 
-
+    //method to show ui
     @Override
     public void show() {
         // Creating instance of JFrame
-        JFrame frame = new JFrame("Student Homepage");
+        frame = new JFrame("Student Homepage");
         // Setting the width and height of frame
         frame.setSize(900, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -55,6 +58,12 @@ public class createRequestAction implements GuiAction, ActionListener {
         actionLabel.setFont(new Font("Serif", Font.BOLD, 20));
         panel.add(actionLabel);
 
+        //add a close button
+        closeBtn = new JButton("Close");
+        closeBtn.setBounds(800, 10, 100, 25);
+        closeBtn.addActionListener(this);
+        panel.add(closeBtn);
+
 
 
         JLabel desc = new JLabel("Specify request details");
@@ -62,23 +71,6 @@ public class createRequestAction implements GuiAction, ActionListener {
         desc.setForeground(Color.red);
         panel.add(desc);
 
-
-//
-//        // Required qualification
-//        JLabel qualification = new JLabel("Specialisation: ");
-//        qualification.setBounds(10, 100, 100, 25);
-//        panel.add(qualification);
-//
-//        subjectText = new JTextField(20);
-//        subjectText.setBounds(100,100,165,25);
-//        panel.add(subjectText);
-//
-//        // Types of qualification
-//        String[] qualificationTypes = {"Bachelor's Degree", "Master's Degree", "Doctoral Degree","Secondary Education"};
-//        qualList = new JComboBox(qualificationTypes);
-//        qualList.setSelectedIndex(0);
-//        qualList.setBounds(300, 100, 200, 25);
-//        panel.add(qualList);
 
         competencyT=new JLabel("specify tutor competency level");
         competencyT.setBounds(10,70,340,25);
@@ -118,18 +110,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         timeInput = new JTextField(20);
         timeInput.setBounds(10,280,50,25);
         panel.add(timeInput);
-//
-//        String[] allTimes = {"AM", "PM"};
-//        timeList = new JComboBox(allTimes);
-//        timeList.setBounds(150, 170, 70, 25);
-//        panel.add(timeList);
 
-        // Day selection
-//        String[] days = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-//        daysBox = new JComboBox(days);
-//        daysBox.setSelectedIndex(0);
-//        daysBox.setBounds(250, 170, 200, 25);
-//        panel.add(daysBox);
 
         // Weekly Sessions
         JLabel session = new JLabel("Number of Weekly Sessions: ");
@@ -172,65 +153,35 @@ public class createRequestAction implements GuiAction, ActionListener {
         bidTypes = new JComboBox(bidT);
         bidTypes.setBounds(10, 430, 430, 25);
         panel.add(bidTypes);
+        //initialise label for message later
+        message=new JLabel();
+        message.setBounds(10,510,400,25);
+        panel.add(message);
 
-
-        // show the current bids
-//        JLabel bidSectionHeader = new JLabel("Your current requests: ");
-//        bidSectionHeader.setBounds(10, 330, 300, 25);
-//        panel.add(bidSectionHeader);
-//
-//        JLabel instruction = new JLabel("Select a request/bid and click on 'Select Bidder' to close bid");
-//        instruction.setBounds(10, 350,1200,25);
-//        instruction.setForeground(Color.red);
-//        panel.add(instruction);
-//
-//
-//        requestMade = new JLabel("Your Request: ");
-//        requestMade.setBounds(10, 380, 800, 25);
-//        panel.add(requestMade);
-//
-//        // Weekly Sessions
-//        JLabel responseLabel = new JLabel("All Responses: ");
-//        responseLabel.setBounds(10, 420, 200, 25);
-//        panel.add(responseLabel);
-//
-//
-//        // all responses
-//        allRequests = new JComboBox();
-//        allRequests.setBounds(130, 420, 750, 25);
-//        panel.add(allRequests);
-//
-//        requestStatus = new JLabel("Status: ");
-//        requestStatus.setBounds(10, 450, 600, 25);
-//        panel.add(requestStatus);
-//
-//
-//        selectBtn = new JButton("Select Bidder");
-//        selectBtn.setBounds(10, 490, 120, 25);
-//        selectBtn.addActionListener(this);
-//        panel.add(selectBtn);
-//
-        // Setting the frame visibility to true
         frame.setVisible(true);
+
+
 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println("Tutor Request process started");
-        // subject id of the subject that student wants
-        String subId = findSubject();
-        System.out.println("Subject ID: " + subId);
-
-        // bid id of the new request
-        String newBidID = webApiPOST("bid", subId);
-        System.out.println("Bid ID: " + newBidID);
-        System.out.println("Successfully created a tutor bid/request");
-        if(bidCreated) {
-            closeBid(newBidID, closeTime);
-            bidCreated = false;
+        if(e.getSource()==closeBtn){
+            frame.setVisible(false);
         }
-        //showAllRequests();
+        else {
+            message.setText("your request has been saved");
+            message.setForeground(Color.blue);
+            // subject id of the subject that student wants
+            String subId = findSubject();
+
+            // bid id of the new request
+            String newBidID = webApiPOST("bid", subId);
+            if (bidCreated) {
+                closeBid(newBidID, closeTime);
+                bidCreated = false;
+            }
+        }
     }
 
     /* Method to get the subject id for the subject given as input by the user */

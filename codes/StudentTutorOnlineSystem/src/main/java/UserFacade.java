@@ -9,12 +9,10 @@ public class UserFacade {
         if (Type.equals("Student")){
             user=new Student();
             user.create(userName,givenName,familyName,id);
-            //display homepage of Student
         }
         else{
             user=new Tutor();
             user.create(userName,givenName,familyName,id);
-            //display homepage of Tutor
         }
     }
 

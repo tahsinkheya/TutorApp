@@ -81,7 +81,6 @@ public class viewContractAction implements GuiAction{
      */
     protected void showFinalizedContracts() {
 		String finalOutput = "";
-		System.out.println("The user id is: "+ id);
 		HttpResponse<String> contResponse = GuiAction.initiateWebApiGET("contract", myApiKey);
 		try {
 			ObjectNode[] jsonNodes = new ObjectMapper().readValue(contResponse.body(), ObjectNode[].class);
@@ -176,17 +175,17 @@ public class viewContractAction implements GuiAction{
 						output += twoParties +subjectInfo +sessionInfo+signDate+dottedLine;
 				
 						// console outputs
-						System.out.println("Student: "+ studentFullName);
-						System.out.println("Tutor: "+ tutorFullName);
-						System.out.println("Subject: "+ subject);
-						System.out.println("Subject Description: "+ lesson);
-						System.out.println("Tutor Competency: "+ tutorCompetency);
-						System.out.println("Number of Sessions per week: "+weeklySessions);
-						System.out.println("Hours per lession: "+studyHrs);
-						System.out.println("Rate: "+rate);
-						System.out.println("Contract signed on: "+ dateFinalized);;
-						System.out.println("---------------------------------------------------------------------");
-						
+//						System.out.println("Student: "+ studentFullName);
+//						System.out.println("Tutor: "+ tutorFullName);
+//						System.out.println("Subject: "+ subject);
+//						System.out.println("Subject Description: "+ lesson);
+//						System.out.println("Tutor Competency: "+ tutorCompetency);
+//						System.out.println("Number of Sessions per week: "+weeklySessions);
+//						System.out.println("Hours per lession: "+studyHrs);
+//						System.out.println("Rate: "+rate);
+//						System.out.println("Contract signed on: "+ dateFinalized);;
+//						System.out.println("---------------------------------------------------------------------");
+//
 					}
 				}
 
@@ -201,7 +200,7 @@ public class viewContractAction implements GuiAction{
 		}
 		
 	}
-    
-    
-    
+
+
+
 }

@@ -41,7 +41,7 @@ public class OpenBidOffer {
         tutorQualification=qualification;
 
     }
-
+//getter methods
     public String getTutorQualification() {
         return tutorQualification;
     }

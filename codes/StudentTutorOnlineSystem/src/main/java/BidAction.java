@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
-
+/*
+* base class for tutors to call when they can to view open and close bids*/
 public abstract class BidAction {
     protected static String myApiKey=OnlineMatchingClient.myApiKey;
-
+    //method called by subclasses to get info abt the bid
     public ArrayList<String> getBidInfo(String bidId){
         ArrayList<String> bidInfo = new ArrayList<String>();
 
@@ -59,7 +60,7 @@ public abstract class BidAction {
         bidInfo.add(studentFullName);
         return bidInfo;
     }
-
+    //method called by subclasses to get tutor qualifications when making a bid offer
     public String TutorQualification(String userId) {
         String endpoint = "user?fields=qualifications";
         String tutorQ = "";

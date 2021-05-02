@@ -2,7 +2,7 @@ import org.json.simple.JSONObject;
 
 import java.net.http.HttpResponse;
 import java.util.Date;
-
+/*class used by creatwContractAction to confirm a contract has been signed by 2 parties */
 public class ContractSigner {
     public  ContractSigner(String contractId, String apiKey){
         String endpoint = "contract/"+contractId+"/sign";

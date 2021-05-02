@@ -20,8 +20,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 /**
- * @author Rafaquat
- *
+ * a class that is used to represent a student, shows the homepage for student and other options
  */
 public class Student implements User, ActionListener {
 	private String userName;
@@ -40,11 +39,7 @@ public class Student implements User, ActionListener {
 	private Vector comboBoxItems=new Vector();
 	private static JComboBox allContracts;
 
-
-
-
-	
-
+	//a method to display all unsigned contract of a user
 	@Override
 	public void signContract() {
 		// Creating instance of JFrame
@@ -151,10 +146,7 @@ public class Student implements User, ActionListener {
 			homeFrame.setVisible(true);
 
 	}
-//
-//	static void showAllRequests(){
-//		studentGUI.showAllRequests();
-//	}
+
 
 
 	@Override
@@ -187,7 +179,7 @@ public class Student implements User, ActionListener {
 		}
 
 	}
-
+	// a method that checks if the closing date of a bid is passed the one we store in additionalInfo and closes it if it is or chooses a tutor for open bid
 	private void checkRequestClosing(){
 		HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid?fields=messages", GuiAction.myApiKey);
 		try {
@@ -198,7 +190,6 @@ public class Student implements User, ActionListener {
 				String bidType = node.get("type").asText();
 				String bidId = node.get("id").asText();
 				String subId = node.get("subject").get("id").asText();
-				System.out.println("sub "+subId);
 				//get todays date
 				String today = new Date().toInstant().toString();
 				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -214,7 +205,6 @@ public class Student implements User, ActionListener {
 				}
 				else if(bidType.contains("open") && node.get("dateClosedDown").toString().equals("null")){
 					//select tutor and close request if one or more offers were receive
-					System.out.println(node.get("messages"));
 					if(node.get("messages").isEmpty()==false){
 						selectTutor(node.get("messages"),bidId,subId);
 					}
@@ -226,6 +216,7 @@ public class Student implements User, ActionListener {
 		}
 		catch(Exception e){}
 	}
+	//a method that checks if there are any unsigned contract for the user and only show them if they have less than 5 signed contract
 	private void checkContract(){
 		HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("contract", GuiAction.myApiKey);
 		try {
@@ -272,7 +263,7 @@ public class Student implements User, ActionListener {
 
 			}
 
-			System.out.println(countOfSignContract);
+
 			//student shouldnt sign more than 5 so remove all the contracts to be signed
 			if(countOfSignContract==5){
 				contractIds.clear();
@@ -285,9 +276,8 @@ public class Student implements User, ActionListener {
 			System.out.println(e.getStackTrace()[0].getLineNumber());
 		}
 	}
-
+	//a method to selsct the last tutor of an open bid
 	private void selectTutor(JsonNode messages,String bidId,String subId) {
-		System.out.println("dhj");
 		TreeMap<Date,OpenBidOffer> map=new TreeMap<>();
 		for (JsonNode node : messages) {
 			try {
@@ -306,11 +296,9 @@ public class Student implements User, ActionListener {
 				System.out.println(e.getCause());
 			}
 		}
-		System.out.println(bidId);
 		OpenBidOffer lastTutor=map.lastEntry().getValue();
 		createContractAction contract= new createContractAction(lastTutor,"",userId,bidId);
 		if(contract.checkContract()){
-			System.out.println(lastTutor.getSecondPartyId());
 			contract.storeContract();
 		}
 	}

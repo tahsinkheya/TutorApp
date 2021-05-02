@@ -10,7 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
 import java.util.*;
-
+/*
+* a class to show messages to the tutor abt close bid*/
 public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
     private String tutorId;
     private JFrame newFrame;
@@ -106,7 +107,7 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
         newFrame.setVisible(true);
 
     }
-
+//a method to get all the messages connected to a bid if its form the student or this tutor
     private void getAllbidMessage(){
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid?fields=messages", myApiKey);
         try {
@@ -181,7 +182,7 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
         }
 
     }
-
+// a method to store messages in the database
     private void storeMessage(String msg,String bidId,String userId,String userFullName,String studentId){
         String jsonString = null;
         // create the message object

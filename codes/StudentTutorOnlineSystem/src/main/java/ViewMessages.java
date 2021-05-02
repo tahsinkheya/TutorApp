@@ -10,7 +10,8 @@ import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+/*
+* a class used by student and tutor to view messages of close bid*/
 public class ViewMessages implements ActionListener {
     private String bidId, userId;
     private JFrame newFrame,frame;
@@ -53,7 +54,7 @@ public class ViewMessages implements ActionListener {
 
         }
     }
-
+    //method to show all sends to the student
     void showSenders() {
         getAllSenders();
 
@@ -220,7 +221,7 @@ public class ViewMessages implements ActionListener {
         }
 
     }
-
+    //if the student chooses a tutor then a contract id created
     private void createContract(String weeklySess,String hrsperlsn,String rate){
         //get the subject id from the bid id and find tutor q and tutor competency
         //bid/gashd?fields=
@@ -245,7 +246,6 @@ public class ViewMessages implements ActionListener {
                 String nodeSubName = node.get("subject").get("name").toString();
                 String tutorSubName = GuiAction.removeQuotations(nodeSubName);
                 if(tutorSubName.equals(subName)) {
-                    System.out.println("Found the subject for which competency is needed");
                     tutorcompetencyLevel = node.get("level").asInt();
                 }
             }
@@ -274,12 +274,6 @@ public class ViewMessages implements ActionListener {
         }
 
 
-        System.out.println(subName);
-        System.out.println(tutorcompetencyLevel);
-        System.out.println(tutorQ);
-
-
-
         OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,subId,subName,Integer.toString(tutorcompetencyLevel),weeklySess,hrsperlsn,rate,"","","","",tutorQ);
         //create contract with first party to sign as student
         createContractAction contract=new createContractAction(offer,"student",userId,bidId);
@@ -287,7 +281,8 @@ public class ViewMessages implements ActionListener {
     }
 
 
-
+// displays a ui to get details abt the contract since close bid is communicated with messages
+    // we have to ask student to tell us what they decided for rate etc.
     private void getCloseBidOfferDetails(String tutorid){
         acceptedTutor=tutorid;
         //show new frame
@@ -363,7 +358,7 @@ public class ViewMessages implements ActionListener {
 
 
     }
-
+//method to check whether a student already has 5 contracts
     private boolean checkContract(String studentId){
         boolean retVal=false;
         int count=0;
@@ -391,6 +386,7 @@ public class ViewMessages implements ActionListener {
         return retVal;
 
     }
+    //a method that displays messgaes to the student
     private void viewMessages(String tutorId, String studentId, String bidid){
         TreeMap<Date,String> treeMap=getMessages(tutorId,studentId,bidid);
         Iterator itr=treeMap.values().iterator();
@@ -401,7 +397,7 @@ public class ViewMessages implements ActionListener {
         offerDetails.setText(output);
 
     }
-
+    // a method that sorts messages acconrding to date
     public TreeMap<Date, String> getMessages(String tutorId, String studentId, String bidid) {
         TreeMap treeMap = new TreeMap<Date, String>();
         //bid/jdgasjdh?fields=messages

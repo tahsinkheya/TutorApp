@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Vector;
-
+/*a class to view other tutor bid info to tutors abt a bid*/
 public class ViewOtherTutorBids implements ActionListener {
     private String bidId;
     private String userId;
@@ -31,6 +31,7 @@ public class ViewOtherTutorBids implements ActionListener {
         userId=userid;
         showUI();
     }
+    //get offers to a bid if the tutor id is not same
     private void getOffer(){
         // get all  messages of the bid
         String endpoint="bid/"+bidId+"?fields=messages";

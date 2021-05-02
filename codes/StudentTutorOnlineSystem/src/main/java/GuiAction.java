@@ -3,6 +3,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+/*
+* interface for GUIcontext
+* */
 public interface GuiAction {
     static String myApiKey=OnlineMatchingClient.myApiKey;
     public void show();
