@@ -56,8 +56,11 @@ public class createContractAction implements GuiAction, ActionListener {
             for (ObjectNode node : userNodes) {
                 String firstParty=node.get("firstParty").toString();
                 String secondParty=node.get("secondParty").toString();
-                if (firstParty.contains(studentId) | secondParty.contains(studentId)){
-                    count+=1;
+                boolean notConfirmed=node.get("dateSigned").toString().equals("null");
+                if (notConfirmed==false) {
+                    if (firstParty.contains(studentId) | secondParty.contains(studentId)) {
+                        count += 1;
+                    }
                 }
 
             }
@@ -117,6 +120,7 @@ public class createContractAction implements GuiAction, ActionListener {
         jsonString=contractInfo.toString();
         HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
         //close the request
+        System.out.println("sta"+updateResponse.statusCode());
         if (updateResponse.statusCode()==201){
             new RequestCloser(1, bidId, myApiKey, new Date().toInstant().toString());
         }
