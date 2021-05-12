@@ -120,7 +120,7 @@ public class createContractAction implements GuiAction, ActionListener {
         jsonString=contractInfo.toString();
         HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
         //close the request
-        System.out.println("sta"+updateResponse.statusCode());
+
         if (updateResponse.statusCode()==201){
             new RequestCloser(1, bidId, myApiKey, new Date().toInstant().toString());
         }
@@ -301,7 +301,6 @@ public class createContractAction implements GuiAction, ActionListener {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
         catch (Exception e){
-            System.out.println("Error!!!");
             System.out.println(e.getCause());
         }
     }
