@@ -286,7 +286,7 @@ public class createRequestAction implements GuiAction, ActionListener {
 
 
         // create a new subject or bid in the database
-        String Url = "https://fit3077.com/api/v1/"+endpoint;
+        String Url = "https://fit3077.com/api/v2/"+endpoint;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest
                 .newBuilder(URI.create(Url))
@@ -325,7 +325,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         // bid lasts for 10 seconds for now
         Integer seconds;
         if (bidTypes.getSelectedItem().toString().contains("Open")){
-            seconds=30*60;
+            seconds=300*60;
 //            seconds=10;
         }
         else{

@@ -22,7 +22,7 @@ public class OnlineMatchingClient implements ActionListener {
     protected static final String myApiKey = "";
 
     // Provide the root URL for the web service. All web service request URLs start with this root URL.
-    private static final String rootUrl = "https://fit3077.com/api/v1";
+    private static final String rootUrl = "https://fit3077.com/api/v2";
     private String usersUrl = rootUrl + "/user";
     private static JLabel user,usernameLabel,passwordLabel,loginNotSuccessful;
     private static JTextField usernameText;

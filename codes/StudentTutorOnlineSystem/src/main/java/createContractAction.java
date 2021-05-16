@@ -26,6 +26,7 @@ public class createContractAction implements GuiAction, ActionListener {
     private JCheckBox c1;
     private String studentId,firstPartySigned,bidId,userType;
     private OpenBidOffer acceptedOffer;
+    private String contractExpiryDate;
 
 
     private JButton button;
@@ -39,11 +40,12 @@ public class createContractAction implements GuiAction, ActionListener {
 
     /*2nd constructor for student/tutor to use to create a contract when selecting a tutor our buying out bid
     or automatic tutor slection* */
-    public createContractAction(OpenBidOffer offer,String fps,String stuId,String bidid){
+    public createContractAction(OpenBidOffer offer,String fps,String stuId,String bidid, String contExpiryDate){
         acceptedOffer=offer;
         firstPartySigned=fps;
         studentId=stuId;
         bidId=bidid;
+        contractExpiryDate = contExpiryDate;
     }
 
     //method to check if student already has 5 contracts
@@ -82,16 +84,14 @@ public class createContractAction implements GuiAction, ActionListener {
 
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
-        //get date 9 mons from now
-        cal.add(Calendar.MONTH, 9);
-        String contractEndTime = cal.getTime().toInstant().toString();
+        
         // create the contract
         JSONObject contractInfo=new JSONObject();
         contractInfo.put("firstPartyId", acceptedOffer.getFirstPartyId());
         contractInfo.put("secondPartyId", acceptedOffer.getSecondPartyId());
         contractInfo.put("subjectId", acceptedOffer.getSubjectId());
         contractInfo.put("dateCreated", new Date().toInstant().toString());
-        contractInfo.put("expiryDate",contractEndTime );
+        contractInfo.put("expiryDate", contractExpiryDate);
 
         JSONObject lessonInfo=new JSONObject();
         // create the lesson info
@@ -166,11 +166,14 @@ public class createContractAction implements GuiAction, ActionListener {
                    String hpl=userNode.get("lessonInfo").get("hoursPerLesson").toString();
                    String rate=userNode.get("lessonInfo").get("rate").toString();
                    String tuteQualification=userNode.get("lessonInfo").get("tutorQualification").toString();
+                   String contractExpiryDate = userNode.get("expiryDate").toString();
+                   
                    contractDetails.add(GuiAction.removeQuotations(comp));
                    contractDetails.add(GuiAction.removeQuotations(weeklySession));
                    contractDetails.add(GuiAction.removeQuotations(hpl));
                    contractDetails.add(GuiAction.removeQuotations(rate));
                    contractDetails.add(GuiAction.removeQuotations(tuteQualification));
+                   contractDetails.add(GuiAction.removeQuotations(contractExpiryDate));
                }
 
 
@@ -230,18 +233,22 @@ public class createContractAction implements GuiAction, ActionListener {
         JLabel qualification=new JLabel("Tutor Qualification/s: "+contractDetails.get(6) );
         qualification.setBounds(10,230,340,25);
         panel.add(qualification);
-
+        
+        
+        JLabel expiryDate=new JLabel("Contract Expiry date : "+contractDetails.get(7) );
+        expiryDate.setBounds(10,260,340,25);
+        panel.add(expiryDate);
 
         c1 = new JCheckBox("");
-        c1.setBounds(10,270,20,20);
+        c1.setBounds(10,300,20,20);
         panel.add(c1);
 
         JLabel confirmText= new JLabel("I agree to this contract content");
-        confirmText.setBounds(30,270,380,25);
+        confirmText.setBounds(35,300,380,25);
         panel.add(confirmText);
 
         warning= new JLabel();
-        warning.setBounds(10,300,380,25);
+        warning.setBounds(10,370,380,25);
         panel.add(warning);
 
         button= new JButton("Confirm and Proceed");

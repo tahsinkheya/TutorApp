@@ -316,7 +316,9 @@ public class Student implements User, ActionListener {
 		//get the last bid offer
 		OpenBidOffer lastTutor=map.lastEntry().getValue();
 		//create contract fps or first personed sign value is null becuase none of the parties signed this contract
-		createContractAction contract= new createContractAction(lastTutor,"",userId,bidId);
+		// default contract length is 6 months
+		String contExpiryDate = GuiAction.getContractExpiryDate("6");
+		createContractAction contract= new createContractAction(lastTutor,"",userId,bidId, contExpiryDate);
 		if(contract.checkContract()){
 			contract.storeContract();
 		}

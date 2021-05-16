@@ -33,6 +33,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
     private JTextArea offerDetails;
     private JPanel panel;
     private String bidid;
+    private JTextField contDurationInput;
 
     public ViewBidOfferAction(String userid){
         userId=userid;
@@ -145,7 +146,8 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
             int index=moreOffers.getSelectedIndex();
             OpenBidOffer dets=offerInfo.get(index);
             //create contract and set student signed to true since they selected the tutor
-            createContractAction c=new createContractAction(dets,"student",userId,bidid);
+            String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
+            createContractAction c=new createContractAction(dets,"student",userId,bidid, contExpiryDate);
             if (c.checkContract()==false){
                 newWarning.setText("you already have 5 one-to-one contracts");
                 newWarning.setForeground(Color.RED);
@@ -230,8 +232,24 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
 
 
 
+        // allow student to choose contract duration 
+        JLabel contDurationHeader = new JLabel("Please specify contract duration before selecting tutor");
+        contDurationHeader.setBounds(10,500,450,25);
+        contDurationHeader.setForeground(Color.BLUE);
+        panel.add(contDurationHeader);
+        
+        JLabel contDuration = new JLabel("Contract duration");
+        contDuration.setBounds(10,530,450,25);
+        panel.add(contDuration);
+        
+        
+        contDurationInput = new JTextField(20);
+        contDurationInput.setBounds(120, 530, 70, 25);
+        contDurationInput.setText("6");
+        panel.add(contDurationInput);
+
         closeBid = new JButton("Select this tutor and close request");
-        closeBid.setBounds(10, 480, 300, 25);
+        closeBid.setBounds(10, 580, 300, 25);
         closeBid.addActionListener(this);
         closeBid.setEnabled(false);
         panel.add(closeBid);

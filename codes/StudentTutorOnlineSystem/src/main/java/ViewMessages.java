@@ -24,7 +24,8 @@ public class ViewMessages implements ActionListener {
     private JTextField field,weeklySeeion,hours,rate;
     private String studentName;
     private String acceptedTutor;
-
+    private JTextField contDurationInput;
+    
 //constructor
     public ViewMessages(String bidid, String userid) {
         bidId = bidid;
@@ -62,7 +63,7 @@ public class ViewMessages implements ActionListener {
         //show new frame
         newFrame = new JFrame("View Offer Details");
         // Setting the width and height of frame
-        newFrame.setSize(900, 700);
+        newFrame.setSize(900, 1000);
         newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
@@ -125,7 +126,8 @@ public class ViewMessages implements ActionListener {
         //this will be enabled after selecting a tutor
         sendMsg.setEnabled(false);
         panel.add(sendMsg);
-
+        
+        
         select = new JButton("Select this Tutor and close request");
         select.setBounds(10, 570, 300, 25);
         select.addActionListener(this);
@@ -283,7 +285,8 @@ public class ViewMessages implements ActionListener {
 
 
         //create contract with first party to sign as student
-        createContractAction contract=new createContractAction(offer,"student",userId,bidId);
+        String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
+        createContractAction contract=new createContractAction(offer,"student",userId,bidId, contExpiryDate);
         contract.storeContract();
     }
 
@@ -352,15 +355,34 @@ public class ViewMessages implements ActionListener {
         allRates = new JComboBox(rateTypes);
         allRates.setBounds(110, 260, 100, 25);
         newPanel.add(allRates);
-
+        
+        
+        // allow student to choose contract duration 
+        JLabel contDurationHeader = new JLabel("Please specify contract duration before selecting tutor");
+        contDurationHeader.setBounds(10,290,450,25);
+        contDurationHeader.setForeground(Color.BLUE);
+        newPanel.add(contDurationHeader);
+        
+        JLabel contDuration = new JLabel("Contract duration");
+        contDuration.setBounds(10,320,450,25);
+        newPanel.add(contDuration);
+        
+        
+        contDurationInput = new JTextField(20);
+        contDurationInput.setBounds(120, 320, 70, 25);
+        contDurationInput.setText("6");
+        newPanel.add(contDurationInput);
+        
+        
+        
         //add a close button
         confirm = new JButton("Confirm");
-        confirm.setBounds(10, 310, 100, 25);
+        confirm.setBounds(10, 350, 100, 25);
         confirm.addActionListener(this);
         newPanel.add(confirm);
 
         offerWarning = new JLabel("");
-        offerWarning.setBounds(10, 340, 1200, 25);
+        offerWarning.setBounds(10, 370, 1200, 25);
         newPanel.add(offerWarning);
 
         frame.setVisible(true);

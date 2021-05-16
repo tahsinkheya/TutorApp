@@ -29,6 +29,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
     private static JLabel competencyAlert;
     private ArrayList<String> bidInfo;
     private String userFullName;
+    private JTextField contDurationInput;
     public OpenBidAction(String bidId, String uId, String fname){
         bidid=bidId;
         userId=uId;
@@ -96,18 +97,35 @@ public class OpenBidAction extends BidAction implements ActionListener {
         panel.add(makeBidOffer);
 
 
-        competencyAlert = new JLabel();
-        competencyAlert.setBounds(10,350,450,25);
-        panel.add(competencyAlert);
+        // allow tutor to choose contract duration 
+        JLabel contDuration = new JLabel("Please specify contract duration before buying out");
+        contDuration.setBounds(10,310,450,25);
+        contDuration.setForeground(Color.BLUE);
+        panel.add(contDuration);
+        
+        contDuration = new JLabel("Contract duration");
+        contDuration.setBounds(10,350,450,25);
+        panel.add(contDuration);
+        
+        
+        contDurationInput = new JTextField(20);
+        contDurationInput.setBounds(120, 350, 70, 25);
+        contDurationInput.setText("6");
+        panel.add(contDurationInput);
 
-
+        		
+        		
         buyOutBtn = new JButton("Buy Out Bid");
-        buyOutBtn.setBounds(10, 310, 300, 25);
+        buyOutBtn.setBounds(10, 400, 300, 25);
         buyOutBtn.addActionListener(this);
         panel.add(buyOutBtn);
+        
+
+        competencyAlert = new JLabel();
+        competencyAlert.setBounds(10,450,450,25);
+        panel.add(competencyAlert);
+
         frame.setVisible(true);
-
-
 
     }
 
@@ -211,7 +229,8 @@ public class OpenBidAction extends BidAction implements ActionListener {
         offer.setExtraInfo("no","");
         offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
         //tutor is the first party to sign
-        createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid);
+        String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
+        createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid, contExpiryDate);
         contract.storeContract();
 
 

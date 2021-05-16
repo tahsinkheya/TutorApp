@@ -170,7 +170,7 @@ public class MakeOpenBidOffer implements ActionListener {
     private void postMessage(String endpoint, String jsonString) {
 
         // create a new message in the database
-        String Url = "https://fit3077.com/api/v1/"+endpoint;
+        String Url = "https://fit3077.com/api/v2/"+endpoint;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest
                 .newBuilder(URI.create(Url))
