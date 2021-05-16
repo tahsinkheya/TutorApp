@@ -325,7 +325,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         // bid lasts for 10 seconds for now
         Integer seconds;
         if (bidTypes.getSelectedItem().toString().contains("Open")){
-            seconds=300*60;
+            seconds=30*60;
 //            seconds=10;
         }
         else{
