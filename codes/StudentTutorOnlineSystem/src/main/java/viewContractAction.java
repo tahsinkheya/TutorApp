@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Font;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -92,102 +93,39 @@ public class viewContractAction implements GuiAction{
 				
 				// not null means contract has been finalized
 				if (!dateSign.equals("null")) {
-					String firstPartyIdRaw = node.get("firstParty").get("id").toString();
-					String firstPartyId = GuiAction.removeQuotations(firstPartyIdRaw);
-					String secondPartyIdRaw = node.get("secondParty").get("id").toString();
-					String secondPartyId = GuiAction.removeQuotations(secondPartyIdRaw);
+					//boolean firstPartyType = node.get("firstParty").get("isStudent").asBoolean();
+					//boolean secondPartyType = node.get("secondParty").get("isStudent").asBoolean();
 					
-					// if student is the first party, then tutor is second party and vice versa
-					String tutorFullName = "";
-					String studentFullName = "";
-					if(id.equals(firstPartyId)) {
-						// tutor information
-						String tutorGivenNameQ =  node.get("secondParty").get("givenName").toString();
-						String tutorFamilyNameQ =  node.get("secondParty").get("familyName").toString();
-						String tutorGivenName = GuiAction.removeQuotations(tutorGivenNameQ);
-						String tutorFamilyName = GuiAction.removeQuotations(tutorFamilyNameQ);
-						tutorFullName = tutorGivenName +" "+ tutorFamilyName;
-						
-						
-						String studentGivenNameQ =  node.get("firstParty").get("givenName").toString();
-						String studentFamilyNameQ =  node.get("firstParty").get("familyName").toString();
-						String studentGivenName = GuiAction.removeQuotations(studentGivenNameQ);
-						String studentFamilyName = GuiAction.removeQuotations(studentFamilyNameQ);
-						studentFullName = studentGivenName +" "+ studentFamilyName;
-						
-					}
-					else if(id.equals(secondPartyId)) {
-						
-						// tutor name
-						String tutorGivenNameQ =  node.get("firstParty").get("givenName").toString();
-						String tutorFamilyNameQ =  node.get("firstParty").get("familyName").toString();
-						String tutorGivenName = GuiAction.removeQuotations(tutorGivenNameQ);
-						String tutorFamilyName = GuiAction.removeQuotations(tutorFamilyNameQ);
-						tutorFullName = tutorGivenName +" "+ tutorFamilyName;
-						
-						
-						String studentGivenNameQ =  node.get("secondParty").get("givenName").toString();
-						String studentFamilyNameQ =  node.get("secondParty").get("familyName").toString();
-						String studentGivenName = GuiAction.removeQuotations(studentGivenNameQ);
-						String studentFamilyName = GuiAction.removeQuotations(studentFamilyNameQ);
-						studentFullName = studentGivenName +" "+ studentFamilyName;
+					ArrayList<String> userFullNames = getStudentAndTutorNames(node);
+					String studentFullName = userFullNames.get(0);
+					//System.out.println(studentFullName);
+					String tutorFullName = userFullNames.get(1);
+					//System.out.println(tutorFullName);
 					
-					}
+					ArrayList<String> details = getcontractDetails(node);
 					
-					// has to be a user related to this contract
-					if (id.equals(firstPartyId) ||id.equals(secondPartyId)) {
-						// subject information
-						String subject = GuiAction.removeQuotations(node.get("subject").get("name").toString());
-						String lesson = GuiAction.removeQuotations(node.get("subject").get("description").toString());
-						String dateFinalized = GuiAction.removeQuotations(node.get("dateSigned").toString());
+					// skip if contract does not involve current user
+					if(!details.isEmpty()) {
+						String subject = details.get(0);
+						String lesson = details.get(1);
+						String tutorQualification = details.get(2);
+						String tutorCompetency = details.get(3);
+						String weeklySessions = details.get(4);
+						String studyHrs = details.get(5);
+						String rate = details.get(6);
+						String dateFinalized = details.get(7);
+						String contractExpiryDate = details.get(8);
 						
 						
-						String studyHrs= "";
-						String weeklySessions = "";
-						String rate = "";
-						String lessonStatus = node.get("lessonInfo").toString();
-						String tutorQualification = "";
-						String tutorCompetency = "";
-						
-						
-						// to handle some empty pre-existing contracts
-						if (!lessonStatus.equals("{}")) {
-							studyHrs =  GuiAction.removeQuotations(node.get("lessonInfo").get("hoursPerLesson").toString());
-							weeklySessions =  GuiAction.removeQuotations(node.get("lessonInfo").get("weeklySession").toString());
-							rate =  GuiAction.removeQuotations(node.get("lessonInfo").get("rate").toString());
-							tutorQualification = GuiAction.removeQuotations(node.get("lessonInfo").get("tutorQualification").toString());
-							tutorCompetency = GuiAction.removeQuotations(node.get("lessonInfo").get("competency").toString());
-						}
-						
-						
-						String twoParties = "";
-						if (type.equals("Student")) {
-							twoParties = "Student: "+ studentFullName + "\n"+ "Tutor: "+ tutorFullName +"\n";
-						}
-						else {
-							// for tutor page, tutor is main user
-							twoParties = "Tutor: "+ studentFullName + "\n"+ "Student: "+ tutorFullName +"\n";
-						}
-						
+						String twoParties = "Student: "+ studentFullName + "\n"+ "Tutor: "+ tutorFullName +"\n";
 						String subjectInfo = "Subject: "+ subject + "\n" + "Subject Description: "+ lesson + "\n" +"Tutor Qualification: "+tutorQualification +"\n"+ "Tutor Competency: "+ tutorCompetency + "\n";  
 						String sessionInfo  = "Number of Sessions per week: "+weeklySessions + "\n" + "Hours per lession: "+studyHrs +"\n" + "Rate: "+ rate + "\n";
-						String signDate = "Contract signed on: "+ dateFinalized + "\n";
+						String signDate = "Contract signed on: "+ dateFinalized + "\n" +"Contract expires on: "+ contractExpiryDate + "\n";
 						String dottedLine = "--------------------------------------------------------------------------"+"\n";
 						output += twoParties +subjectInfo +sessionInfo+signDate+dottedLine;
-				
-						// console outputs
-//						System.out.println("Student: "+ studentFullName);
-//						System.out.println("Tutor: "+ tutorFullName);
-//						System.out.println("Subject: "+ subject);
-//						System.out.println("Subject Description: "+ lesson);
-//						System.out.println("Tutor Competency: "+ tutorCompetency);
-//						System.out.println("Number of Sessions per week: "+weeklySessions);
-//						System.out.println("Hours per lession: "+studyHrs);
-//						System.out.println("Rate: "+rate);
-//						System.out.println("Contract signed on: "+ dateFinalized);;
-//						System.out.println("---------------------------------------------------------------------");
-//
 					}
+					
+					
 				}
 
 			}
@@ -201,7 +139,93 @@ public class viewContractAction implements GuiAction{
 		}
 		
 	}
-
-
+    
+    /**
+     * Method to get the student and tutor full names
+     * @param node
+     * @return ArrayList containing student and tutor full names
+     */
+    private ArrayList<String> getStudentAndTutorNames(ObjectNode node) {
+    	ArrayList<String> studentAndTutor = new ArrayList<String>();
+    	boolean firstPartyType = node.get("firstParty").get("isStudent").asBoolean();
+    	String studentFullName;
+		String tutorFullName;
+		// first party is student and second party is tutor
+		if(firstPartyType == true) {
+			String studentGivenName = GuiAction.removeQuotations(node.get("firstParty").get("givenName").toString());
+			String studentFamilyName = GuiAction.removeQuotations(node.get("firstParty").get("familyName").toString());
+			studentFullName = studentGivenName +" "+ studentFamilyName;
+			
+			String tutorGivenName = GuiAction.removeQuotations(node.get("secondParty").get("givenName").toString());
+			String tutorFamilyName = GuiAction.removeQuotations(node.get("secondParty").get("familyName").toString());
+			tutorFullName = tutorGivenName +" "+ tutorFamilyName;
+		}
+		
+		// second party is student and first party is tutor
+		else {
+			String studentGivenName = GuiAction.removeQuotations(node.get("secondParty").get("givenName").toString());
+			String studentFamilyName = GuiAction.removeQuotations(node.get("secondParty").get("familyName").toString());
+			studentFullName = studentGivenName +" "+ studentFamilyName;
+			
+			String tutorGivenName = GuiAction.removeQuotations(node.get("firstParty").get("givenName").toString());
+			String tutorFamilyName = GuiAction.removeQuotations(node.get("firstParty").get("familyName").toString());
+			tutorFullName = tutorGivenName +" "+ tutorFamilyName;
+		}
+		
+		studentAndTutor.add(studentFullName);
+		studentAndTutor.add(tutorFullName);
+		return studentAndTutor;
+    	
+    }
+    
+    /*
+     * Method to receive details about each contract
+     */
+    private ArrayList<String> getcontractDetails(ObjectNode node) {
+    	ArrayList<String> contractDetails = new ArrayList<String>();
+    	String firstPartyId = GuiAction.removeQuotations(node.get("firstParty").get("id").toString());
+		String secondPartyId = GuiAction.removeQuotations(node.get("secondParty").get("id").toString());
+		
+		// has to be a user related to this contract
+		if (id.equals(firstPartyId) || id.equals(secondPartyId)) {
+			// subject information
+			String subject = GuiAction.removeQuotations(node.get("subject").get("name").toString());
+			String lesson = GuiAction.removeQuotations(node.get("subject").get("description").toString());
+			String dateFinalized = GuiAction.removeQuotations(node.get("dateSigned").toString());
+			String contractExpiryDate = GuiAction.removeQuotations(node.get("expiryDate").toString());
+			
+			String studyHrs= "";
+			String weeklySessions = "";
+			String rate = "";
+			String lessonStatus = node.get("lessonInfo").toString();
+			String tutorQualification = "";
+			String tutorCompetency = "";
+			
+			// to handle some empty pre-existing contracts
+			if (!lessonStatus.equals("{}")) {
+				studyHrs =  GuiAction.removeQuotations(node.get("lessonInfo").get("hoursPerLesson").toString());
+				weeklySessions =  GuiAction.removeQuotations(node.get("lessonInfo").get("weeklySession").toString());
+				rate =  GuiAction.removeQuotations(node.get("lessonInfo").get("rate").toString());
+				tutorQualification = GuiAction.removeQuotations(node.get("lessonInfo").get("tutorQualification").toString());
+				tutorCompetency = GuiAction.removeQuotations(node.get("lessonInfo").get("competency").toString());
+			}
+			
+			contractDetails.add(subject);
+			contractDetails.add(lesson);
+			contractDetails.add(tutorQualification);
+			contractDetails.add(tutorCompetency);
+			contractDetails.add(weeklySessions);
+			contractDetails.add(studyHrs);
+			contractDetails.add(rate);
+			contractDetails.add(dateFinalized);
+			contractDetails.add(contractExpiryDate);
+		}
+		else {
+			System.out.println("Match not found");
+		}
+		
+		return contractDetails;
+    }
+    
 
 }
