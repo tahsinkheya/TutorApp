@@ -7,42 +7,52 @@
 public class OpenBidOffer {
     private String firstPartyId;
     private String secondPartyId;
+    private String studentName;
+    private String tutorName;
+
     private String subjectId;
     private String subjectDesc;
+    private String tutorQualification;
     private String competency;
+
     private String weeklySession;
     private String hoursPerLesson;
     private String rate;
 
-
-
-    private String studentName;
-    private String tutorName;
     private String fressLesson;
     private String extraInfo;
 
 
-    private String tutorQualification;
-
-
-
-    public OpenBidOffer(String newFirstId, String newSecondId, String newsubId, String newSubDes, String comp, String weeklySess, String hlp, String newRate, String stuName, String tuteName,String fl,String extra,String qualification ){
+    public OpenBidOffer(String newFirstId, String newSecondId,  String stuName, String tuteName ){
         firstPartyId=newFirstId;
         secondPartyId=newSecondId;
-        subjectId=newsubId;
-        subjectDesc=newSubDes;
-        competency=comp;
+        studentName=stuName;
+        tutorName=tuteName;
+
+
+    }
+
+    public void setClassInfo(String weeklySess, String hlp, String newRate){
         weeklySession=weeklySess;
         hoursPerLesson=hlp;
         rate=newRate;
-        studentName=stuName;
-        tutorName=tuteName;
+    }
+    public void setExtraInfo(String fl,String extra){
         fressLesson=fl;
         extraInfo=extra;
+    }
+    public void setSubjectInfo(String newsubId, String newSubDes,String comp,String qualification){
+        subjectId=newsubId;
+        subjectDesc=newSubDes;
         tutorQualification=qualification;
+        competency=comp;
 
     }
-//getter methods
+
+
+
+
+    //getter methods
     public String getTutorQualification() {
         return tutorQualification;
     }

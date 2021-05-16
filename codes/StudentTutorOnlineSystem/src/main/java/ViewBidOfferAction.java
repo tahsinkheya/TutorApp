@@ -334,7 +334,12 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                         }
                         String studId=GuiAction.removeQuotations(userNode.get("initiator").get("id").toString());
                         newComboBoxItems.add(option+"from: "+GuiAction.removeQuotations((msgSender)));
-                        OpenBidOffer newOffer= new OpenBidOffer(msgSenderId,studId,subjectId,subjectName,competency,numberOfSession,duration,rate,student,tutor,freelesson,extra,qualification);
+                        //create an open bid offer
+                        OpenBidOffer newOffer=new OpenBidOffer(msgSenderId,studId,student,tutor);
+                        //set all info
+                        newOffer.setClassInfo(numberOfSession,duration,rate);
+                        newOffer.setExtraInfo(freelesson,extra);
+                        newOffer.setSubjectInfo(subjectId,subjectName,competency,qualification);
 
                         //add the new offer in the arrayList
                         offerInfo.add(newOffer);

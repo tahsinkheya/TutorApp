@@ -299,12 +299,20 @@ public class Student implements User, ActionListener {
 				String comp=node.get("additionalInfo").get("tutorComp").asText();
 				String rate=node.get("additionalInfo").get("rate").asText();
 				String tutorQ=node.get("additionalInfo").get("tutorQualification").asText();
-				OpenBidOffer offer=new OpenBidOffer( userId,tutorId,subId,"",comp,weeklyS,hrsperLesson,rate,userName,tutorId,"","",tutorQ);
+
+				OpenBidOffer offer=new OpenBidOffer(userId,tutorId,userName,"");
+				offer.setClassInfo(weeklyS,hrsperLesson,rate);
+				offer.setExtraInfo("no","");
+				offer.setSubjectInfo(subId,"",comp,tutorQ);
+
 				map.put(newDate,offer);
 			} catch (Exception e) {
 				System.out.println(e.getCause());
 			}
 		}
+
+
+
 		//get the last bid offer
 		OpenBidOffer lastTutor=map.lastEntry().getValue();
 		//create contract fps or first personed sign value is null becuase none of the parties signed this contract

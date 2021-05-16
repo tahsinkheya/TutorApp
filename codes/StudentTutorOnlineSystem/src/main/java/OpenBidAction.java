@@ -203,10 +203,17 @@ public class OpenBidAction extends BidAction implements ActionListener {
         String studentId=bidInfo.get(6);
         String tutorQualification=TutorQualification(userId);
         String tutorCompetency=Integer.toString(tuteCompetency);
-        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(7),bidInfo.get(1),tutorCompetency,bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(8),userFullName,"no","",tutorQualification);
+
+
+        //set all info
+        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(8),userFullName);
+        offer.setClassInfo(bidInfo.get(3),bidInfo.get(4),bidInfo.get(5));
+        offer.setExtraInfo("no","");
+        offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
         //tutor is the first party to sign
         createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid);
         contract.storeContract();
+
 
     }
 

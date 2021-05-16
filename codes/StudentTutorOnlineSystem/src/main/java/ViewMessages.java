@@ -275,11 +275,19 @@ public class ViewMessages implements ActionListener {
         }
 
 
-        OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,subId,subName,Integer.toString(tutorcompetencyLevel),weeklySess,hrsperlsn,rate,"","","","",tutorQ);
+        OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,"","");
+        offer.setClassInfo(weeklySess,hrsperlsn,rate);
+        offer.setExtraInfo("no","");
+        offer.setSubjectInfo(subId,subName,Integer.toString(tutorcompetencyLevel),tutorQ);
+
+
+
         //create contract with first party to sign as student
         createContractAction contract=new createContractAction(offer,"student",userId,bidId);
         contract.storeContract();
     }
+
+
 
 
 // displays a ui to get details abt the contract since close bid is communicated with messages
