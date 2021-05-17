@@ -92,7 +92,6 @@ public class Student implements User, ActionListener {
 		checkRequestClosing();
 		checkContract();
 		viewContractAction.contractNotification(uId);
-
 	}
 //a method to show the homepage
 	@Override
@@ -192,23 +191,24 @@ public class Student implements User, ActionListener {
 		HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid?fields=messages", GuiAction.myApiKey);
 		try {
 			ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
-
 			for (ObjectNode node : userNodes) {
 				//check if bid is of type close
 				String bidType = node.get("type").asText();
 				String initiator= node.get("initiator").get("id").asText();
 				String bidId = node.get("id").asText();
 				String subId = node.get("subject").get("id").asText();
+
 				//get todays date
 				String today = new Date().toInstant().toString();
 				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
 				String bidCloseTime = node.get("additionalInfo").get("requestClosesAt").asText();
+
 				Date todayDate = sourceFormat.parse(today);
 				Date endDate = sourceFormat.parse(bidCloseTime);
 				boolean close=todayDate.after(endDate);
+
 				boolean currentStudentBid=initiator.contains(userId);
-
-
 
 				//we need to close all close bids if they have passed their expiry date by this student
 				if (currentStudentBid && bidType.contains("close") && node.get("dateClosedDown").toString().equals("null")){
@@ -220,6 +220,7 @@ public class Student implements User, ActionListener {
 				else if(currentStudentBid && close==true && bidType.contains("open") && node.get("dateClosedDown").toString().equals("null")){
 					//select tutor and close request if one or more offers were receive
 
+
 					if(node.get("messages").isEmpty()==false){
 						selectTutor(node.get("messages"),bidId,subId);
 					}
@@ -229,7 +230,9 @@ public class Student implements User, ActionListener {
 
 			}
 		}
-		catch(Exception e){}
+		catch(Exception e){
+			System.out.println(e.getStackTrace()[0].getLineNumber());
+		}
 	}
 	//a method that checks if there are any unsigned contract for the user and only show them if they have less than 5 signed contract
 	private void checkContract(){

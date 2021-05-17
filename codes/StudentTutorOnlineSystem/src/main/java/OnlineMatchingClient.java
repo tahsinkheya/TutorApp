@@ -8,6 +8,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
 
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -30,6 +31,7 @@ public class OnlineMatchingClient implements ActionListener {
     private static JFrame logInFrame;
     // the type of user that logged in: Student or Tutor
     private String userType;
+    private static JPanel loginPanel;
     
     // userID needed for initializing bids and messages
     private String userID;
@@ -40,9 +42,8 @@ public class OnlineMatchingClient implements ActionListener {
         logInFrame=new JFrame();
         logInFrame.setSize(350,250);
         logInFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         //add a panel and title
-        JPanel loginPanel= new JPanel();
+        loginPanel= new JPanel();
         logInFrame.add(loginPanel);
         loginPanel.setBackground(new Color(172, 209, 233));
         loginPanel.setLayout(null);
@@ -82,70 +83,54 @@ public class OnlineMatchingClient implements ActionListener {
 
 
     }
+    private JsonNode decodeJwt(String token){
+        //decode the jwt to get user info
+        String[] chunks = token.split("\\.");
+        Base64.Decoder decoder = Base64.getDecoder();
+
+        String payload = new String(decoder.decode(chunks[1]));
+
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+        JsonNode actualObj = mapper.readValue(payload, JsonNode.class);
+        return actualObj;}
+        catch(Exception e){return null;}
+    }
     //a method for user to log in returns true if the process is successful
     public boolean logInUser(String username,String password){
         boolean booleanVal=false;
-        String jsonString = "{" +
-                "\"userName\":\"" + username + "\"," +
-                "\"password\":\"" + password + "\"" +
-                "}";
-
-        HttpClient client;
-        HttpRequest request;
+        String jsonString = "{" + "\"userName\":\"" + username + "\"," + "\"password\":\"" + password + "\"" + "}";
         HttpResponse<String> response = null;
-
         // A request body needs to be supplied to this endpoint, otherwise a 400 Bad Request error will be returned.
         String usersLoginUrl = usersUrl + "/login";
-        client = HttpClient.newHttpClient();
-        request = HttpRequest.newBuilder(URI.create(usersLoginUrl + "?jwt=true")) // Return a JWT so we can use it in Part 5 later.
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder(URI.create(usersLoginUrl + "?jwt=true")) // Return a JWT so we can use it in Part 5 later.
                 .setHeader("Authorization", myApiKey)
                 .header("Content-Type","application/json") // This header needs to be set when sending a JSON request body.
                 .POST(HttpRequest.BodyPublishers.ofString(jsonString))
                 .build();
         ObjectNode jsonNode;
-
-        
         try{
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             jsonNode= new ObjectMapper().readValue(response.body(), ObjectNode.class);
-
-            String token = jsonNode.get("jwt").textValue();
-
-            //decode the jwt to get user info
-            String[] chunks = token.split("\\.");
-            Base64.Decoder decoder = Base64.getDecoder();
-
-            String payload = new String(decoder.decode(chunks[1]));
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode actualObj = mapper.readValue(payload, JsonNode.class);
+            JsonNode actualObj=decodeJwt(jsonNode.get("jwt").textValue());
             // Find the username of the logged in user in db and find their type. Based on the type initialize their UI page
             if(actualObj.get("isStudent").asBoolean()==true){
                 userType="Student";
-                userID = actualObj.get("sub").asText();
-
             }
             else{
             	userType="Tutor";
-            	userID = actualObj.get("sub").asText();
-
             }
-            loginNotSuccessful.setText("Loading...");
+            userID = actualObj.get("sub").asText();
             //create facadeuser by using the type
             facadeUser= new UserFacade(actualObj.get("username").asText(),actualObj.get("givenName").asText(),actualObj.get("familyName").asText(),userType,userID);
-
-
         }
         catch (Exception e){
-            System.out.println(e.getCause());
         }
-
         //if the signin process is successful
         if (response!=null & response.statusCode()==200){
             booleanVal=true;
-
         }
-
         return booleanVal;
     }
     //method for the button
@@ -165,7 +150,7 @@ public class OnlineMatchingClient implements ActionListener {
                 loginNotSuccessful.setText("Login not successful.Username or password incorrect");
             }
             else {
-                //call facede method
+                //call facade method
                 logInFrame.setVisible(false);
                 facadeUser.displayHomePage();
 

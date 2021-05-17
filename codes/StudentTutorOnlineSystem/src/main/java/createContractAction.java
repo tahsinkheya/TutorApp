@@ -294,7 +294,7 @@ public class createContractAction implements GuiAction, ActionListener {
         contractInfo.put("additionalInfo",additionalInfo);
         String jsonString = contractInfo.toString();
 
-        String Url = "https://fit3077.com/api/v1/"+endpoint;
+        String Url = "https://fit3077.com/api/v2/"+endpoint;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest
