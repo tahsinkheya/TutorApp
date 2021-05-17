@@ -22,7 +22,7 @@ public class Tutor implements  User, ActionListener {
     private JButton viewContract,viewRequest,viewMessage,signContract,viewDetails,closeBtn; 	//Btn
     private Vector comboBoxItems=new Vector();
     private ArrayList<String> contractIds= new ArrayList<>();
-    private JLabel contractNotif;
+    private JLabel contractNotif, contractExpAlert;
     private  JComboBox allContracts;
     private JFrame frame;
 
@@ -102,7 +102,7 @@ public class Tutor implements  User, ActionListener {
         homepage.setLayout(null);
 
         welcome = new JLabel("Welcome:"+userName);
-        welcome.setBounds(100,50,400,25);
+        welcome.setBounds(100,20,400,25);
         homepage.add(welcome);
 
         viewRequest = new JButton("View Student Requests");
@@ -135,6 +135,13 @@ public class Tutor implements  User, ActionListener {
             homepage.add(contractNotif);
             signContract.setEnabled(true);
         }
+        
+        if(viewContractAction.contractNotification(userId)) {
+			contractExpAlert = new JLabel("You have contracts expiring in a month");
+			contractExpAlert.setBounds(100, 50, 400, 25);
+			contractExpAlert.setForeground(new Color(200,0,200));
+			homepage.add(contractExpAlert);
+		}
 
         homeFrame.setVisible(true);
     }

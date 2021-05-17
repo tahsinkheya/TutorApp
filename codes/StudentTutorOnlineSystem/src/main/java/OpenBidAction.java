@@ -122,7 +122,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         
 
         competencyAlert = new JLabel();
-        competencyAlert.setBounds(10,450,450,25);
+        competencyAlert.setBounds(10,430,450,25);
         panel.add(competencyAlert);
 
         frame.setVisible(true);

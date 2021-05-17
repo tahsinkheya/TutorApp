@@ -1,7 +1,9 @@
 import java.awt.Color;
 import java.awt.Font;
 import java.net.http.HttpResponse;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -225,6 +227,58 @@ public class viewContractAction implements GuiAction{
 		}
 		
 		return contractDetails;
+    }
+    
+    static boolean contractNotification(String userId) {
+    	String notification = "";
+		HttpResponse<String> contResponse = GuiAction.initiateWebApiGET("contract", myApiKey);
+		try {
+			ObjectNode[] jsonNodes = new ObjectMapper().readValue(contResponse.body(), ObjectNode[].class);
+			for (ObjectNode node: jsonNodes) {
+				// get the signed date for contract to check if it is null or not
+				String dateSign = node.get("dateSigned").toString();	
+				
+				// not null means contract has been finalized
+				if (!dateSign.equals("null")) {
+					String firstPartyId = GuiAction.removeQuotations(node.get("firstParty").get("id").toString());
+					String secondPartyId = GuiAction.removeQuotations(node.get("secondParty").get("id").toString());
+					
+					// has to be a user related to this contract
+					if (userId.equals(firstPartyId) || userId.equals(secondPartyId)) {
+						String[] contractExpiryTime = GuiAction.removeQuotations(node.get("expiryDate").toString()).split("T");
+						String[] currentTime = new Date().toInstant().toString().split("T");
+						//System.out.println("User Id: "+userId);
+						String currentDate = currentTime[0];
+						String expiryDate = contractExpiryTime[0];
+						
+						 SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd");
+						 Date d1 = sdf.parse(currentDate);
+				         Date d2 = sdf.parse(expiryDate);
+				         long difference_In_Time= d2.getTime() - d1.getTime();
+				         long difference_In_Years = (difference_In_Time / (1000l * 60 * 60 * 24 * 365));
+			  
+				         long difference_In_Days = (difference_In_Time/ (1000 * 60 * 60 * 24))% 365;
+				         if( (difference_In_Years == 0) && (difference_In_Days <= 31)) {
+				        	 System.out.println("Contracts expiring in a month time");
+				        	 System.out.println( "years: "+difference_In_Years+" days: " + difference_In_Days + " days ");
+				        	 return true;
+				         }
+				         
+					}
+				}
+				
+
+			}
+		
+			
+		}
+		catch(Exception e) {
+			System.out.println("Error!!!");
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause());
+		}
+		return false;
+		
     }
     
 

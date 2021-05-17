@@ -35,7 +35,7 @@ public class Student implements User, ActionListener {
 	//ui components
 	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract,viewDetails;
 	private JPanel homepagePanel,contractPanel;
-	private  JLabel welcome,contractNotif;
+	private  JLabel welcome,contractNotif, contractExpAlert;
 	private Vector comboBoxItems=new Vector();
 	private static JComboBox allContracts;
 
@@ -91,6 +91,7 @@ public class Student implements User, ActionListener {
 		this.userId=uId;
 		checkRequestClosing();
 		checkContract();
+		viewContractAction.contractNotification(uId);
 
 	}
 //a method to show the homepage
@@ -108,7 +109,7 @@ public class Student implements User, ActionListener {
 			homepagePanel.setLayout(null);
 
 			welcome = new JLabel("Welcome:"+userName);
-			welcome.setBounds(100,50,400,25);
+			welcome.setBounds(100,20,400,25);
 			homepagePanel.add(welcome);
 
 
@@ -142,7 +143,13 @@ public class Student implements User, ActionListener {
 				homepagePanel.add(contractNotif);
 				signContract.setEnabled(true);
 			}
-
+			
+			if(viewContractAction.contractNotification(userId)) {
+				contractExpAlert = new JLabel("You have contracts expiring in a month");
+				contractExpAlert.setBounds(100, 50, 400, 25);
+				contractExpAlert.setForeground(new Color(200,0,200));
+				homepagePanel.add(contractExpAlert);
+			}
 			homeFrame.setVisible(true);
 
 	}
