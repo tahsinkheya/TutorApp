@@ -29,7 +29,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
     private ArrayList<String> bidIds = new ArrayList<String>();
     private ArrayList<OpenBidOffer> offerInfo = new ArrayList<OpenBidOffer>();
     private ArrayList<String> tutorids = new ArrayList<String>();
-    private JLabel warning,newWarning;
+    private JLabel warning,newWarning, contWarning;
     private JTextArea offerDetails;
     private JPanel panel;
     private String bidid;
@@ -147,15 +147,22 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
             OpenBidOffer dets=offerInfo.get(index);
             //create contract and set student signed to true since they selected the tutor
             String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
-            createContractAction c=new createContractAction(dets,"student",userId,bidid, contExpiryDate);
-            if (c.checkContract()==false){
-                newWarning.setText("you already have 5 one-to-one contracts");
-                newWarning.setForeground(Color.RED);
+            if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
+            	contWarning.setText(contExpiryDate);
+            	contWarning.setForeground(Color.RED);
             }
             else {
-                c.storeContract();
-                newWarning.setText("Your selection is noted.Contract creation in process, waiting for tutor to sign.");
+            	createContractAction c=new createContractAction(dets,"student",userId,bidid, contExpiryDate);
+                if (c.checkContract()==false){
+                    newWarning.setText("you already have 5 one-to-one contracts");
+                    newWarning.setForeground(Color.RED);
+                }
+                else {
+                    c.storeContract();
+                    newWarning.setText("Your selection is noted.Contract creation in process, waiting for tutor to sign.");
+                }
             }
+            
         }
         else if (e.getSource()==closeBtn){
             newFrame.setVisible(false);
@@ -247,6 +254,10 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
         contDurationInput.setBounds(120, 530, 70, 25);
         contDurationInput.setText("6");
         panel.add(contDurationInput);
+        
+        contWarning = new JLabel();
+        contWarning.setBounds(200, 530, 500, 25);
+        panel.add(contWarning);
 
         closeBid = new JButton("Select this tutor and close request");
         closeBid.setBounds(10, 580, 300, 25);

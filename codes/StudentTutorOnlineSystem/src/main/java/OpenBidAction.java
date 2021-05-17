@@ -23,7 +23,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
     private String userId;
 
     private JPanel panel;
-    private JLabel subName,subDesc,requiredComp,weekSess,Hlp,rate;
+    private JLabel subName,subDesc,requiredComp,weekSess,Hlp,rate, contWarning;
     private JButton viewOtherBids,makeBidOffer,buyOutBtn;
     private JFrame frame;
     private static JLabel competencyAlert;
@@ -112,7 +112,10 @@ public class OpenBidAction extends BidAction implements ActionListener {
         contDurationInput.setBounds(120, 350, 70, 25);
         contDurationInput.setText("6");
         panel.add(contDurationInput);
-
+        
+        contWarning = new JLabel();
+        contWarning.setBounds(200, 350, 500, 25);
+        panel.add(contWarning);
         		
         		
         buyOutBtn = new JButton("Buy Out Bid");
@@ -230,8 +233,18 @@ public class OpenBidAction extends BidAction implements ActionListener {
         offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
         //tutor is the first party to sign
         String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
-        createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid, contExpiryDate);
-        contract.storeContract();
+        if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
+        	contWarning.setText(contExpiryDate);
+        	contWarning.setForeground(Color.RED);
+        	competencyAlert.setVisible(false);
+        	
+        }
+        else {
+        	createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid, contExpiryDate);
+            contract.storeContract();
+            competencyAlert.setVisible(true);
+        }
+        
 
 
     }

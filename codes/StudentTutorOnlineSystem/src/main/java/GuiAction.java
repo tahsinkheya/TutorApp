@@ -73,6 +73,9 @@ public interface GuiAction {
         else {
         	System.out.println("Duration is not empty");
         	contractLength = Integer.parseInt(contDurationInput.toString());
+        	if(contractLength < 3) {
+        		return "Contract duration must be atleast 3 months";
+        	}
         	System.out.println("Duration set by user is: "+contractLength);
         }
         

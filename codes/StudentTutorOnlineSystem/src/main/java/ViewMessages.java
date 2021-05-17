@@ -19,7 +19,7 @@ public class ViewMessages implements ActionListener {
     private Vector newComboBoxItems = new Vector();
     private JComboBox moreOffers,allRates;
     private JTextArea offerDetails;
-    private JLabel warning,newWarning,offerWarning;
+    private JLabel warning,newWarning,offerWarning, contWarning;
     private ArrayList<String> senders = new ArrayList<String>();
     private JTextField field,weeklySeeion,hours,rate;
     private String studentName;
@@ -282,12 +282,19 @@ public class ViewMessages implements ActionListener {
         offer.setExtraInfo("no","");
         offer.setSubjectInfo(subId,subName,Integer.toString(tutorcompetencyLevel),tutorQ);
 
-
-
         //create contract with first party to sign as student
         String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
-        createContractAction contract=new createContractAction(offer,"student",userId,bidId, contExpiryDate);
-        contract.storeContract();
+        if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
+        	contWarning.setText(contExpiryDate);
+        	contWarning.setForeground(Color.RED);
+        	offerWarning.setVisible(false);
+        }
+        else {
+        	createContractAction contract=new createContractAction(offer,"student",userId,bidId, contExpiryDate);
+            contract.storeContract();
+            offerWarning.setVisible(true);
+        }
+        
     }
 
 
@@ -373,7 +380,9 @@ public class ViewMessages implements ActionListener {
         contDurationInput.setText("6");
         newPanel.add(contDurationInput);
         
-        
+        contWarning = new JLabel();
+        contWarning.setBounds(200, 320, 500, 25);
+        newPanel.add(contWarning);
         
         //add a close button
         confirm = new JButton("Confirm");
