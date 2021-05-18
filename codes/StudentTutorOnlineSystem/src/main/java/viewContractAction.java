@@ -104,7 +104,7 @@ public class viewContractAction implements GuiAction{
 					String tutorFullName = userFullNames.get(1);
 					//System.out.println(tutorFullName);
 					
-					ArrayList<String> details = getcontractDetails(node);
+					ArrayList<String> details = getcontractDetails(node, id);
 					
 					// skip if contract does not involve current user
 					if(!details.isEmpty()) {
@@ -147,7 +147,7 @@ public class viewContractAction implements GuiAction{
      * @param node
      * @return ArrayList containing student and tutor full names
      */
-    private ArrayList<String> getStudentAndTutorNames(ObjectNode node) {
+    static ArrayList<String> getStudentAndTutorNames(ObjectNode node) {
     	ArrayList<String> studentAndTutor = new ArrayList<String>();
     	boolean firstPartyType = node.get("firstParty").get("isStudent").asBoolean();
     	String studentFullName;
@@ -183,7 +183,7 @@ public class viewContractAction implements GuiAction{
     /*
      * Method to receive details about each contract
      */
-    private ArrayList<String> getcontractDetails(ObjectNode node) {
+    static ArrayList<String> getcontractDetails(ObjectNode node, String id) {
     	ArrayList<String> contractDetails = new ArrayList<String>();
     	String firstPartyId = GuiAction.removeQuotations(node.get("firstParty").get("id").toString());
 		String secondPartyId = GuiAction.removeQuotations(node.get("secondParty").get("id").toString());
@@ -223,7 +223,7 @@ public class viewContractAction implements GuiAction{
 			contractDetails.add(contractExpiryDate);
 		}
 		else {
-			System.out.println("Match not found");
+			System.out.println("");
 		}
 		
 		return contractDetails;
