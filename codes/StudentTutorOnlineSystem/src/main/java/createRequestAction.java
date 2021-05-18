@@ -81,8 +81,35 @@ public class createRequestAction implements GuiAction, ActionListener {
         compList.setSelectedIndex(0);
         compList.setBounds(10, 100, 60, 25);
         panel.add(compList);
+        //get lesson info
+        getLessonInfo();
+        // Creating request button
+
+        submitButton = new JButton("Make Request");
+        submitButton.setBounds(10, 480, 120, 25);
+        submitButton.addActionListener(this);
+        panel.add(submitButton);
+
+        bidType=new JLabel("specify the Bid Type");
+        bidType.setBounds(10,400,400,25);
+        panel.add(bidType);
+
+        String[] bidT = {"Open", "Close"};
+        bidTypes = new JComboBox(bidT);
+        bidTypes.setBounds(10, 430, 430, 25);
+        panel.add(bidTypes);
+        //initialise label for message later
+        message=new JLabel();
+        message.setBounds(10,510,400,25);
+        panel.add(message);
+
+        frame.setVisible(true);
 
 
+
+    }
+    //display text and text fields to get info for lesson for the request
+    private void getLessonInfo(){
         // Lesson
         JLabel lesson = new JLabel("Lesson subject: ");
         lesson.setBounds(10, 130, 200, 25);
@@ -121,10 +148,7 @@ public class createRequestAction implements GuiAction, ActionListener {
         sessionNum= new JTextField(20);
         sessionNum.setBounds(10,340,50,25);
         panel.add(sessionNum);
-
-
         // Payment Rate
-
         JLabel rate = new JLabel("Rate (RM): ");
         rate.setBounds(10, 370, 100, 25);
         panel.add(rate);
@@ -137,31 +161,6 @@ public class createRequestAction implements GuiAction, ActionListener {
         allRates = new JComboBox(rateTypes);
         allRates.setBounds(180, 370, 100, 25);
         panel.add(allRates);
-
-        // Creating request button
-
-        submitButton = new JButton("Make Request");
-        submitButton.setBounds(10, 480, 120, 25);
-        submitButton.addActionListener(this);
-        panel.add(submitButton);
-
-        bidType=new JLabel("specify the Bid Type");
-        bidType.setBounds(10,400,400,25);
-        panel.add(bidType);
-
-        String[] bidT = {"Open", "Close"};
-        bidTypes = new JComboBox(bidT);
-        bidTypes.setBounds(10, 430, 430, 25);
-        panel.add(bidTypes);
-        //initialise label for message later
-        message=new JLabel();
-        message.setBounds(10,510,400,25);
-        panel.add(message);
-
-        frame.setVisible(true);
-
-
-
     }
 
     @Override
@@ -192,7 +191,6 @@ public class createRequestAction implements GuiAction, ActionListener {
         String userSub = subjectText.getText();
         String userDesc = descText.getText();
         userSub= userSub.substring(0, 1).toUpperCase() + userSub.substring(1);
-        System.out.println(userSub);
         HttpResponse<String> subResponse = GuiAction.initiateWebApiGET("subject", myApiKey);
         try {
             ObjectNode[] jsonNodes = new ObjectMapper().readValue(subResponse.body(), ObjectNode[].class);
@@ -201,19 +199,15 @@ public class createRequestAction implements GuiAction, ActionListener {
             for (ObjectNode node: jsonNodes) {
                 String subFromDB = node.get("name").asText();
                 String descFromDB = node.get("description").asText();
-
                 if (subFromDB.equals(userSub) & descFromDB.equals(userDesc) ) {
                     subjectFound = true;
                     subjectID = node.get("id").asText();
                     return subjectID;
                 }
             }
-
             if (subjectFound==false) {
                 // if the subject is not found in database, then create new subject
-                System.out.println("Subject not found, so creating new subject: " + userSub);
                 subjectID = webApiPOST("subject","");
-                System.out.println(subjectID);
                 return subjectID;
             }
         }
@@ -230,14 +224,10 @@ public class createRequestAction implements GuiAction, ActionListener {
         // set the endpoint types to be false
         boolean isSubject = false;
         boolean isBid = false;
-
         // endpoint.contains is used since we can have subject or subject/subjectID
         if(endpoint.contains("subject")) {
             // create a new JSON object for subject
-            jsonString = "{" +
-                    "\"name\":\"" + subjectText.getText() + "\"," +
-                    "\"description\":\"" + descText.getText()+ "\"" +
-                    "}";
+            jsonString = "{" + "\"name\":\"" + subjectText.getText() + "\"," + "\"description\":\"" + descText.getText()+ "\"" + "}";
             isSubject = true;
         }
 
@@ -245,43 +235,16 @@ public class createRequestAction implements GuiAction, ActionListener {
         else if(endpoint.contains("bid")) {
             //bid type
             String bidT=bidTypes.getSelectedItem().toString();// bidtype
-            // find today's date and time
+            String bidEndTime=getBidEndTime(bidT);
             String bidStartTime = new Date().toInstant().toString();
 
-            Calendar date = Calendar.getInstance();
-            long timeInSecs = date.getTimeInMillis();
-            String bidEndTime;
-            if (bidT.contains("Open")){
-                bidEndTime = new Date(timeInSecs + (30*60*1000)).toInstant().toString();}
-            else{
-                Integer minsInSevenDays=7*24*60;
-                bidEndTime = new Date(timeInSecs + (minsInSevenDays*60*1000)).toInstant().toString();
-            }
-            System.out.println(bidEndTime);
-
-            JSONObject additionalInfo=new JSONObject();
-            // create the additional info
-            additionalInfo.put("requiredCompetency", compList.getSelectedItem().toString());
-            additionalInfo.put("weeklySessions", sessionNum.getText());
-            String sessionTime = timeInput.getText();
-            additionalInfo.put("hoursPerLesson", sessionTime);
-            String rate = "RM"+rateIn.getText()+" "+ allRates.getSelectedItem().toString();
-            additionalInfo.put("rate", rate);
-
-            // the web api does not accept "dateClosedDown" value when making POST
-            additionalInfo.put("requestClosesAt", bidEndTime);
+            //create additional info and add stuff to it
+            JSONObject additionalInfo=editAdditionalInfo(bidEndTime);
+            //assign global variable for later use
             closeTime = bidEndTime;
-
-            // create the bid
-            JSONObject bidInfo=new JSONObject();
-            bidInfo.put("type", bidT.toLowerCase());
-            bidInfo.put("initiatorId", userId);
-            bidInfo.put("dateCreated", bidStartTime);
-            bidInfo.put("subjectId", subID);
-            bidInfo.put("additionalInfo", additionalInfo);
+            JSONObject bidInfo=storeBid(additionalInfo,bidT,bidStartTime,subID);
             jsonString = bidInfo.toString(); // convert to string
             isBid = true;
-
         }
 
 
@@ -298,23 +261,20 @@ public class createRequestAction implements GuiAction, ActionListener {
         try {
             HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if(isSubject) {
-                System.out.println("Created new subject in database");
-            }
-            else if(isBid) {
-                System.out.println("Created new bid in database");
+            if(isBid) {
                 bidCreated = true;
             }
 
             // get the id of the newly created object
             ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
             refId = jsonNode.get("id").asText();
+            System.out.println(refId);
             return refId;
+
 
         }
         catch(Exception e){
             System.out.println(e.getCause());
-            System.out.println(e.getMessage());
 
         }
         return refId;
@@ -322,11 +282,10 @@ public class createRequestAction implements GuiAction, ActionListener {
 
     /*Method to close the bid after 30 minutes or 10080 mins it was created*/
     private void closeBid(String bidId, String closeTime) {
-        // bid lasts for 10 seconds for now
+        // bid lasts for 30 mins for now
         Integer seconds;
         if (bidTypes.getSelectedItem().toString().contains("Open")){
             seconds=30*60;
-//            seconds=10;
         }
         else{
             seconds=7*24*60*60;
@@ -334,7 +293,48 @@ public class createRequestAction implements GuiAction, ActionListener {
         new RequestCloser(seconds, bidId, myApiKey, closeTime);
     }
 
+    //method to get bid endtime depending on the bid type
+    private String getBidEndTime(String bidT){
 
+        Calendar date = Calendar.getInstance();
+        long timeInSecs = date.getTimeInMillis();
+        String bidEndTime;
+        if (bidT.contains("Open")){
+            bidEndTime = new Date(timeInSecs + (30*60*1000)).toInstant().toString();}
+        else{
+            Integer minsInSevenDays=7*24*60;
+            bidEndTime = new Date(timeInSecs + (minsInSevenDays*60*1000)).toInstant().toString();
+        }
+        return bidEndTime;
+    }
+
+    //return a json additional object with info abt the bid request
+    private JSONObject editAdditionalInfo(String bidEndTime){
+        JSONObject additionalInfo=new JSONObject();
+        // create the additional info
+        additionalInfo.put("requiredCompetency", compList.getSelectedItem().toString());
+        additionalInfo.put("weeklySessions", sessionNum.getText());
+        String sessionTime = timeInput.getText();
+        additionalInfo.put("hoursPerLesson", sessionTime);
+        String rate = "RM"+rateIn.getText()+" "+ allRates.getSelectedItem().toString();
+        additionalInfo.put("rate", rate);
+
+        // the web api does not accept "dateClosedDown" value when making POST
+        additionalInfo.put("requestClosesAt", bidEndTime);
+        return additionalInfo;
+
+    }
+    //returns a json object containing bid info
+    private JSONObject storeBid(JSONObject additionalInfo,String bidT,String bidStartTime,String subID){
+        // create the bid
+        JSONObject bidInfo=new JSONObject();
+        bidInfo.put("type", bidT.toLowerCase());
+        bidInfo.put("initiatorId", userId);
+        bidInfo.put("dateCreated", bidStartTime);
+        bidInfo.put("subjectId", subID);
+        bidInfo.put("additionalInfo", additionalInfo);
+        return bidInfo;
+    }
 
 
 }
