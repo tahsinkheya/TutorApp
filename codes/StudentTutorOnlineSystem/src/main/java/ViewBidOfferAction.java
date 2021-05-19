@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,75 +94,85 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
 
 
     }
+    // a method that is called when viewdetails button is clicked to show details
+    private void showAllBidViewDetails(){
+        if (bidType.size()==0){
+            warning.setText("there are no offers for this bid");
+            warning.setForeground(Color.RED);
+        }
+        else{
+            int index=allOffers.getSelectedIndex();
+            String bidStatus=bidType.get(index);
+            String bidid=bidIds.get(index);
+            //show bids made
+            if (bidStatus.contains("open")){
+                //show open bid offers
+                showOpenBidOffers(bidid);
+            }
+            else{
+                //shiow close bid offer
+                ViewMessages v=new ViewMessages(bidid,userId);
+                v.showSenders();
+
+            }
+        }
+    }
+    //a method to display details of an open bid offer made by a tutor
+    private void showOpenBidOfferDetails(){
+        if (offerInfo.size()==0){
+            newWarning.setText("no offers have been made");
+        }
+        else {
+            int index=moreOffers.getSelectedIndex();
+
+            OpenBidOffer dets=offerInfo.get(index);
+
+            String output="Duration Offered:"+dets.getHoursPerLesson()+" hrs per lesson"+"\n"+
+                    "Rate:"+dets.getRate()+"\n"+"Number of weekly session:"+dets.getWeeklySession()+"\n"+
+                    "a fress lesson was offered:"+dets.getFressLesson()+"\n"+
+                    "extra information from the tutor:"+dets.getExtraInfo()+"\n"+
+                    "Tutor competency level for this subject:"+dets.getCompetency();
+            closeBid.setEnabled(true);
+            offerDetails.setText(output);
+            offerDetails.setForeground(Color.blue);
+
+        }
+    }
+    //a method to choose tutor and close a bid and create a contract
+    private void closeOpenBid(){
+        int index=moreOffers.getSelectedIndex();
+        OpenBidOffer dets=offerInfo.get(index);
+        //create contract and set student signed to true since they selected the tutor
+        String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
+        if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
+            contWarning.setText(contExpiryDate);
+            contWarning.setForeground(Color.RED);
+        }
+        else {
+            createContractAction c=new createContractAction(dets,"student",userId,bidid, contExpiryDate);
+            if (c.checkContract()==false){
+                newWarning.setText("you already have 5 one-to-one contracts");
+                newWarning.setForeground(Color.RED);
+            }
+            else {
+                c.storeContract();
+                newWarning.setText("Your selection is noted.Contract creation in process, waiting for tutor to sign.");
+            }
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==viewDetails){
-            if (bidType.size()==0){
-                warning.setText("there are no offers for this bid");
-                warning.setForeground(Color.RED);
-            }
-            else{
-                int index=allOffers.getSelectedIndex();
-                String bidStatus=bidType.get(index);
-                String bidid=bidIds.get(index);
-                //show bids made
-                if (bidStatus.contains("open")){
-                    //show open bid offers
-                    showOpenBidOffers(bidid);
-                }
-                else{
-                    //shiow close bid offer
-                    ViewMessages v=new ViewMessages(bidid,userId);
-                    v.showSenders();
-
-                }
-            }
+            showAllBidViewDetails();
         }
         //view the student the details of the offer
         else if (e.getSource()==offerView){
-            if (offerInfo.size()==0){
-                newWarning.setText("no offers have been made");
-            }
-            else {
-                int index=moreOffers.getSelectedIndex();
-
-                OpenBidOffer dets=offerInfo.get(index);
-
-                String output="Duration Offered:"+dets.getHoursPerLesson()+" hrs per lesson"+"\n"+
-                        "Rate:"+dets.getRate()+"\n"+"Number of weekly session:"+dets.getWeeklySession()+"\n"+
-                        "a fress lesson was offered:"+dets.getFressLesson()+"\n"+
-                        "extra information from the tutor:"+dets.getExtraInfo()+"\n"+
-                        "Tutor competency level for this subject:"+dets.getCompetency();
-                closeBid.setEnabled(true);
-                offerDetails.setText(output);
-                offerDetails.setForeground(Color.blue);
-
-
-
-            }
+            showOpenBidOfferDetails();
         }
         //student choosing a tutor
         else if (e.getSource()==closeBid){
-            int index=moreOffers.getSelectedIndex();
-            OpenBidOffer dets=offerInfo.get(index);
-            //create contract and set student signed to true since they selected the tutor
-            String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
-            if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
-            	contWarning.setText(contExpiryDate);
-            	contWarning.setForeground(Color.RED);
-            }
-            else {
-            	createContractAction c=new createContractAction(dets,"student",userId,bidid, contExpiryDate);
-                if (c.checkContract()==false){
-                    newWarning.setText("you already have 5 one-to-one contracts");
-                    newWarning.setForeground(Color.RED);
-                }
-                else {
-                    c.storeContract();
-                    newWarning.setText("Your selection is noted.Contract creation in process, waiting for tutor to sign.");
-                }
-            }
+            closeOpenBid();
             
         }
         else if (e.getSource()==closeBtn){
@@ -183,8 +194,6 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
         showAllOpenRequests(bidId);
         //close previous frame
         frame.setVisible(false);
-
-
         //show new frame
         newFrame = new JFrame("View Offer Details");
         // Setting the width and height of frame
@@ -270,6 +279,17 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
 
 
     }
+    //an extra check to make sure that the bid is actually active
+    private boolean bidExpired(String closeTimeDb) throws ParseException {
+        //get todays date
+        String today = new Date().toInstant().toString();
+        SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String bidCloseTime = GuiAction.removeQuotations(closeTimeDb);
+        Date todayDate = sourceFormat.parse(today);
+        Date endDate = sourceFormat.parse(bidCloseTime);
+        return todayDate.after(endDate) == false;
+    }
+
     /* Method to show the current bids opened by the student  */
     private void showAllRequests(){
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid?fields=", myApiKey);
@@ -279,36 +299,23 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                 // process the initiator id to remove extra quotations
                 String initId = node.get("initiator").get("id").toString();
                 String initiatorId = GuiAction.removeQuotations(initId);
-
-                //an extra check to make sure that the bid is actually active
-                //get todays date
-                String today = new Date().toInstant().toString();
-                SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 //get closing date from additionalinfo and remove "" only if its not null
                 if (node.get("additionalInfo").toString().equals("{}")==false) {
                     String closeTimeDb = node.get("additionalInfo").get("requestClosesAt").toString();
-                    String bidCloseTime = GuiAction.removeQuotations(closeTimeDb);
-                    Date todayDate = sourceFormat.parse(today);
-                    Date endDate = sourceFormat.parse(bidCloseTime);
+                    boolean check=bidExpired(closeTimeDb);
                     //show offer if not expired
-                    if (initiatorId.contains(userId) && node.get("dateClosedDown").toString().equals("null") && todayDate.after(endDate) == false) {
+                    if (initiatorId.contains(userId) && node.get("dateClosedDown").toString().equals("null") && check) {
                         String subjectName = node.get("subject").get("name").toString();
                         String desc = node.get("subject").get("description").toString();
                         String bidT = node.get("type").toString();
                         String bidid = node.get("id").toString();
-                        String output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"bid type "+bidT+" closing on:" +
-                                endDate;
-
+                        String output = "Subject: "+subjectName  +"    "+ "Topic: "+ desc+"    "+"bid type "+bidT+" closing on:" + GuiAction.removeQuotations(closeTimeDb);
                         comboBoxItems.add(output);
                         bidType.add(GuiAction.removeQuotations(bidT));
-                        bidIds.add(GuiAction.removeQuotations(bidid));
-                    }
-                }
-            }
+                        bidIds.add(GuiAction.removeQuotations(bidid)); } } }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 /*
@@ -318,10 +325,8 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
         // get all  messages of the bid
         String endpoint="bid/"+bidId+"?fields=messages";
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
-        System.out.println(userResponse.statusCode());
         try {
             ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
-
             for (JsonNode msgNode : userNode.get("messages")) {
                 if (userNode.get("additionalInfo").toString().equals("{}")==false){
                         //get all details
@@ -333,29 +338,8 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                             occurrences = (int) tutorids.stream().filter(tutor -> msgSenderId.equals(tutor)).count();
                         }
                         tutorids.add(msgSenderId);
-                        //get ll related info
-
-                        String duration=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("duration").toString());
-
-                        String rate=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("rate").toString());
-
-                        String numberOfSession=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("numberOfSession").toString());
-                        String freelesson=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("freeLesson").toString());
-
-                        String competency=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("tutorComp").toString());
-                        String extra=(msgNode.get("additionalInfo").get("extraInfo").toString());
-                        String subjectId=GuiAction.removeQuotations(userNode.get("subject").get("id").toString());
-
-                        String qualification=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("tutorQualification").toString());
-                        //getting student and tutor full names
-                        String student=GuiAction.removeQuotations(userNode.get("initiator").get("givenName").toString())+" "+GuiAction.removeQuotations(userNode.get("initiator").get("familyName").toString());
-
-
-                        String tutor=GuiAction.removeQuotations(msgNode.get("poster").get("givenName").toString())+" "+GuiAction.removeQuotations(msgNode.get("poster").get("familyName").toString());
-
-
-                        String subjectName=GuiAction.removeQuotations(userNode.get("subject").get("description").toString());
-
+                        //get ll related info// alldetails={duration,rate,numberOfSession,freelesson,competency,extra,subjectId,qualification,student,tutor,subjectName};
+                        String[] alldetails=getLessonDetails(msgNode,userNode);
 
                         String option="";
                         if (occurrences!=0){
@@ -364,25 +348,42 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                         String studId=GuiAction.removeQuotations(userNode.get("initiator").get("id").toString());
                         newComboBoxItems.add(option+"from: "+GuiAction.removeQuotations((msgSender)));
                         //create an open bid offer
-                        OpenBidOffer newOffer=new OpenBidOffer(msgSenderId,studId,student,tutor);
+                        OpenBidOffer newOffer=new OpenBidOffer(msgSenderId,studId,alldetails[8],alldetails[9]);
                         //set all info
-                        newOffer.setClassInfo(numberOfSession,duration,rate);
-                        newOffer.setExtraInfo(freelesson,extra);
-                        newOffer.setSubjectInfo(subjectId,subjectName,competency,qualification);
-
+                        newOffer.setClassInfo(alldetails[2],alldetails[0],alldetails[1]);
+                        newOffer.setExtraInfo(alldetails[3],alldetails[5]);
+                        newOffer.setSubjectInfo(alldetails[6],alldetails[10],alldetails[4],alldetails[7]);
                         //add the new offer in the arrayList
-                        offerInfo.add(newOffer);
-
-//
-                  }
+                        offerInfo.add(newOffer); }
             }
-
         }
         catch(Exception e) {
-            System.out.println(e.getCause());
-            System.out.println(e.getStackTrace()[0].getLineNumber());
+            System.out.println(e.getCause());}
+    }
+    private String [] getLessonDetails(JsonNode msgNode,JsonNode userNode){
 
-        }
+        String duration=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("duration").toString());
+
+        String rate=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("rate").toString());
+
+        String numberOfSession=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("numberOfSession").toString());
+        String freelesson=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("freeLesson").toString());
+
+        String competency=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("tutorComp").toString());
+        String extra=(msgNode.get("additionalInfo").get("extraInfo").toString());
+        String subjectId=GuiAction.removeQuotations(userNode.get("subject").get("id").toString());
+
+        String qualification=GuiAction.removeQuotations(msgNode.get("additionalInfo").get("tutorQualification").toString());
+        //getting student and tutor full names
+        String student=GuiAction.removeQuotations(userNode.get("initiator").get("givenName").toString())+" "+GuiAction.removeQuotations(userNode.get("initiator").get("familyName").toString());
+
+
+        String tutor=GuiAction.removeQuotations(msgNode.get("poster").get("givenName").toString())+" "+GuiAction.removeQuotations(msgNode.get("poster").get("familyName").toString());
+
+
+        String subjectName=GuiAction.removeQuotations(userNode.get("subject").get("description").toString());
+
+        return new String[]{duration,rate,numberOfSession,freelesson,competency,extra,subjectId,qualification,student,tutor,subjectName};
     }
 
 }

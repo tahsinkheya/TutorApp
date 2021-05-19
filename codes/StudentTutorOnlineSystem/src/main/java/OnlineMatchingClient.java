@@ -16,10 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class OnlineMatchingClient implements ActionListener {
     private UserFacade facadeUser;
-    /*
-    NOTE: In order to access the web service, you will need to include your API key in the Authorization header of all requests you make.
-    Your personal API key can be obtained here: https://fit3077.com
-   */
+
     protected static final String myApiKey = "";
 
     // Provide the root URL for the web service. All web service request URLs start with this root URL.
