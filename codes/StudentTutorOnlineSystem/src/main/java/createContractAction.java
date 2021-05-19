@@ -27,9 +27,8 @@ public class createContractAction implements GuiAction, ActionListener {
     private String studentId,firstPartySigned,bidId,userType;
     private OpenBidOffer acceptedOffer;
     private String contractExpiryDate;
-
-
     private JButton button;
+
     /* 1st constructor for students and tutors to sign contracts when contract has already been created by buy
     * out process or select tutor process and bid closed process*/
     public createContractAction(String contractid,String usertype){

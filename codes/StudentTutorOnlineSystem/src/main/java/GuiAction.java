@@ -9,8 +9,8 @@ import java.util.Date;
 * interface for GUIcontext
 * */
 public interface GuiAction {
-    static String myApiKey=OnlineMatchingClient.myApiKey;
-    public void show();
+    String myApiKey=OnlineMatchingClient.myApiKey;
+    void show();
 
     /* Method to make a web request to GET some data. Concrete implementation since
      * the subclasses will need this method */
@@ -51,7 +51,6 @@ public interface GuiAction {
         }
         catch (Exception e){
             System.out.println("Error!!!");
-            System.out.println(e.getCause());
         }
         return response;
     }
@@ -66,12 +65,9 @@ public interface GuiAction {
     static String getContractExpiryDate(String contDurationInput) {
     	int contractLength;
         if(contDurationInput.equals("")) {
-        	System.out.println("Duration is empty");
         	contractLength = 6;
-        	System.out.println("Default duration is: "+contractLength);
         }
         else {
-        	System.out.println("Duration is not empty");
         	contractLength = Integer.parseInt(contDurationInput.toString());
         	if(contractLength < 3) {
         		return "Contract duration must be atleast 3 months";
@@ -80,15 +76,10 @@ public interface GuiAction {
         }
         
     	Calendar date = Calendar.getInstance();
-        long timeInSecs = date.getTimeInMillis();
-        String contExpiryDate = new Date(timeInSecs).toInstant().toString();
-        
         // add 6 months
         date.add(Calendar.MONTH, contractLength);
-        timeInSecs = date.getTimeInMillis();
-        contExpiryDate = new Date(timeInSecs).toInstant().toString();
-        
-        System.out.println("Contract will expire on: "+contExpiryDate);
+        long timeInSecs = date.getTimeInMillis();
+        String contExpiryDate = new Date(timeInSecs).toInstant().toString();
     	return contExpiryDate;
     }
 

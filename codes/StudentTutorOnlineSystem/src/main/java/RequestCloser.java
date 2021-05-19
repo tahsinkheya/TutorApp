@@ -30,15 +30,13 @@ public class RequestCloser {
             String endpoint = "bid/"+id+"/close-down";
             
             JSONObject bidInfo=new JSONObject();
-//            String close = GuiAction.removeQuotations(bidEndTime);
-//            System.out.println(close);
 			bidInfo.put("dateClosedDown", bidEndTime);
     	
     		String jsonString = bidInfo.toString();
             HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, key, jsonString);
 
             timer.cancel(); //Terminate the timer thread
-            //patch
+
         }
     }
 	

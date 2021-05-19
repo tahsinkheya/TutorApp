@@ -25,33 +25,43 @@ public class CloseBidAction extends BidAction implements ActionListener {
         userId=uId;
         userFullName=fullName;
         studentId=studentid;
+        bidInfo=getBidInfo(bidId);
         showUI();
     }
 //method to show ui
     private void showUI(){
-        bidInfo=getBidInfo(bidId);
-
         // Creating instance of JFrame
         frame = new JFrame("Close Bid Request");
         // Setting the width and height of frame
         frame.setSize(900, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
         panel = new JPanel();
         panel.setBackground(new Color(172, 209, 233));
-
         // adding panel to frame
         frame.add(panel);
         panel.setLayout(null);
-
         // show title
         JLabel actionLabel = new JLabel("Bid Details");
         actionLabel.setBounds(350,10,300,25);
         actionLabel.setFont(new Font("Serif", Font.BOLD, 20));
         panel.add(actionLabel);
-
         //show details
+        showSubDetails();
+        showLessonDetails();
+        showMessageDetails();
+        //add a close button
+        closeBtn = new JButton("Close");
+        closeBtn.setBounds(800, 10, 100, 25);
+        closeBtn.addActionListener(this);
+        panel.add(closeBtn);
+        //add a label to show warning later
+
+
+        frame.setVisible(true);
+
+    }
+    //method to display subject details
+    private void showSubDetails(){
         JLabel subName=new JLabel("subject Name: "+bidInfo.get(0) );
         subName.setBounds(10,50,340,25);
         panel.add(subName);
@@ -59,7 +69,29 @@ public class CloseBidAction extends BidAction implements ActionListener {
         JLabel subDesc=new JLabel("subject Description: "+bidInfo.get(1) );
         subDesc.setBounds(10,80,340,25);
         panel.add(subDesc);
+        //add a warning for use later
+        warning=new JLabel();
+        warning.setBounds(10,400,340,25);
+        panel.add(warning);
+    }
+    //method to display messaging instruction and details
+    private void showMessageDetails(){
+        JLabel instruction=new JLabel("If you want to bid on this request.Please write a message to the requester");
+        instruction.setBounds(10,230,500,25);
+        instruction.setForeground(Color.RED);
+        panel.add(instruction);
 
+        message = new JTextArea();
+        message.setBounds(10,260,340,100);
+        panel.add(message);
+
+        sendMessage = new JButton("Send Message");
+        sendMessage.setBounds(10, 370, 300, 25);
+        sendMessage.addActionListener(this);
+        panel.add(sendMessage);
+    }
+    //method to display lesson details
+    private void showLessonDetails(){
         JLabel requiredComp=new JLabel("Required Competency: "+bidInfo.get(2) );
         requiredComp.setBounds(10,110,340,25);
         panel.add(requiredComp);
@@ -75,34 +107,6 @@ public class CloseBidAction extends BidAction implements ActionListener {
         JLabel rate=new JLabel("Rate: "+bidInfo.get(5) );
         rate.setBounds(10,200,340,25);
         panel.add(rate);
-
-        JLabel instruction=new JLabel("If you want to bid on this request.Please write a message to the requester");
-        instruction.setBounds(10,230,500,25);
-        instruction.setForeground(Color.RED);
-        panel.add(instruction);
-
-        message = new JTextArea();
-        message.setBounds(10,260,340,100);
-        panel.add(message);
-
-        sendMessage = new JButton("Send Message");
-        sendMessage.setBounds(10, 370, 300, 25);
-        sendMessage.addActionListener(this);
-        panel.add(sendMessage);
-
-        //add a close button
-        closeBtn = new JButton("Close");
-        closeBtn.setBounds(800, 10, 100, 25);
-        closeBtn.addActionListener(this);
-        panel.add(closeBtn);
-
-        //add a label to show warning later
-        warning=new JLabel();
-        warning.setBounds(10,400,340,25);
-        panel.add(warning);
-
-        frame.setVisible(true);
-
     }
     //method used by the buttons
     @Override
@@ -123,9 +127,9 @@ public class CloseBidAction extends BidAction implements ActionListener {
             }
         }
     }
-//methos to store message by tutor to student
+    //methos to store message by tutor to student
     private void storeMessage(String msg){
-        String jsonString = null;
+        String jsonString;
         // create the message object
         JSONObject msgInfo=new JSONObject();
         msgInfo.put("bidId", bidId);
@@ -138,7 +142,7 @@ public class CloseBidAction extends BidAction implements ActionListener {
 
         // convert message to JSON string
         jsonString = msgInfo.toString();
-        HttpResponse<String> userResponse=GuiAction.updateWebApi("message",myApiKey,jsonString);
+        GuiAction.updateWebApi("message",myApiKey,jsonString);
 
         warning.setText("your response has been saved successfully");
     }

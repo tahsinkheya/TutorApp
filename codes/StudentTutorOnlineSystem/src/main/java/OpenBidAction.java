@@ -86,7 +86,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         rate.setBounds(10,200,340,25);
         panel.add(rate);
 
-        viewOtherBids = new JButton("View other offers to this request");
+        viewOtherBids = new JButton("Subscribe to this Bid");
         viewOtherBids.setBounds(10, 230, 300, 25);
         viewOtherBids.addActionListener(this);
         panel.add(viewOtherBids);
@@ -153,7 +153,6 @@ public class OpenBidAction extends BidAction implements ActionListener {
         }
         catch (Exception e){
             System.out.println("Error!!!");
-            System.out.println(e.getCause());
         }
 
         // competency level is zero
@@ -167,10 +166,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
      * */
     private boolean isCompetent(int tutorCompetency) {
         boolean retVal=false;
-        System.out.println("Inside the Competency check function");
         int competencyRequired=Integer.parseInt(bidInfo.get(2));
-        System.out.println(competencyRequired);
-        System.out.println(tutorCompetency);
         int twoLvlHigher=competencyRequired+2;
         if (tutorCompetency>=twoLvlHigher){
             return true;
@@ -186,67 +182,73 @@ public class OpenBidAction extends BidAction implements ActionListener {
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
             if (isCompetent(level)==false){
-                competencyAlert.setText("You do not have the required competency to bid on this request");
-                competencyAlert.setForeground(Color.RED);
+                showMessage("You do not have the required competency to bid on this request","red");
             }
 
             else{
                 //can bid
-                //String tutorQualification=TutorQualification();
                 frame.setVisible(false);
-                MakeOpenBidOffer newBid=new MakeOpenBidOffer(bidid,userId,level,tutorQualification);
+                new MakeOpenBidOffer(bidid,userId,level,tutorQualification);
             }
 
         }
         else if (e.getSource()==viewOtherBids){
             frame.setVisible(false);
-            ViewOtherTutorBids offer=new ViewOtherTutorBids(bidid,userId);
+            new ViewOtherTutorBids(bidid,userId);
         }
         else if (e.getSource()==buyOutBtn){
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
             if (isCompetent(level)==false){
-                competencyAlert.setText("You do not have the required competency to buy out this bid");
-                competencyAlert.setForeground(Color.RED);
+                showMessage("You do not have the required competency to buy out this bid","red");
             }
             else{
                 //can create contract and wait for student to sign
                 createContract(userId,level);
-                competencyAlert.setText("contract creation in process. waiting for student");
-                competencyAlert.setForeground(Color.blue);
+                showMessage("contract creation in process. waiting for student","blue");
             }
 
+        }
+    }
+//method to show warning to user
+    private void showMessage(String msg,String colour){
+        competencyAlert.setText(msg);
+        if (colour.contains("blue")){
+            competencyAlert.setForeground(Color.blue);}
+        else{
+            competencyAlert.setForeground(Color.red);
         }
     }
     //method used by tutor to create contract when buying out a bid
     private void createContract(String userId,int tuteCompetency){
         //lets create a OpenBidOffer and pass it to the createcontractaction class
         String studentId=bidInfo.get(6);
-        String tutorQualification=TutorQualification(userId);
-        String tutorCompetency=Integer.toString(tuteCompetency);
-
-
-        //set all info
-        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(8),userFullName);
-        offer.setClassInfo(bidInfo.get(3),bidInfo.get(4),bidInfo.get(5));
-        offer.setExtraInfo("no","");
-        offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
+        OpenBidOffer offer=creatOffer(userId,tuteCompetency);
         //tutor is the first party to sign
         String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
         if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
         	contWarning.setText(contExpiryDate);
         	contWarning.setForeground(Color.RED);
         	competencyAlert.setVisible(false);
-        	
         }
         else {
         	createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid, contExpiryDate);
             contract.storeContract();
             competencyAlert.setVisible(true);
         }
-        
 
-
+    }
+    //a method to create an open bid offer instance for use later
+    private OpenBidOffer creatOffer(String userId,Integer tuteCompetency){
+        String studentId=bidInfo.get(6);
+        String tutorQualification=TutorQualification(userId);
+        String tutorCompetency=Integer.toString(tuteCompetency);
+        //set all info
+        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(8),userFullName);
+        offer.setClassInfo(bidInfo.get(3),bidInfo.get(4),bidInfo.get(5));
+        offer.setExtraInfo("no","");
+        offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
+        return offer;
     }
 
 
