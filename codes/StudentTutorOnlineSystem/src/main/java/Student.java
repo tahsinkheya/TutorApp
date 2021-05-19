@@ -33,7 +33,7 @@ public class Student implements User, ActionListener {
 
 
 	//ui components
-	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract,viewDetails;
+	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract,viewDetails, viewLatestConts;
 	private JPanel homepagePanel,contractPanel;
 	private  JLabel welcome,contractNotif, contractExpAlert;
 	private Vector comboBoxItems=new Vector();
@@ -99,7 +99,7 @@ public class Student implements User, ActionListener {
 
 			JFrame homeFrame = new JFrame();
 			// Setting the width and height of frame
-			homeFrame.setSize(900, 500);
+			homeFrame.setSize(900, 600);
 			homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 			homepagePanel= new JPanel();
@@ -133,6 +133,13 @@ public class Student implements User, ActionListener {
 			signContract.addActionListener(this);
 			signContract.setEnabled(false);
 			homepagePanel.add(signContract);
+			
+			
+			viewLatestConts = new JButton("View latest contracts with a tutor");
+			viewLatestConts.setBounds(100, 500, 600, 25);
+			viewLatestConts.addActionListener(this);
+			homepagePanel.add(viewLatestConts);
+			
 
 			//signContract button is only enabled when thers a pending contract
 			if (contractIds.size()>0){
@@ -183,6 +190,11 @@ public class Student implements User, ActionListener {
 			context=new GUIcontext(new createContractAction(contractIds.get(allContracts.getSelectedIndex()),"student"));
 			context.showUI();
 
+		}
+		else if (e.getSource()==viewLatestConts) {
+			System.out.println("View Latest Contracts");
+			context = new GUIcontext(new ViewLatestFiveContracts(userId));
+			context.showUI();
 		}
 
 	}
