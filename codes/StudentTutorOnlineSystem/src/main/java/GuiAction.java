@@ -82,5 +82,23 @@ public interface GuiAction {
         String contExpiryDate = new Date(timeInSecs).toInstant().toString();
     	return contExpiryDate;
     }
+    //method to use a web request to patch data. subclasses use this method
+    static HttpResponse<String> patchWebApi(String endpoint,String jsonString){
+        String Url = "https://fit3077.com/api/v2/"+endpoint;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest
+                .newBuilder(URI.create(Url))
+                .setHeader("Authorization", myApiKey)
+                .header("Content-Type","application/json")
+                .method("PATCH",HttpRequest.BodyPublishers.ofString(jsonString))
+                .build();
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        }
+        catch (Exception e){}
+        return response;
+    }
 
 }

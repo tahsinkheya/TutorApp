@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -19,67 +20,20 @@ public class Tutor implements  User, ActionListener {
 
     private JPanel homepage;
     private JLabel welcome;
-    private JButton viewContract,viewRequest,viewMessage,signContract,viewDetails,closeBtn; 	//Btn
+    private JButton viewContract,viewRequest,viewMessage,signContract; 	//Btn
     private Vector comboBoxItems=new Vector();
     private ArrayList<String> contractIds= new ArrayList<>();
     private JLabel contractNotif, contractExpAlert;
-    private  JComboBox allContracts;
-    private JFrame frame;
 
 
 
     //a method to display all unsigned contract of a user
     @Override
     public void signContract() {
-        // Creating instance of JFrame
-       frame = new JFrame();
-        // Setting the width and height of frame
-        frame.setSize(900, 500);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-
-
-        JPanel contractPanel = new JPanel();
-        // adding panel to frame
-        frame.add(contractPanel);
-        contractPanel.setLayout(null);
-        contractPanel.setBackground(new Color(172, 209, 233));
-
-
-        //add a close button
-        closeBtn = new JButton("Close");
-        closeBtn.setBounds(800, 10, 100, 25);
-        closeBtn.addActionListener(this);
-        contractPanel.add(closeBtn);
-
-        JLabel relListTitle = new JLabel("All Contracts Pending Confimation");
-        relListTitle.setBounds(10,50,450,25);
-        contractPanel.add(relListTitle);
-
-
-        JLabel instruction = new JLabel("Select a contract and then click on view details");
-        instruction.setBounds(10,80,400,25);
-        instruction.setForeground(Color.red);
-        contractPanel.add(instruction);
-
-        final DefaultComboBoxModel model = new DefaultComboBoxModel(comboBoxItems);
-        allContracts = new JComboBox(model);
-        allContracts.setBounds(10, 120, 700, 25);
-        contractPanel.add(allContracts);
-
-
-
-        viewDetails = new JButton("View details");
-        viewDetails.setBounds(10, 180, 180, 25);
-        viewDetails.addActionListener(this);
-        contractPanel.add(viewDetails);
-
-        frame.setVisible(true);
-
+        context=new GUIcontext(new ViewContractsToSignAction("tutor",contractIds,comboBoxItems));
+        context.showUI();
 
     }
-
     @Override
     public void create(String uName, String gName,String fName,String uId) {
         this.userName=uName;
@@ -168,16 +122,6 @@ public class Tutor implements  User, ActionListener {
         else if(e.getSource()==signContract){
             signContract();
         }
-        //close signContract window
-        else if(e.getSource()==closeBtn){
-            frame.setVisible(false);
-        }
-        //view details of the contract selected
-        else if (e.getSource()==viewDetails){
-            context=new GUIcontext(new createContractAction(contractIds.get(allContracts.getSelectedIndex()),"tutor"));
-            context.showUI();
-
-        }
 
     }
     //a method that checks if there are any unsigned contract for the user
@@ -193,41 +137,37 @@ public class Tutor implements  User, ActionListener {
                 if(firstId.contains(userId) || secondId.contains(userId)){
                     //check if there are any unsigned contract created by tutor when open bid was done
                     if(node.get("dateSigned").toString().equals("null")){
-                        String contract=node.get("subject").get("name").toString()+" , "+node.get("subject").get("description").toString()+","
-                                + " contract between" +node.get("firstParty").get("givenName").toString()+" and "+node.get("secondParty").get("givenName").toString();
-                        //dateSigned can be null is none of the parties signed it or if one party signed it
-                        if(node.get("additionalInfo").toString().equals("{}")==false){
-                            String userType=node.get("additionalInfo").get("firstPartySigned").toString();
-                            if(userType.contains("tutor")==false)//means tutor hasnt already agrred
-                            {
-                                //store contractid and details
-                                String cId=node.get("id").toString();
-                                int lenCid=cId.length();
-                                contractIds.add(cId.substring(1, lenCid-1));
-                                comboBoxItems.add(contract);
-                            }
-                        }
-                        //now add contracts which none of the parties signed
-                        else{
-                            //store contractid and details
-                            String cId=node.get("id").toString();
-                            int lenCid=cId.length();
-                            contractIds.add(cId.substring(1, lenCid-1));
-                            comboBoxItems.add(contract);
-                        }
-
-
+                        getAllContractDets(node);
                     }
 
                 }
 
             }
         }
-        catch(Exception e) {
-            System.out.println("Error");
-            System.out.println(e.getMessage());
-            System.out.println(e.getCause());
-            System.out.println(e.getStackTrace()[0].getLineNumber());
+        catch(Exception e) { }
+    }
+    //a method to get all contract details and store it in an arraylist
+    private void getAllContractDets(JsonNode node){
+        String contract=node.get("subject").get("name").toString()+" , "+node.get("subject").get("description").toString()+","
+                + " contract between" +node.get("firstParty").get("givenName").toString()+" and "+node.get("secondParty").get("givenName").toString();
+        //dateSigned can be null is none of the parties signed it or if one party signed it
+        if(node.get("additionalInfo").toString().equals("{}")==false){
+            String userType=node.get("additionalInfo").get("firstPartySigned").toString();
+            if(userType.contains("tutor")==false)//means tutor hasnt already agrred
+            {//store contractid and details
+                String cId=node.get("id").toString();
+                int lenCid=cId.length();
+                contractIds.add(cId.substring(1, lenCid-1));
+                comboBoxItems.add(contract);
+            }
+        }
+        //now add contracts which none of the parties signed
+        else{
+            //store contractid and details
+            String cId=node.get("id").toString();
+            int lenCid=cId.length();
+            contractIds.add(cId.substring(1, lenCid-1));
+            comboBoxItems.add(contract);
         }
     }
 
