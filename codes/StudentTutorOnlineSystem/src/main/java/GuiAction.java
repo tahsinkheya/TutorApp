@@ -96,8 +96,9 @@ public interface GuiAction {
         HttpResponse<String> response = null;
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.statusCode());
         }
-        catch (Exception e){}
+        catch (Exception e){System.out.println(e.getMessage());}
         return response;
     }
 

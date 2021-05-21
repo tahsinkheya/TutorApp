@@ -6,12 +6,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.Base64;
 
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 
 public class OnlineMatchingClient implements ActionListener {
@@ -35,6 +38,7 @@ public class OnlineMatchingClient implements ActionListener {
 
 //the main method this starts the program
     public static void main(String[] args){
+
         //add a frame
         logInFrame=new JFrame();
         logInFrame.setSize(350,250);
