@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -214,11 +215,15 @@ public class OpenBidAction extends BidAction implements ActionListener {
 
         }
     }
+
     //a method that allows tutors to subsribes to openbids
     private void subscribe() {
         String endpoint = "user/" + userId;
         int count = 0;
         JSONObject jsonObj=new JSONObject();
+        System.out.println(bidid);
+        jsonObj.put("bidId",bidid);
+        jsonObj.put("bidInfo","by "+bidInfo.get(8)+" for "+bidInfo.get(0)+" : "+bidInfo.get(1));
         JSONObject additionalInfo=new JSONObject();
         JSONObject[] arr=null;
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
@@ -227,7 +232,6 @@ public class OpenBidAction extends BidAction implements ActionListener {
             if (jsonNode.get("additionalInfo").toString().equals("{}") == true) {
                 count = 1;
                 arr=new JSONObject[1];
-                jsonObj.put("bid1",bidid);
                 arr[0]= jsonObj;}
             else{
                 count=Integer.parseInt(jsonNode.get("additionalInfo").get("count").asText())+1;
@@ -235,7 +239,6 @@ public class OpenBidAction extends BidAction implements ActionListener {
                 String joinedMinusBrackets = previousBid.substring( 1, previousBid.length() - 1);
                 String[] bidsSubscribedTo = joinedMinusBrackets.split( ", ");
                 arr=new JSONObject[bidsSubscribedTo.length+1];
-                jsonObj.put("bid"+count,bidid);
                 arr[0]=jsonObj;
                 int loopVar=1;
                 for (String bid: bidsSubscribedTo){ // add the previos bids
@@ -245,6 +248,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
                     arr[loopVar]=json;
                     loopVar=loopVar+1;
                 }
+
             }
         }catch(Exception e){System.out.println(e.getMessage());
             System.out.println(e.getStackTrace()[0].getLineNumber());
@@ -254,10 +258,6 @@ public class OpenBidAction extends BidAction implements ActionListener {
         additionalInfo.put("count",Integer.toString(count));
         userInfo.put("additionalInfo",additionalInfo);
         GuiAction.patchWebApi(endpoint,userInfo.toString());
-
-
-
-
     }
 
 //method to show warning to user

@@ -1,3 +1,7 @@
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -100,6 +104,28 @@ public interface GuiAction {
         }
         catch (Exception e){System.out.println(e.getMessage());}
         return response;
+    }
+
+    //method that gets tutor comp for a given subject and tutorid
+    static int getTuteComp(String subName,String tutorId){
+        //get tutor competency in the subject
+        String endpoint = "user/"+tutorId+"?fields=competencies.subject";
+        int tutorcompetencyLevel = 0;
+        HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
+        try {
+            ObjectNode userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode.class);
+
+            for (JsonNode node : userNode.get("competencies")) {
+                // get the subject name that the tutor teaches and compare it to the requested one.
+                String nodeSubName = node.get("subject").get("name").toString();
+                String tutorSubName = GuiAction.removeQuotations(nodeSubName);
+                if(tutorSubName.equals(subName)) {
+                    tutorcompetencyLevel = node.get("level").asInt();
+                }
+            }
+        }
+        catch (Exception e){}
+        return tutorcompetencyLevel;
     }
 
 }

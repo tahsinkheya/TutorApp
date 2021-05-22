@@ -20,7 +20,7 @@ public class Tutor implements  User, ActionListener {
 
     private JPanel homepage;
     private JLabel welcome;
-    private JButton viewContract,viewRequest,viewMessage,signContract; 	//Btn
+    private JButton viewContract,viewRequest,viewMessage,signContract,dashboard; 	//Btn
     private Vector comboBoxItems=new Vector();
     private ArrayList<String> contractIds= new ArrayList<>();
     private JLabel contractNotif, contractExpAlert;
@@ -47,7 +47,7 @@ public class Tutor implements  User, ActionListener {
     public void showHomePage() {
         JFrame homeFrame = new JFrame();
         // Setting the width and height of frame
-        homeFrame.setSize(900, 500);
+        homeFrame.setSize(900, 600);
         homeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         homepage= new JPanel();
@@ -65,7 +65,7 @@ public class Tutor implements  User, ActionListener {
         homepage.add(viewRequest);
 
         viewContract = new JButton("View Contracts");
-        viewContract.setBounds(100, 200, 600, 25);
+        viewContract.setBounds(100, 400, 600, 25);
         viewContract.addActionListener(this);
         homepage.add(viewContract);
 
@@ -74,9 +74,14 @@ public class Tutor implements  User, ActionListener {
         viewMessage.addActionListener(this);
         homepage.add(viewMessage);
 
+        dashboard = new JButton("My Monitoring Dashboard");
+        dashboard.setBounds(100, 200, 600, 25);
+        dashboard.addActionListener(this);
+        homepage.add(dashboard);
+
         //this button is disabled until theres a contract pending signature from this tutor
         signContract = new JButton("Sign Contracts");
-        signContract.setBounds(100, 400, 600, 25);
+        signContract.setBounds(100, 500, 600, 25);
         signContract.addActionListener(this);
         signContract.setEnabled(false);
         homepage.add(signContract);
@@ -121,6 +126,10 @@ public class Tutor implements  User, ActionListener {
         //sign contract button
         else if(e.getSource()==signContract){
             signContract();
+        }
+        else if(e.getSource()==dashboard){
+            //create controller and pass in view
+            new Controller(new DashboardView(userId),userId);
         }
 
     }
