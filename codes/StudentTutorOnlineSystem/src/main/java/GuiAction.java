@@ -128,4 +128,29 @@ public interface GuiAction {
         return tutorcompetencyLevel;
     }
 
+    static String getTutorQualification(String userId) {
+        String endpoint = "user?fields=qualifications";
+        String tutorQ = "";
+        HttpResponse<String> compResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
+        try{
+            ObjectNode[] userNode = new ObjectMapper().readValue(compResponse.body(), ObjectNode[].class);
+            for (JsonNode node : userNode) {
+                if(node.get("id").toString().contains(userId)){//check that the tutorid=userid
+                    for(JsonNode n:node.get("qualifications")){
+                        tutorQ+=GuiAction.removeQuotations(n.get("title").toString())+" | ";
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //if tutor qualifictaion is not known then
+        if (tutorQ.equals("")){
+            tutorQ="unknown";
+        }
+        return tutorQ;
+
+    }
+
 }

@@ -78,6 +78,7 @@ public class TutorBidModel {
     }
 // a method called by the modeller to get the bid offers for a particular bid
     public ArrayList<String> getBidOffers(int index){
+        offerInfo.clear();
         ArrayList<String> offers=new ArrayList<String>();
         String choosenBid=bidIds.get(index);
         String endpoint="bid/"+choosenBid+"?fields=messages";
@@ -125,15 +126,88 @@ public class TutorBidModel {
 
             @Override
             public void run () {
-                if (times == 60) { //the amount of times you want the code executed.
+                if (times == 120) { //the amount of times you want the code executed.120 is the max since 30mins is the time
                     timer.cancel();
                     return;
                 }
                 observer.update();
                 times++;
             }
-        }, 30*1000);
+        }, 15*1000);
 
+    }
+
+    public boolean checkTutorComp(int index){
+        boolean retVal=false;
+        String choosenBid=bidIds.get(index);
+        String endpoint="bid/"+choosenBid+"?fields=";
+        HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
+        try {
+            ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
+            String subName=userNode.get("subject").get("name").textValue();
+            int actualComp=GuiAction.getTuteComp(subName,tutorId);
+            System.out.println(actualComp);
+            int requirendComp=Integer.parseInt(userNode.get("additionalInfo").get("requiredCompetency").textValue());
+            System.out.println(requirendComp);
+            if(actualComp>=(requirendComp+2)){retVal=true;}
+        }
+        catch(Exception e){System.out.println(e.getMessage());}
+        return retVal;
+
+    }
+
+    public void CreateMessage(int index,JSONObject additionalInfo){
+        String choosenBid=bidIds.get(index);
+        String endpoint="bid/"+choosenBid+"?fields=messages";
+        HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
+        boolean reviseBid=false;
+        String msgId=null;
+        String subName=null;
+        try {
+            ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
+            for (JsonNode msgNode : userNode.get("messages")) {
+                subName=userNode.get("subject").get("name").textValue();
+                if (msgNode.get("poster").get("id").textValue().contains(getTutorId())){
+                    //revising the bid
+                    reviseBid=true;
+                    msgId=msgNode.get("id").textValue();
+
+                }
+
+            }
+        }
+        catch(Exception e){System.out.println(e.getMessage());}
+        String totorQ=GuiAction.getTutorQualification(tutorId);
+        int comp=GuiAction.getTuteComp(subName,tutorId);
+        additionalInfo.put("tutorComp",String.valueOf(comp));
+        additionalInfo.put("tutorQualification",totorQ);
+        if (reviseBid){
+            updatePreviousOffer(additionalInfo,msgId);
+        }
+        else{storeNewOffer(additionalInfo,index);}
+
+
+
+
+    }
+    private void updatePreviousOffer(JSONObject additionalInfo,String msgId){
+        JSONObject userInfo=new JSONObject();
+        userInfo.put("additionalInfo",additionalInfo);
+        GuiAction.patchWebApi("message/"+msgId,userInfo.toString());
+
+    }
+
+    private void storeNewOffer(JSONObject additionalInfo,int index){
+        JSONObject msgInfo=new JSONObject();
+        msgInfo.put("bidId", bidIds.get(index));
+        msgInfo.put("posterId", tutorId);
+        msgInfo.put("datePosted", new Date().toInstant().toString());
+        msgInfo.put("content", "an open bid offer");
+        msgInfo.put("additionalInfo", additionalInfo);
+
+        // convert message to JSON string
+        String jsonString = msgInfo.toString();
+        GuiAction.updateWebApi("message",GuiAction.myApiKey,jsonString);
     }
 
 
