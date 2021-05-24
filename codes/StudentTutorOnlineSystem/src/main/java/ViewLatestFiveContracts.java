@@ -27,9 +27,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private JPanel panel;
-	private JComboBox tutorList;
+	private JComboBox tutorList, contractList;
 	private String userId, userFullName;
-	private Vector comboBoxItems;
+	private Vector comboBoxItems, contractVector;
 	private JButton showContracts;
 	private JTextArea contractField;
 	private JSONObject allContractInfo;
@@ -71,6 +71,18 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
         showContracts.setBounds(10, 120, 270, 25);
         showContracts.addActionListener(this);
         panel.add(showContracts);
+        
+        
+        
+        JLabel contractListDetails = new JLabel("Contracts will appear here as a list");
+        contractListDetails.setBounds(10,180,400,25);
+		panel.add(contractListDetails);
+        
+        contractVector = new Vector();
+        contractList = new JComboBox(contractVector);
+        contractList.setBounds(10, 210, 300, 25);
+        panel.add(contractList);
+        
         
         contractField = new JTextArea();
         contractField.setBounds(360, 50, 480, 620);
@@ -157,8 +169,10 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	 * Method to find the latest contracts
 	 */
 	private void findLatestContracts() {
+		// clear the combo box for the newly selected tutor
+		contractVector.removeAll(contractVector);
 		ArrayList<String> signedDates = new ArrayList<String>();
-		System.out.println(allContracts.toString()+"\n");
+		//System.out.println(allContracts.toString()+"\n");
 		String selectedTutor = tutorList.getSelectedItem().toString();
 		JSONParser parser = new JSONParser();  
 		JSONObject json; 
@@ -191,6 +205,7 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	 * 
 	 */
 	private void showLatestContracts(ArrayList<String> latestContractDates) {
+		
 		String output = "";
 		ArrayList<String> signedDates = new ArrayList<String>();
 		
@@ -211,7 +226,8 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 						String contDate = latestContractDates.get(k);
 						
 						if(dateFinalized.contains(contDate)) {
-							
+							// the contract details
+							String contractComboBoxItem = "";
 							String subject = "Subject: "+ contract.get(0);
 							String lesson = "Lesson: "+contract.get(1);
 							String tutorQualification = "Tutor Qualification: "+contract.get(2);
@@ -226,7 +242,12 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 							
 							String dottedLines = "-------------------------------------------------------------------------------------------------------------------";		
 							output +=tutor +"\n"+ subject + "   "+lesson+ "\n"+tutorQualification+ "    "+tutorCompetency+ "\n"+weeklySessions+ "\n"+studyHrs+ "    "+rate+ "\nSigned On: "+signedDate+"    Expires On: "+expiryDate+"\n"+dottedLines+"\n";
+							
+							// add the tutor and contract order number to the list for contracts
+							contractComboBoxItem += (k+1) +")  Contract with : "+tutor ;
+							contractVector.add(contractComboBoxItem);
 						}
+						
 					}		
 				}
 			} catch (ParseException e) {
@@ -236,9 +257,8 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 				e.printStackTrace();
 			}
 	          
-	          
 	      }
-		
+		contractList.setSelectedIndex(0);
 		//output+= output+output;
 		contractField.setText(output);
 		
