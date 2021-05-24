@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Font;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,10 +27,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public class viewContractAction implements GuiAction{
 	private JFrame frame;
+	private JPanel panel;
 	private JLabel warning;
 	private JTextArea contractDetails;
 	private String id;
 	private String type;
+	
     public viewContractAction(String userid, String userType) {
     	id = userid;
     	type = userType;
@@ -46,7 +49,7 @@ public class viewContractAction implements GuiAction{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-        JPanel panel = new JPanel();
+        panel = new JPanel();
         // adding panel to frame
         frame.add(panel);
         panel.setLayout(null);
@@ -95,15 +98,9 @@ public class viewContractAction implements GuiAction{
 				
 				// not null means contract has been finalized
 				if (!dateSign.equals("null")) {
-					//boolean firstPartyType = node.get("firstParty").get("isStudent").asBoolean();
-					//boolean secondPartyType = node.get("secondParty").get("isStudent").asBoolean();
-					
 					ArrayList<String> userFullNames = getStudentAndTutorNames(node);
 					String studentFullName = userFullNames.get(0);
-					//System.out.println(studentFullName);
 					String tutorFullName = userFullNames.get(1);
-					//System.out.println(tutorFullName);
-					
 					ArrayList<String> details = getcontractDetails(node, id);
 					
 					// skip if contract does not involve current user
@@ -114,24 +111,30 @@ public class viewContractAction implements GuiAction{
 						String tutorCompetency = details.get(3);
 						String weeklySessions = details.get(4);
 						String studyHrs = details.get(5);
-						String rate = details.get(6);
+						String rate = details.get(6);						
 						String dateFinalized = details.get(7);
 						String contractExpiryDate = details.get(8);
 						
+						// format the sign and expiry data to a more readable form
+						Date signedDate = ViewLatestFiveContracts.formatDate(dateFinalized);
+						Date expiryDate = ViewLatestFiveContracts.formatDate(contractExpiryDate);
 						
 						String twoParties = "Student: "+ studentFullName + "\n"+ "Tutor: "+ tutorFullName +"\n";
 						String subjectInfo = "Subject: "+ subject + "\n" + "Subject Description: "+ lesson + "\n" +"Tutor Qualification: "+tutorQualification +"\n"+ "Tutor Competency: "+ tutorCompetency + "\n";  
 						String sessionInfo  = "Number of Sessions per week: "+weeklySessions + "\n" + "Hours per lession: "+studyHrs +"\n" + "Rate: "+ rate + "\n";
-						String signDate = "Contract signed on: "+ dateFinalized + "\n" +"Contract expires on: "+ contractExpiryDate + "\n";
+						String signDate = "Contract signed on: "+ signedDate + "\n" +"Contract expires on: "+ expiryDate + "\n";
 						String dottedLine = "--------------------------------------------------------------------------"+"\n";
-						output += twoParties +subjectInfo +sessionInfo+signDate+dottedLine;
+						String expirNot = expiryNotification(contractExpiryDate).toUpperCase() + "\n";
+						
+						if(expirNot.equals("")) {
+							output += twoParties +subjectInfo +sessionInfo+signDate+dottedLine;
+						}	
+						else {
+							output += twoParties +subjectInfo +sessionInfo+signDate+expirNot+dottedLine;
+						}	
 					}
-					
-					
 				}
-
 			}
-		
 			contractDetails.setText(output);
 		}
 		catch(Exception e) {
@@ -141,6 +144,29 @@ public class viewContractAction implements GuiAction{
 		}
 		
 	}
+    
+    /** Method to print contract expiry notifications for specific contracts **/
+    private String expiryNotification(String contractExpiryDate) {
+    		String output = "";
+    		// split the numerical date parts, YYYY-MMMM-DDDD
+			String[] contractExpiryTime = contractExpiryDate.split("-");
+			String[] currentTime = new Date().toInstant().toString().split("-");
+			
+			String currentYear = currentTime[0];
+			String expiryYear = contractExpiryTime[0];
+			int currentMonth = Integer.parseInt(currentTime[1]);
+			int expiryMonth = Integer.parseInt(contractExpiryTime[1]);
+			
+			// contract needs to expire the same year as current year
+			if(currentYear.equals(expiryYear)) {
+				// the month of expiry may have come or will come in a month's time
+				if((expiryMonth-currentMonth) <= 1) {
+					output = "This contract will expire soon";
+					return output;
+				}
+			}
+			return output;
+    }
     
     /**
      * Method to get the student and tutor full names

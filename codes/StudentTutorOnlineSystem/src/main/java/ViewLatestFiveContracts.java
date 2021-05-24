@@ -277,7 +277,7 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	/**
 	 * Method to remove .Z part from date string 
 	**/
-	private Date formatDate(String date) {
+	static Date formatDate(String date) {
 		Date output = new Date();
 		String removeDots = date.substring(0, (date.length()-5));
 		String[] dateSplit = removeDots.split("T");
