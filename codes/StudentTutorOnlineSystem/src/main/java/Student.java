@@ -120,8 +120,8 @@ public class Student implements User, ActionListener {
 		}
 
 		if(viewContractAction.contractNotification(userId)) {
-			contractExpAlert = new JLabel("You have contracts expiring in a month");
-			contractExpAlert.setBounds(100, 50, 400, 25);
+			contractExpAlert = new JLabel("You have contracts expiring in a month. Please Click on 'View Contracts' to view which contracts are about to expire");
+			contractExpAlert.setBounds(100, 50, 700, 25);
 			contractExpAlert.setForeground(new Color(200,0,200));
 			homepagePanel.add(contractExpAlert);
 		}
@@ -150,7 +150,8 @@ public class Student implements User, ActionListener {
 			signContract();
 		}
 		else if (e.getSource()==viewLatestConts) {
-			context = new GUIcontext(new ViewLatestFiveContracts(userId));
+			String studentFullName = givenName + " " + familyName;
+			context = new GUIcontext(new ViewLatestFiveContracts(userId, studentFullName));
 			context.showUI();
 		}
 

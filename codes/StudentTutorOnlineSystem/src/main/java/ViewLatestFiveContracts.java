@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private JPanel panel;
 	private JComboBox tutorList;
-	private String userId;
+	private String userId, userFullName;
 	private Vector comboBoxItems;
 	private JButton showContracts;
 	private JTextArea contractField;
@@ -37,8 +37,9 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private JScrollPane scrollBar;
 	private JFrame pageFrame;
 	
-	public ViewLatestFiveContracts(String id) {
+	public ViewLatestFiveContracts(String id, String studentFullName) {
 		userId = id;
+		userFullName = studentFullName;
 	}
 	
 	@Override
@@ -112,10 +113,12 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 				if (!dateSign.equals("null")) {
 					ArrayList<String> userFullNames = viewContractAction.getStudentAndTutorNames(node);
 					ArrayList<String> contractDetails = viewContractAction.getcontractDetails(node, userId);
+					String studentFullName = userFullNames.get(0);
 					String tutorFullName = userFullNames.get(1);
-					
+					//System.out.println("Contract between: "+studentFullName +" and "+ tutorFullName);
+					//System.out.println("Current Student: "+ userFullName);
 					// write to combo box and avoid repeated names
-					if(!tutorTracker.contains(tutorFullName)) {
+					if(!tutorTracker.contains(tutorFullName)  && (studentFullName.equals(userFullName)) ) {
 						tutorTracker.add(tutorFullName);
 						comboBoxItems.add(tutorFullName);				
 					}
@@ -145,7 +148,7 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 			allContractInfo.put("contract", contractDetails);
 	        String jsonString = allContractInfo.toString(); // convert to string
 	        allContracts.add(jsonString);
-	        System.out.println(jsonString);	
+	        //System.out.println(jsonString);	
 		}
 	}
 	
@@ -216,9 +219,13 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 							String weeklySessions = "Weekly Sessions: "+contract.get(4);
 							String studyHrs = "Study Hours: "+contract.get(5);
 							String rate = "Rate: "+contract.get(6);
-							String contractExpiryDate = "Expiry Date: "+contract.get(8);
-							String dottedLines = "---------------------------------------------------------------------------------";		
-							output +=tutor +"\n"+ subject + "   "+lesson+ "\n"+tutorQualification+ "    "+tutorCompetency+ "\n"+weeklySessions+ "\n"+studyHrs+ "    "+rate+ "\n Signed On: "+dateFinalized+"    "+contractExpiryDate+"\n"+dottedLines+"\n";
+							String contractExpiryDate =contract.get(8);
+							
+							Date signedDate = formatDate(dateFinalized);
+							Date expiryDate = formatDate(contractExpiryDate);
+							
+							String dottedLines = "-------------------------------------------------------------------------------------------------------------------";		
+							output +=tutor +"\n"+ subject + "   "+lesson+ "\n"+tutorQualification+ "    "+tutorCompetency+ "\n"+weeklySessions+ "\n"+studyHrs+ "    "+rate+ "\nSigned On: "+signedDate+"    Expires On: "+expiryDate+"\n"+dottedLines+"\n";
 						}
 					}		
 				}
