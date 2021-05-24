@@ -241,7 +241,7 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 							Date expiryDate = formatDate(contractExpiryDate);
 							
 							String dottedLines = "-------------------------------------------------------------------------------------------------------------------";		
-							output +=tutor +"\n"+ subject + "   "+lesson+ "\n"+tutorQualification+ "    "+tutorCompetency+ "\n"+weeklySessions+ "\n"+studyHrs+ "    "+rate+ "\nSigned On: "+signedDate+"    Expires On: "+expiryDate+"\n"+dottedLines+"\n";
+							output +="Contract No: "+(k+1) +"\n"+tutor +"\n"+ subject + "   "+lesson+ "\n"+tutorQualification+ "    "+tutorCompetency+ "\n"+weeklySessions+ "\n"+studyHrs+ "    "+rate+ "\nSigned On: "+signedDate+"    Expires On: "+expiryDate+"\n"+dottedLines+"\n";
 							
 							// add the tutor and contract order number to the list for contracts
 							contractComboBoxItem += (k+1) +")  Contract with : "+tutor ;
