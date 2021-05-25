@@ -28,18 +28,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private JPanel panel;
 	private JComboBox tutorList, contractList;
-	private String userId, userFullName;
+	private String userId, userFullName,subject,requiredComp;
 	private Vector comboBoxItems, contractVector;
-	private JButton showContracts;
+	private JButton showContracts,selectContractSameTutor,selectContractDiffTutor,selectContractCond;
 	private JTextArea contractField;
 	private JSONObject allContractInfo;
 	private ArrayList<String> allContracts;
-	private JScrollPane scrollBar;
+	private ArrayList<String> contractIds=new ArrayList<>();
 	private JFrame pageFrame;
 	
-	public ViewLatestFiveContracts(String id, String studentFullName) {
+	public ViewLatestFiveContracts(String id, String studentFullName,String sub,String comp) {
 		userId = id;
 		userFullName = studentFullName;
+		subject=sub;
+		requiredComp=comp;
 	}
 	
 	@Override
@@ -53,8 +55,8 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 		panel.setBackground(new Color(172, 209, 233));
 		panel.setLayout(null);
 		
-		JLabel pageTitle = new JLabel("View Latest 5 contracts with a tutor");
-		pageTitle.setBounds(400,20,400,25);
+		JLabel pageTitle = new JLabel("Latest 5 contracts with a tutor for renewing contract for "+subject);
+		pageTitle.setBounds(380,20,700,25);
 		panel.add(pageTitle);
 		
 		JLabel listLabel = new JLabel("Select a tutor and click view contracts");
@@ -82,10 +84,24 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
         contractList = new JComboBox(contractVector);
         contractList.setBounds(10, 210, 300, 25);
         panel.add(contractList);
-        
-        
+//"<html>fnord<br />foo</html>"
+		selectContractSameTutor = new JButton("<html>Select this contract terms and conditions <br />and this tutor</html>");
+		selectContractSameTutor.setBounds(10, 240, 330, 50);
+		selectContractSameTutor.addActionListener(this);
+		panel.add(selectContractSameTutor);
+
+		selectContractDiffTutor = new JButton("<html>Select this contract terms and conditions<br /> and a different tutor</html>");
+		selectContractDiffTutor.setBounds(10, 300, 330, 50);
+		selectContractDiffTutor.addActionListener(this);
+		panel.add(selectContractDiffTutor);
+
+		selectContractCond = new JButton("<html>Select this tutor with different <br />terms and conditions</html>");
+		selectContractCond.setBounds(10, 360, 330, 50);
+		selectContractCond.addActionListener(this);
+		panel.add(selectContractCond);
+
         contractField = new JTextArea();
-        contractField.setBounds(360, 50, 480, 620);
+        contractField.setBounds(360, 50, 495, 620);
         contractField.setEditable(false);
 		panel.add(contractField);
 		
@@ -171,6 +187,7 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private void findLatestContracts() {
 		// clear the combo box for the newly selected tutor
 		contractVector.removeAll(contractVector);
+
 		ArrayList<String> signedDates = new ArrayList<String>();
 		//System.out.println(allContracts.toString()+"\n");
 		String selectedTutor = tutorList.getSelectedItem().toString();

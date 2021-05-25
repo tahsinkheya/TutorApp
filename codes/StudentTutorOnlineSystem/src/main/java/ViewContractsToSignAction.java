@@ -182,11 +182,11 @@ public class ViewContractsToSignAction implements GuiAction, ActionListener {
             studentName=GuiAction.removeQuotations(userNode.get("secondParty").get("givenName").toString())+" "+GuiAction.removeQuotations(userNode.get("secondParty").get("familyName").toString());;
             // if theres no additionl info we dont know abt competetncy,weekly session,hpl,rate so we will put unknown for contractInfo
             if (userNode.get("lessonInfo").toString().equals("{}")){
-                contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown","unknown")); }
+                contractDetails.addAll(Arrays.asList("unknown","unknown","unknown","unknown","unknown","unkown")); }
             else{
                 //get details and store them
                 getContractDets(userNode); }
-        } catch (Exception e) {}
+        } catch (Exception e) {System.out.println(e.getStackTrace()[0].getLineNumber());}
     }
     // a method to get details abt a contract and put it in a list for use later
     private void getContractDets(JsonNode userNode){
@@ -203,6 +203,7 @@ public class ViewContractsToSignAction implements GuiAction, ActionListener {
         contractDetails.add(GuiAction.removeQuotations(rate));
         contractDetails.add(GuiAction.removeQuotations(tuteQualification));
         contractDetails.add(GuiAction.removeQuotations(contractExpiryDate));
+        System.out.println(contractDetails.add(GuiAction.removeQuotations(contractExpiryDate)));
     }
     //method to patch a contract this is done only when a contract was created by the system at the ened of an open bid and
     // and one of the parties sign the contract
@@ -230,7 +231,7 @@ public class ViewContractsToSignAction implements GuiAction, ActionListener {
                 }
                 //both parties have now signed the contract
                 else{
-                    new ContractSigner(contractId,"");
+                    new ContractSigner(contractId,GuiAction.myApiKey);
                     warning.setText("your contract has been finalised.");
                 }
                 warning.setForeground(Color.BLUE);

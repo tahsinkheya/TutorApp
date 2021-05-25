@@ -15,7 +15,7 @@ import java.util.Vector;
 
 public class RenewContractAction implements GuiAction, ActionListener {
     private String userId;
-    private String userFullName;
+    private String userFullName,subName,subDesc,compReq;
     private JFrame renewFrame;
     private JPanel renewPanel;
     private JButton newcloseBtn,selectbtn,viewDetails;
@@ -24,6 +24,7 @@ public class RenewContractAction implements GuiAction, ActionListener {
     private JLabel warning;
     private ArrayList<String> contractInfo=new ArrayList<>();
     private JTextArea message;
+    private ViewLatestFiveContracts viewContracts;
     public RenewContractAction(String id,String userName){
         userId=id;
         userFullName=userName;
@@ -124,13 +125,13 @@ public class RenewContractAction implements GuiAction, ActionListener {
         String hpl=userNode.get("lessonInfo").get("hoursPerLesson").asText();
         String rate=userNode.get("lessonInfo").get("rate").asText();
         String contractExpiryDate = userNode.get("expiryDate").asText();
-        String subName=userNode.get("subject").get("name").asText();
-        String subDesc=userNode.get("subject").get("description").asText();
-        String compReq=userNode.get("lessonInfo").get("requiredCompetency").asText();
+        subName=userNode.get("subject").get("name").asText();
+        subDesc=userNode.get("subject").get("description").asText();
+        compReq=userNode.get("lessonInfo").get("requiredCompetency").asText();
         contractInfo.add("Between "+tutorName+" and "+studentName+"\n" +
                 "Subject name:"+subName+"\n"+"Subject desc:"+subDesc+"\n"+
                 "Comptency required:"+compReq+"\n"+"Weekly Session:"+weeklySession+"\n"+
-                "Hours Per Lesson :"+hpl+"\n"+"Rate:"+rate+"\n"+"Expired on"+contractExpiryDate);
+                "Hours Per Lesson :"+hpl+"\n"+"Rate:"+rate+"\n"+"Expired on: "+contractExpiryDate);
 
     }
     //a method to add buttons to th ui
@@ -168,6 +169,11 @@ public class RenewContractAction implements GuiAction, ActionListener {
             int index= contracts.getSelectedIndex();
             message.setText(contractInfo.get(index));
             message.setForeground(Color.blue);
+        }
+        else if(e.getSource()==selectbtn){
+            renewFrame.setVisible(false);
+            viewContracts=new ViewLatestFiveContracts(userId,userFullName,subName+" "+subDesc,compReq);
+            viewContracts.show();
         }
     }
 }
