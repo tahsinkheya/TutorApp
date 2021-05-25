@@ -30,11 +30,12 @@ public class Student implements User, ActionListener {
 	private GUIcontext context;
 	private String userId;
 	private ArrayList <String> contractIds= new ArrayList<>();
+	private boolean canRenewContract=true;
 
 
 
 	//ui components
-	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract, viewLatestConts;
+	private JButton requestTbutton, viewCbutton, ViewBbutton,signContract, renewContract;
 	private JPanel homepagePanel;
 	private  JLabel welcome,contractNotif, contractExpAlert;
 	private Vector comboBoxItems=new Vector();
@@ -97,12 +98,13 @@ public class Student implements User, ActionListener {
 			signContract.addActionListener(this);
 			signContract.setEnabled(false);
 			homepagePanel.add(signContract);
-			
-			
-			viewLatestConts = new JButton("View latest contracts with a tutor");
-			viewLatestConts.setBounds(100, 500, 600, 25);
-			viewLatestConts.addActionListener(this);
-			homepagePanel.add(viewLatestConts);
+
+
+			renewContract = new JButton("Renew Contract");
+			renewContract.setBounds(100, 500, 600, 25);
+			renewContract.addActionListener(this);
+			homepagePanel.add(renewContract);
+			if (canRenewContract==false){renewContract.setEnabled(false);}
 			notificationUI();
 			homeFrame.setVisible(true);
 
@@ -149,9 +151,10 @@ public class Student implements User, ActionListener {
 			//show contracts to be signed
 			signContract();
 		}
-		else if (e.getSource()==viewLatestConts) {
+		else if (e.getSource()==renewContract) {
 			String studentFullName = givenName + " " + familyName;
-			context = new GUIcontext(new ViewLatestFiveContracts(userId, studentFullName));
+			//context = new GUIcontext(new ViewLatestFiveContracts(userId, studentFullName));
+			context = new GUIcontext(new RenewContractAction(userId, studentFullName));
 			context.showUI();
 		}
 
@@ -191,7 +194,8 @@ public class Student implements User, ActionListener {
 					//select tutor and close request if one or more offers were receive
 
 					if(node.get("messages").isEmpty()==false){
-						selectTutor(node.get("messages"),bidId,subId); } } } }
+						String reqComp=node.get("additionalInfo").get("requiredCompetency").textValue();
+						selectTutor(node.get("messages"),bidId,subId,reqComp); } } } }
 		catch(Exception e){ System.out.println(e.getStackTrace()[0].getLineNumber())
 			;}
 	}
@@ -215,8 +219,9 @@ public class Student implements User, ActionListener {
 						countOfSignContract+=1; }
 				}
 			}
-			//student shouldnt sign more than 5 so remove all the contracts to be signed
-			if(countOfSignContract==5){contractIds.clear();}
+			//student shouldnt sign more than 5 so remove all the contracts to be signed and disable renewcontractbutton
+			if(countOfSignContract==5){contractIds.clear();
+				canRenewContract=false;}
 		}
 		catch(Exception e) {}
 	}
@@ -246,7 +251,7 @@ public class Student implements User, ActionListener {
 		}
 	}
 	//a method to selsct the last tutor of an open bid
-	private void selectTutor(JsonNode messages,String bidId,String subId) {
+	private void selectTutor(JsonNode messages,String bidId,String subId,String requiredComp) {
 		TreeMap<Date,OpenBidOffer> map=new TreeMap<>();
 		for (JsonNode node : messages) {
 			try {
@@ -254,7 +259,7 @@ public class Student implements User, ActionListener {
 				String datePosted = GuiAction.removeQuotations(node.get("datePosted").toString());
 				SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				Date newDate = sourceFormat.parse(datePosted);
-				map.put(newDate,createOpenBidOffer(node, subId));
+				map.put(newDate,createOpenBidOffer(node, subId,requiredComp));
 			} catch (Exception e) {} }
 		//get the last bid offer
 		OpenBidOffer lastTutor=map.lastEntry().getValue();
@@ -266,7 +271,7 @@ public class Student implements User, ActionListener {
 			contract.storeContract(); }
 	}
 // a helper method for creating openbid offer for all the tutors offer for the method selectTutor
-	private OpenBidOffer createOpenBidOffer(JsonNode node,String subId){
+	private OpenBidOffer createOpenBidOffer(JsonNode node,String subId,String reqComp){
 		String tutorId=node.get("poster").get("id").asText();
 		String hrsperLesson=node.get("additionalInfo").get("duration").asText();
 		String weeklyS=node.get("additionalInfo").get("numberOfSession").asText();
@@ -275,7 +280,7 @@ public class Student implements User, ActionListener {
 		String tutorQ=node.get("additionalInfo").get("tutorQualification").asText();
 
 		OpenBidOffer offer=new OpenBidOffer(userId,tutorId,userName,"");
-		offer.setClassInfo(weeklyS,hrsperLesson,rate);
+		offer.setClassInfo(weeklyS,hrsperLesson,rate,reqComp);
 		offer.setExtraInfo("no","");
 		offer.setSubjectInfo(subId,"",comp,tutorQ);
 		return offer;

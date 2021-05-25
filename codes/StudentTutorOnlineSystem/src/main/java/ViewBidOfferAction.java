@@ -350,7 +350,7 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
                         //create an open bid offer
                         OpenBidOffer newOffer=new OpenBidOffer(msgSenderId,studId,alldetails[8],alldetails[9]);
                         //set all info
-                        newOffer.setClassInfo(alldetails[2],alldetails[0],alldetails[1]);
+                        newOffer.setClassInfo(alldetails[2],alldetails[0],alldetails[1],alldetails[11]);
                         newOffer.setExtraInfo(alldetails[3],alldetails[5]);
                         newOffer.setSubjectInfo(alldetails[6],alldetails[10],alldetails[4],alldetails[7]);
                         //add the new offer in the arrayList
@@ -382,8 +382,9 @@ public class ViewBidOfferAction implements GuiAction, ActionListener {
 
 
         String subjectName=GuiAction.removeQuotations(userNode.get("subject").get("description").toString());
+        String requiredComp=userNode.get("additionalInfo").get("requiredCompetency").asText();
 
-        return new String[]{duration,rate,numberOfSession,freelesson,competency,extra,subjectId,qualification,student,tutor,subjectName};
+        return new String[]{duration,rate,numberOfSession,freelesson,competency,extra,subjectId,qualification,student,tutor,subjectName,requiredComp};
     }
 
 }

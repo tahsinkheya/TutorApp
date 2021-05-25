@@ -186,6 +186,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
             String tutorQualification=TutorQualification(userId);
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
+
             if (isCompetent(level)==false){
                 showMessage("You do not have the required competency to bid on this request","red");
             }
@@ -295,7 +296,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         String tutorCompetency=Integer.toString(tuteCompetency);
         //set all info
         OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(8),userFullName);
-        offer.setClassInfo(bidInfo.get(3),bidInfo.get(4),bidInfo.get(5));
+        offer.setClassInfo(bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(9));
         offer.setExtraInfo("no","");
         offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
         return offer;

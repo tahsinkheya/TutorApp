@@ -59,8 +59,7 @@ public class createContractAction implements GuiAction {
         String endpoint="contract";
         String jsonString="";
 
-        Calendar cal = Calendar.getInstance();
-        Date today = cal.getTime();
+
         
         // create the contract
         JSONObject contractInfo=new JSONObject();
@@ -81,6 +80,7 @@ public class createContractAction implements GuiAction {
         lessonInfo.put("studentName", acceptedOffer.getStudentName());
         lessonInfo.put("tutorName", acceptedOffer.getTutorName());
         lessonInfo.put("tutorQualification", acceptedOffer.getTutorQualification());
+        lessonInfo.put("requiredCompetency", acceptedOffer.getRequiredCompetency());
 
         JSONObject additionalInfo=new JSONObject();
         //create additional info

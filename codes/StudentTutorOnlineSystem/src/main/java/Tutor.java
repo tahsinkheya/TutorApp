@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.Vector;
 /*class that represents a tutor*/
 public class Tutor implements  User, ActionListener {
-    String userName;
-    String givenName;
-    String familyName;
-    String userId;
+    private String userName;
+    private String givenName;
+    private String familyName;
+    private String userId;
 
     private GUIcontext context;
 

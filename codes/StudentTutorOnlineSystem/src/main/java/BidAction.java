@@ -37,6 +37,7 @@ public abstract class BidAction {
         String subId = "";
         String initiatorgname = "";
         String initiatorfname = "";
+        String requireComp="";
         HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, myApiKey);
         try {
             ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
@@ -47,6 +48,7 @@ public abstract class BidAction {
             initiatorId=userNode.get("initiator").get("id").toString();
             initiatorgname=userNode.get("initiator").get("givenName").toString();
             initiatorfname=userNode.get("initiator").get("familyName").toString();
+            requireComp=userNode.get("additionalInfo").get("requiredCompetency").asText();
              }
         catch (Exception e){
             System.out.println("Error!!!"); }
@@ -54,6 +56,7 @@ public abstract class BidAction {
         bidInfo.add(GuiAction.removeQuotations(initiatorId));
         bidInfo.add(GuiAction.removeQuotations(subId));
         bidInfo.add(studentFullName);
+        bidInfo.add(requireComp);
         return bidInfo;
     }
     //method called by subclasses to get tutor qualifications when making a bid offer

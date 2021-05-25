@@ -21,6 +21,7 @@ public class OpenBidOffer {
 
     private String fressLesson;
     private String extraInfo;
+    private String requiredCompetency;
 
 
     public OpenBidOffer(String newFirstId, String newSecondId,  String stuName, String tuteName ){
@@ -32,10 +33,12 @@ public class OpenBidOffer {
 
     }
 
-    public void setClassInfo(String weeklySess, String hlp, String newRate){
+    public void setClassInfo(String weeklySess, String hlp, String newRate,String competencyRequired){
         weeklySession=weeklySess;
         hoursPerLesson=hlp;
         rate=newRate;
+        requiredCompetency=competencyRequired;
+
     }
     public void setExtraInfo(String fl,String extra){
         fressLesson=fl;
@@ -56,7 +59,7 @@ public class OpenBidOffer {
     public String getTutorQualification() {
         return tutorQualification;
     }
-
+    public String getRequiredCompetency(){return  requiredCompetency;}
     public String getFressLesson() {
         return fressLesson;
     }

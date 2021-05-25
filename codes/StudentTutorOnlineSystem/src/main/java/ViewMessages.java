@@ -278,11 +278,13 @@ public class ViewMessages implements ActionListener {
         //get the subject id from the bid id and find tutor q and tutor competency
         String subName="";
         String subId="";
+        String requiredComp="";
         HttpResponse<String> response = GuiAction.initiateWebApiGET("bid/"+bidId, GuiAction.myApiKey);
         try {
             ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
             subName = userNode.get("subject").get("name").asText();
-            subId = userNode.get("subject").get("id").asText();}
+            subId = userNode.get("subject").get("id").asText();
+            requiredComp = userNode.get("additionalInfo").get("requiredCompetency").asText();}
         catch (Exception e){
         }
         int tutorcompetencyLevel=getTuteComp(subName);
@@ -291,7 +293,7 @@ public class ViewMessages implements ActionListener {
         if (tutorQ.equals("")){
             tutorQ="unknown"; }
         OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,"","");
-        offer.setClassInfo(weeklySess,hrsperlsn,rate);
+        offer.setClassInfo(weeklySess,hrsperlsn,rate,requiredComp);
         offer.setExtraInfo("no","");
         offer.setSubjectInfo(subId,subName,Integer.toString(tutorcompetencyLevel),tutorQ);
         storeContract(offer);
