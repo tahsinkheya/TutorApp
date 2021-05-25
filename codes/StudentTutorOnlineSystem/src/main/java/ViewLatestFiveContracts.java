@@ -187,7 +187,8 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private void findLatestContracts() {
 		// clear the combo box for the newly selected tutor
 		contractVector.removeAll(contractVector);
-
+		contractIds.removeAll(contractIds);
+		
 		ArrayList<String> signedDates = new ArrayList<String>();
 		//System.out.println(allContracts.toString()+"\n");
 		String selectedTutor = tutorList.getSelectedItem().toString();
@@ -203,6 +204,8 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 					String contract = json.get("contract").toString();
 					ArrayList<String> contractArr = (ArrayList<String>) json.get("contract");
 					signedDates.add(contractArr.get(7));
+					System.out.println("Contract Id: "+ contractArr.get(9));
+					contractIds.add(contractArr.get(9));
 				}
 				
 			} catch (ParseException e) {

@@ -211,6 +211,7 @@ public class viewContractAction implements GuiAction{
      */
     static ArrayList<String> getcontractDetails(ObjectNode node, String id) {
     	ArrayList<String> contractDetails = new ArrayList<String>();
+    	String contractId = GuiAction.removeQuotations(node.get("id").toString());
     	String firstPartyId = GuiAction.removeQuotations(node.get("firstParty").get("id").toString());
 		String secondPartyId = GuiAction.removeQuotations(node.get("secondParty").get("id").toString());
 		
@@ -247,6 +248,7 @@ public class viewContractAction implements GuiAction{
 			contractDetails.add(rate);
 			contractDetails.add(dateFinalized);
 			contractDetails.add(contractExpiryDate);
+			contractDetails.add(contractId);
 		}
 		else {
 			System.out.println("");
