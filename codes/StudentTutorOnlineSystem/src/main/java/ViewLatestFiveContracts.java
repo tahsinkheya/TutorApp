@@ -139,6 +139,10 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 				ContractRenewal contractRenewal=new DifferentTutorSameConditions(jlabel,contractId,subject,userId,text.getText(),pageFrame,requiredComp);
 
 			}
+			else if(e.getSource()==selectContractCond){
+				ContractRenewal contractRenewal=new SameTutorDifferntConditions(jlabel,contractId,subject,userId,text.getText(),pageFrame,requiredComp);
+
+			}
 		}
 
 	}
@@ -294,16 +298,12 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 					}		
 				}
 			} catch (ParseException e) {
-				System.out.println("Error!!!");
-				System.out.println(e.getMessage());
 				System.out.println(e.getCause());
 				e.printStackTrace();
 			}
 	          
 	      }
-		for (String c:contractIds){
-			System.out.println("yo "+c);
-		}
+
 		contractList.setSelectedIndex(0);
 		//output+= output+output;
 		contractField.setText(output);
