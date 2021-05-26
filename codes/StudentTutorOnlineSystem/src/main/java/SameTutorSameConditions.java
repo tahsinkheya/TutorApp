@@ -27,7 +27,8 @@ public class SameTutorSameConditions extends ContractRenewal{
             if (Integer.parseInt(Mons)<3){
                 showWarning("please choose number of month greater than equal 3");
             }
-            prepareToStore();
+            else{
+                prepareToStore();}
         }
         else{
             showWarning("the subject of this contract is not "+subName);

@@ -20,7 +20,7 @@ import org.json.simple.parser.JSONParser;
 public class OnlineMatchingClient implements ActionListener {
     private UserFacade facadeUser;
 
-    protected static final String myApiKey = "7NBdTK99FjkrTJH9LCThRJbTRNzJnp";
+    protected static final String myApiKey = "";
 
     // Provide the root URL for the web service. All web service request URLs start with this root URL.
     private static final String rootUrl = "https://fit3077.com/api/v2";

@@ -129,10 +129,18 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 			selectContractSameTutor.setEnabled(true);
 			selectContractDiffTutor.setEnabled(true);
 		}
-		else if (e.getSource()==selectContractSameTutor){
+		else{
 			String contractId=contractIds.get(contractList.getSelectedIndex());
-			ContractRenewal contractRenewal=new SameTutorSameConditions(jlabel,contractId,subject,userId,text.getText());
+			if (e.getSource()==selectContractSameTutor){
+
+				ContractRenewal contractRenewal=new SameTutorSameConditions(jlabel,contractId,subject,userId,text.getText());
+			}
+			else if (e.getSource()==selectContractDiffTutor){
+				ContractRenewal contractRenewal=new DifferentTutorSameConditions(jlabel,contractId,subject,userId,text.getText(),pageFrame,requiredComp);
+
+			}
 		}
+
 	}
 	
 	/** 
