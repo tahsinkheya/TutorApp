@@ -9,14 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -36,6 +29,8 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private ArrayList<String> allContracts;
 	private ArrayList<String> contractIds=new ArrayList<>();
 	private JFrame pageFrame;
+	private JLabel jlabel;
+	private JTextField text;
 	
 	public ViewLatestFiveContracts(String id, String studentFullName,String sub,String comp) {
 		userId = id;
@@ -89,22 +84,35 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 		selectContractSameTutor.setBounds(10, 240, 330, 50);
 		selectContractSameTutor.addActionListener(this);
 		panel.add(selectContractSameTutor);
+		selectContractSameTutor.setEnabled(false);
 
 		selectContractDiffTutor = new JButton("<html>Select this contract terms and conditions<br /> and a different tutor</html>");
 		selectContractDiffTutor.setBounds(10, 300, 330, 50);
 		selectContractDiffTutor.addActionListener(this);
 		panel.add(selectContractDiffTutor);
+		selectContractDiffTutor.setEnabled(false);
 
 		selectContractCond = new JButton("<html>Select this tutor with different <br />terms and conditions</html>");
 		selectContractCond.setBounds(10, 360, 330, 50);
 		selectContractCond.addActionListener(this);
 		panel.add(selectContractCond);
+		selectContractCond.setEnabled(false);
 
         contractField = new JTextArea();
         contractField.setBounds(360, 50, 495, 620);
         contractField.setEditable(false);
 		panel.add(contractField);
-		
+
+		jlabel = new JLabel("");
+		jlabel.setBounds(10,480,400,25);
+		panel.add(jlabel);
+		JLabel instu = new JLabel("type the number of months for this new contract");
+		instu.setBounds(10,410,400,25);
+		panel.add(instu);
+		text=new JTextField("6");
+		text.setBounds(10,440,200,25);
+		panel.add(text);
+
 		pageFrame.add(panel);
 		pageFrame.setVisible(true);
 		
@@ -117,6 +125,13 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == showContracts){
 			findLatestContracts();
+			selectContractCond.setEnabled(true);
+			selectContractSameTutor.setEnabled(true);
+			selectContractDiffTutor.setEnabled(true);
+		}
+		else if (e.getSource()==selectContractSameTutor){
+			String contractId=contractIds.get(contractList.getSelectedIndex());
+			ContractRenewal contractRenewal=new SameTutorSameConditions(jlabel,contractId,subject,userId,text.getText());
 		}
 	}
 	
@@ -204,7 +219,7 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 					String contract = json.get("contract").toString();
 					ArrayList<String> contractArr = (ArrayList<String>) json.get("contract");
 					signedDates.add(contractArr.get(7));
-					System.out.println("Contract Id: "+ contractArr.get(9));
+					//System.out.println("Contract Id: "+ contractArr.get(9));
 					contractIds.add(contractArr.get(9));
 				}
 				
@@ -278,6 +293,9 @@ public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 			}
 	          
 	      }
+		for (String c:contractIds){
+			System.out.println("yo "+c);
+		}
 		contractList.setSelectedIndex(0);
 		//output+= output+output;
 		contractField.setText(output);

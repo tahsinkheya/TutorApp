@@ -96,6 +96,7 @@ public class createContractAction implements GuiAction {
 
         jsonString=contractInfo.toString();
         HttpResponse<String> updateResponse = GuiAction.updateWebApi(endpoint, myApiKey, jsonString);
+        System.out.println(updateResponse.statusCode());
         //close the request
 
         if (updateResponse.statusCode()==201){

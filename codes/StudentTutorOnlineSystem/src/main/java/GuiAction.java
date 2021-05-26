@@ -53,9 +53,7 @@ public interface GuiAction {
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
-        catch (Exception e){
-            System.out.println("Error!!!");
-        }
+        catch (Exception e){ }
         return response;
     }
     /* Method to remove "" from json get strings */

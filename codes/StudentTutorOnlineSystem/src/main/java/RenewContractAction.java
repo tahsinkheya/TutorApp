@@ -15,7 +15,7 @@ import java.util.Vector;
 
 public class RenewContractAction implements GuiAction, ActionListener {
     private String userId;
-    private String userFullName,subName,subDesc,compReq;
+    private String userFullName;
     private JFrame renewFrame;
     private JPanel renewPanel;
     private JButton newcloseBtn,selectbtn,viewDetails;
@@ -23,6 +23,8 @@ public class RenewContractAction implements GuiAction, ActionListener {
     private JComboBox contracts;
     private JLabel warning;
     private ArrayList<String> contractInfo=new ArrayList<>();
+    private ArrayList<String> subjects=new ArrayList<>();
+    private ArrayList<String> reqiredComp=new ArrayList<>();
     private JTextArea message;
     private ViewLatestFiveContracts viewContracts;
     public RenewContractAction(String id,String userName){
@@ -125,9 +127,11 @@ public class RenewContractAction implements GuiAction, ActionListener {
         String hpl=userNode.get("lessonInfo").get("hoursPerLesson").asText();
         String rate=userNode.get("lessonInfo").get("rate").asText();
         String contractExpiryDate = userNode.get("expiryDate").asText();
-        subName=userNode.get("subject").get("name").asText();
-        subDesc=userNode.get("subject").get("description").asText();
-        compReq=userNode.get("lessonInfo").get("requiredCompetency").asText();
+        String subName=userNode.get("subject").get("name").asText();
+        String subDesc=userNode.get("subject").get("description").asText();
+        String compReq=userNode.get("lessonInfo").get("requiredCompetency").asText();
+        subjects.add(subName);
+        reqiredComp.add(compReq);
         contractInfo.add("Between "+tutorName+" and "+studentName+"\n" +
                 "Subject name:"+subName+"\n"+"Subject desc:"+subDesc+"\n"+
                 "Comptency required:"+compReq+"\n"+"Weekly Session:"+weeklySession+"\n"+
@@ -171,8 +175,9 @@ public class RenewContractAction implements GuiAction, ActionListener {
             message.setForeground(Color.blue);
         }
         else if(e.getSource()==selectbtn){
+            int index= contracts.getSelectedIndex();
             renewFrame.setVisible(false);
-            viewContracts=new ViewLatestFiveContracts(userId,userFullName,subName+" "+subDesc,compReq);
+            viewContracts=new ViewLatestFiveContracts(userId,userFullName,subjects.get(index),reqiredComp.get(index));
             viewContracts.show();
         }
     }
