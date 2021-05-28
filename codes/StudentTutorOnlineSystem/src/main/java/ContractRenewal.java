@@ -6,11 +6,12 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-
+//an abstartct class that is used by 3 subclasses to renew contract
 public abstract class ContractRenewal {
 
      abstract void showMessage();
      abstract void showWarning(String msg);
+     //method used by subclasses to store contract
      public void storeContract(String contractId,String firstUid,String SeconUid,String userId,String mons){
 
          //create open bid offer
@@ -27,7 +28,7 @@ public abstract class ContractRenewal {
           createContractAction contract=new createContractAction(offer,"student",userId,"",GuiAction.getContractExpiryDate(mons));
           contract.storeContract();
      }
-
+//method used by subclasses to check if subject matches
      boolean checkSubject(String subName, String contractId){
           boolean subjectMatched=false;
           HttpResponse<String> contResponse = GuiAction.initiateWebApiGET("contract/"+contractId, GuiAction.myApiKey);

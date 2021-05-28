@@ -9,12 +9,11 @@ import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+// class to implement active mvc for the tutors dashboard
 public class TutorBidModel {
     private String tutorId;
     private Timer timer=new Timer();
     private Observer observer;
-    //private Timer timer;
     private ArrayList<String> bidIds=new ArrayList<>();
     private ArrayList<String> offerInfo=new ArrayList<>();
 
@@ -22,9 +21,7 @@ public class TutorBidModel {
     public TutorBidModel(String userId){
         tutorId=userId;
     }
-//    private ArrayList<OpenBidOffer> getOfferList(String bidId){
-//
-//    }
+
     public void registerObserver(Observer obs){
         observer=obs;
     }
@@ -56,7 +53,7 @@ public class TutorBidModel {
         offerInfo.clear();
         return comboBoxItems;
     }
-
+//get bids subscribed to
     public String getBidOfferInfo(int index){
         return offerInfo.get(index);
     }
@@ -104,7 +101,7 @@ public class TutorBidModel {
         timelyUpdateBidOffer();
         return offers;
     }
-
+// chechk if the bid has expired
     private boolean expiredBid(String bidid) throws JsonProcessingException, ParseException {
 
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid/" + bidid, GuiAction.myApiKey);
@@ -136,7 +133,7 @@ public class TutorBidModel {
         }, 15*1000);
 
     }
-
+//check if tutor is compternt
     public boolean checkTutorComp(int index){
         boolean retVal=false;
         String choosenBid=bidIds.get(index);
@@ -155,7 +152,7 @@ public class TutorBidModel {
         return retVal;
 
     }
-
+//create tutor bid offer as message
     public void CreateMessage(int index,JSONObject additionalInfo){
         String choosenBid=bidIds.get(index);
         String endpoint="bid/"+choosenBid+"?fields=messages";
@@ -190,13 +187,14 @@ public class TutorBidModel {
 
 
     }
+    // update previous bid offer
     private void updatePreviousOffer(JSONObject additionalInfo,String msgId){
         JSONObject userInfo=new JSONObject();
         userInfo.put("additionalInfo",additionalInfo);
         GuiAction.patchWebApi("message/"+msgId,userInfo.toString());
 
     }
-
+// method to store the new offre made by the student
     private void storeNewOffer(JSONObject additionalInfo,int index){
         JSONObject msgInfo=new JSONObject();
         msgInfo.put("bidId", bidIds.get(index));
@@ -212,12 +210,6 @@ public class TutorBidModel {
 
 
 
-//    class TimelyUpdater extends TimerTask {
-//        public void run() {
-//            timer.cancel(); //Terminate the timer thread
-//
-//        }
-//    }
 
 }
 

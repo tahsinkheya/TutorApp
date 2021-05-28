@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Date;
-
+//a view class for implementing the mvc pattern
 public class DashboardView implements ActionListener {
     private String userId;
     private int index;
@@ -21,15 +21,18 @@ public class DashboardView implements ActionListener {
     private JTextArea info;
     private JLabel refreshInfo;
     private JTextField rateOffered,durationOffered,sessionOffered,extraInfo;
+    //constructor
     public DashboardView(String uId){
         userId=uId;
     }
+    //setter for buttons
     public void setButtons(JButton details,JButton revise,JButton offer,JLabel refresh){
         viewDetails=details;
         reviseBid=revise;
         viewOffer=offer;
         refreshInfo=refresh;
     }
+    //setters for comboboxes
     public void setBidComboBoxes(JComboBox bid ){
         allBids=bid;
         if (bid.getSelectedItem() == null ){
@@ -44,9 +47,11 @@ public class DashboardView implements ActionListener {
         }
         else{noOffers=false;}
     }
+    //setter for model
     public  void setModel(TutorBidModel newModel){
         model=newModel;
     }
+    //method to show all bids
     public void showAllOffers(){
         allOffers.setBounds(10, 220, 700, 25);
         panel.add(allOffers);
@@ -64,11 +69,12 @@ public class DashboardView implements ActionListener {
 
 
     }
+    //method to display a particular offer
     public void displayOffer(String offerInfo){
         info.setText(offerInfo);
         info.setForeground(Color.blue);
     }
-
+// method to show bids
     public void showTutorBids(){
         // Creating instance of JFrame
         frame = new JFrame("Tutor Dashboard");
@@ -121,14 +127,14 @@ public class DashboardView implements ActionListener {
         reviseBid.setEnabled(false);
         frame.setVisible(true);
     }
-
+//method to shhoe message
     private void showMessage(String msg,String color){
         warning.setText(msg);
         if (color.contains("blue")){
              warning.setForeground(Color.BLUE);}
         else{warning.setForeground(Color.red);}
     }
-
+//method to take details abt the current tutor's offer
     public void showTakeOffer(int indexOfBid){
         index=indexOfBid;
         newFrame = new JFrame();
@@ -212,6 +218,7 @@ public class DashboardView implements ActionListener {
 
         newFrame.setVisible(true);
     }
+    //method to show competetncy warning
     public void showCompWarning(){
         JLabel compWarning = new JLabel("You dont have the required competency to offer a bid");
         compWarning.setBounds(10,490,1200,25);

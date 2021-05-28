@@ -3,7 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Vector;
-
+// a controller class for implmenting the dashboard mvc fature
 public class Controller implements ActionListener, Observer {
     private TutorBidModel model;
     private DashboardView view;
@@ -13,7 +13,7 @@ public class Controller implements ActionListener, Observer {
     private JButton viewOffer=new JButton("View offers for this bid");
     private JComboBox theBids,theOffers;
     private JLabel refreshMessage=new JLabel("");
-
+//constructor
     public Controller(DashboardView newView,String tutorId){
         view=newView;
         userId=tutorId;
@@ -28,7 +28,7 @@ public class Controller implements ActionListener, Observer {
         view.setModel(model);
         showallOffers();
     }
-
+//call model get the iffers and send it to view
     private void showallOffers(){
         final DefaultComboBoxModel offers = new DefaultComboBoxModel(model.getBidList());
         theBids=new JComboBox(offers);
@@ -55,6 +55,7 @@ public class Controller implements ActionListener, Observer {
             else{view.showCompWarning();}
         }
     }
+    //call method get offers for a bid selected and then call view to uodate
     private void showBidOffers(int index){
 
         ArrayList<String> offers = model.getBidOffers(index);
@@ -81,11 +82,12 @@ public class Controller implements ActionListener, Observer {
         view.setOfferComboBox(theOffers);
         view.showAllOffers();
     }
+    //show info abt the offer selected
     private void showOfferInfo(int index){
         String output=model.getBidOfferInfo(index);
         view.displayOffer(output);
     }
-    @Override
+    @Override  //called by the model
     public void update() {
         refreshMessage.setText("refreshing..");
         int index=theBids.getSelectedIndex();

@@ -17,7 +17,7 @@ import org.json.simple.parser.ParseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+//a class to view latest 5 contracts of every tutor with a studentt
 public class ViewLatestFiveContracts implements GuiAction, ActionListener {
 	private JPanel panel;
 	private JComboBox tutorList, contractList;

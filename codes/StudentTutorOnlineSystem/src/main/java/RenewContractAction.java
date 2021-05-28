@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
-
+//method that shows expired contracts to student to get them renewd
 public class RenewContractAction implements GuiAction, ActionListener {
     private String userId;
     private String userFullName;
@@ -27,6 +27,7 @@ public class RenewContractAction implements GuiAction, ActionListener {
     private ArrayList<String> reqiredComp=new ArrayList<>();
     private JTextArea message;
     private ViewLatestFiveContracts viewContracts;
+    //constructor
     public RenewContractAction(String id,String userName){
         userId=id;
         userFullName=userName;
@@ -70,7 +71,7 @@ public class RenewContractAction implements GuiAction, ActionListener {
 
         renewFrame.setVisible(true);
     }
-
+//check if contract has expired or terminated
     private boolean expiredOrTerminated(JsonNode node) throws ParseException {
 
         String today = new Date().toInstant().toString();
@@ -85,7 +86,7 @@ public class RenewContractAction implements GuiAction, ActionListener {
         boolean terminated=!node.get("terminationDate").toString().equals("null");
         return (close || terminated);
     }
-
+//display expired contracts
     private void showExpiredContracts(){
         HttpResponse<String> contResponse = GuiAction.initiateWebApiGET("contract", myApiKey);
         try {
@@ -117,7 +118,7 @@ public class RenewContractAction implements GuiAction, ActionListener {
             System.out.println(e.getStackTrace()[0].getLineNumber());
         }
     }
-
+//get info abt the expired contract
     private void getInfo(JsonNode userNode){
 
         String tutorName=userNode.get("firstParty").get("givenName").asText()+" "+userNode.get("firstParty").get("familyName").asText();

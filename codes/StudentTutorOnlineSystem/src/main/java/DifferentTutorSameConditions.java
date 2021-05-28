@@ -6,14 +6,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
-
+//subclass of contractrenewal used to renew contract with different tutor but same contract conditiond
 public class DifferentTutorSameConditions extends ContractRenewal implements ActionListener {
     private String subName,contractId,StudentID,Mons,requiredComp;
     private JLabel message,warning;
     private JFrame previousFrame, currentFrame;
     private JTextField username;
     private JButton button;
-
+//constructor
     public DifferentTutorSameConditions(JLabel jlabel, String contract, String subname, String stuid, String numOfMons,JFrame previousF,String rcomp){
         subName=subname;
         contractId=contract;
@@ -25,7 +25,7 @@ public class DifferentTutorSameConditions extends ContractRenewal implements Act
         execute();
 
     }
-
+//show warning if required or call method to store
     private void execute(){
         boolean subjectMatched=super.checkSubject(subName,contractId);
         if (subjectMatched){
@@ -42,7 +42,7 @@ public class DifferentTutorSameConditions extends ContractRenewal implements Act
 
         }
     }
-
+//method to get the username of the tutor chosen
     @Override
     void showMessage() {
         previousFrame.setVisible(false);
@@ -87,7 +87,7 @@ public class DifferentTutorSameConditions extends ContractRenewal implements Act
             checkTutor(username.getText());
         }
     }
-
+//check if tutor exists and also if he is competent
     private void checkTutor(String name){
         boolean found=false;
         String tutorId="";
@@ -118,7 +118,7 @@ public class DifferentTutorSameConditions extends ContractRenewal implements Act
 
 
     }
-
+//show warning to abt the tutor selected
     private void tutorWarning(String msg,Color color){
         warning.setText(msg);
         warning.setForeground(color);

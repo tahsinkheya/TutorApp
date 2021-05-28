@@ -6,15 +6,13 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
+
 import java.util.Base64;
 
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+
 
 
 public class OnlineMatchingClient implements ActionListener {
@@ -84,6 +82,7 @@ public class OnlineMatchingClient implements ActionListener {
 
 
     }
+    //method to decode Jwt
     private JsonNode decodeJwt(String token){
         //decode the jwt to get user info
         String[] chunks = token.split("\\.");
