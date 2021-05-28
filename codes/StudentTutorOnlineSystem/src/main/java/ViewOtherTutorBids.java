@@ -24,17 +24,18 @@ public class ViewOtherTutorBids implements ActionListener {
     private ArrayList<String> offerInfo = new ArrayList<String>();
 
 
-
-
     public ViewOtherTutorBids(String bidid, String userid) {
         bidId=bidid;
         userId=userid;
         showUI();
     }
+    //getter methods for instance variable
+    private String getBidId(){return bidId;}
+    private String getuserId(){return userId;}
     //get offers to a bid if the tutor id is not same
     private void getOffer(){
         // get all  messages of the bid
-        String endpoint="bid/"+bidId+"?fields=messages";
+        String endpoint="bid/"+getBidId()+"?fields=messages";
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
 
         try {
@@ -45,7 +46,7 @@ public class ViewOtherTutorBids implements ActionListener {
                     String  msgSender = msgNode.get("poster").get("userName").toString();
                     String  msgSenderId = GuiAction.removeQuotations(msgNode.get("poster").get("id").toString());
                     //check thats its not this tutor
-                    if (msgSenderId.contains(userId)==false) {
+                    if (msgSenderId.contains(getuserId())==false) {
                         //check if there is any other offer from this tutor
                         int occurrences = 0;
                         if (tutorids.size() != 0) {

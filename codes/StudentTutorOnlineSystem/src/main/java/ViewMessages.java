@@ -19,19 +19,19 @@ public class ViewMessages implements ActionListener {
     private Vector newComboBoxItems = new Vector();
     private JComboBox moreOffers,allRates;
     private JTextArea offerDetails;
-    private JLabel warning,newWarning,offerWarning;
+    private JLabel warning,newWarning,offerWarning, contWarning;
     private ArrayList<String> senders = new ArrayList<String>();
     private JTextField field,weeklySeeion,hours,rate;
     private String studentName;
     private String acceptedTutor;
-
+    private JTextField contDurationInput;
+    private JPanel panel;
+    
 //constructor
     public ViewMessages(String bidid, String userid) {
         bidId = bidid;
         userId = userid;
-
     }
-
     /*method to get all tutor who sent messages*/
     private void getAllSenders() {
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("message", GuiAction.myApiKey);
@@ -62,10 +62,10 @@ public class ViewMessages implements ActionListener {
         //show new frame
         newFrame = new JFrame("View Offer Details");
         // Setting the width and height of frame
-        newFrame.setSize(900, 700);
+        newFrame.setSize(900, 1000);
         newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel panel = new JPanel();
+        panel = new JPanel();
         // adding panel to frame
         newFrame.add(panel);
         panel.setLayout(null);
@@ -115,6 +115,16 @@ public class ViewMessages implements ActionListener {
         text.setBounds(10, 480, 700, 25);
         panel.add(text);
 
+        getMessageUi();
+
+        newWarning = new JLabel();
+        newWarning.setBounds(10, 600, 700, 25);
+        panel.add(newWarning);
+        newFrame.setVisible(true);
+
+    }
+    //displaly ui related to getting message
+    private void getMessageUi(){
         field=new JTextField(100);
         field.setBounds(10,510,700,25);
         panel.add(field);
@@ -126,115 +136,104 @@ public class ViewMessages implements ActionListener {
         sendMsg.setEnabled(false);
         panel.add(sendMsg);
 
+
         select = new JButton("Select this Tutor and close request");
         select.setBounds(10, 570, 300, 25);
         select.addActionListener(this);
         //this will be enabled after selecting a tutor
         select.setEnabled(false);
         panel.add(select);
+    }
 
-        newWarning = new JLabel();
-        newWarning.setBounds(10, 600, 700, 25);
-        panel.add(newWarning);
-        newFrame.setVisible(true);
+    // a method thats called when a button is cliskec to show messages from a selected tutor
+    private void selectedTutorMessages(){
+        if (senders.size() == 0) {
+            //no messages to show
+            warning.setText("no tutor has sent any messages for this bid");
+        } else {
+            sendMsg.setEnabled(true);
+            select.setEnabled(true);
+            int index = moreOffers.getSelectedIndex();
+            String tutorId = senders.get(index);
+            viewMessages(tutorId, userId, bidId);
+        }
+    }
+    //a method to store message by the student
+    private void storeMessage(){
+        String msg=field.getText();
+        if (msg.equals("")){
+            warning.setText("please enter the message you want to send");
+            warning.setForeground(Color.RED);
+        }
+        else{
+            int index = moreOffers.getSelectedIndex();
+            String tutorId = senders.get(index);
 
+            String jsonString = null;
+            // create the message object
+            JSONObject msgInfo=new JSONObject();
+            msgInfo.put("bidId", bidId);
+            msgInfo.put("posterId", userId);
+            msgInfo.put("datePosted", new Date().toInstant().toString());
+            msgInfo.put("content", studentName+": "+msg);
+            JSONObject additionalInfo=new JSONObject();
+            additionalInfo.put("tutorId",tutorId);
+            msgInfo.put("additionalInfo", additionalInfo);
+
+            // convert message to JSON string
+            jsonString = msgInfo.toString();
+            HttpResponse<String> postResponse = GuiAction.updateWebApi("message",GuiAction.myApiKey,jsonString);
+            newWarning.setText("message sent!");
+
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         //close the main frame
         if (e.getSource() == closeBtn) {
-            newFrame.setVisible(false);
-        }
+            newFrame.setVisible(false); }
         //view messages from the selcted sender
         else if (e.getSource() == offerView) {
-            if (senders.size() == 0) {
-                //no messages to show
-                warning.setText("no tutor has sent any messages for this bid");
-            } else {
-                sendMsg.setEnabled(true);
-                select.setEnabled(true);
-                int index = moreOffers.getSelectedIndex();
-                String tutorId = senders.get(index);
-                viewMessages(tutorId, userId, bidId);
-            }
-        }
+            selectedTutorMessages(); }
         //store message
         else if(e.getSource()==sendMsg){
-            String msg=field.getText();
-            if (msg.equals("")){
-                warning.setText("please enter the message you want to send");
-                warning.setForeground(Color.RED);
-            }
-            else{
-                int index = moreOffers.getSelectedIndex();
-                String tutorId = senders.get(index);
-
-                String jsonString = null;
-                // create the message object
-                JSONObject msgInfo=new JSONObject();
-                msgInfo.put("bidId", bidId);
-                msgInfo.put("posterId", userId);
-                msgInfo.put("datePosted", new Date().toInstant().toString());
-                msgInfo.put("content", studentName+": "+msg);
-                JSONObject additionalInfo=new JSONObject();
-                additionalInfo.put("tutorId",tutorId);
-                msgInfo.put("additionalInfo", additionalInfo);
-
-                // convert message to JSON string
-                jsonString = msgInfo.toString();
-                HttpResponse<String> postResponse = GuiAction.updateWebApi("message",GuiAction.myApiKey,jsonString);
-                newWarning.setText("message sent!");
-
-            }
-        }
+            storeMessage(); }
         //tutor selction
         else if(e.getSource()==select){
             boolean x=checkContract(userId); //check if student already has 5 ocntracts
             if (x==false){
-                newWarning.setText("You already have 5 one-to-one contracts");
-            }
+                newWarning.setText("You already have 5 one-to-one contracts"); }
             else{
                 int index = moreOffers.getSelectedIndex();
                 String tutorId = senders.get(index);
                 newFrame.setVisible(false);
-                getCloseBidOfferDetails(tutorId);
-            }
+                getCloseBidOfferDetails(tutorId); }
         }
         //close the window for taking info abt the accepted offer
         else if(e.getSource()==newcloseBtn){
-            frame.setVisible(false);
-        }
+            frame.setVisible(false); }
         //the student has mentioned all details abt the offer selected
         else if(e.getSource()==confirm){
-            String newRate="RM: "+rate.getText()+" "+allRates.getSelectedItem();
-            String weeklyS=weeklySeeion.getText();
-            String horsPerLson=hours.getText();
-            if (newRate.equals("") | weeklyS.equals("") |horsPerLson.equals("")){
-                offerWarning.setText("please fill all the fields");
-                offerWarning.setForeground(Color.red);
-            }
-            else{
-                createContract(weeklyS,horsPerLson,newRate);
-                offerWarning.setText("contract creation in process, waiting for tutor");
-                offerWarning.setForeground(Color.BLUE);}
-
-        }
-
+            selectTutor(); }
     }
-    //if the student chooses a tutor then a contract is created
-    private void createContract(String weeklySess,String hrsperlsn,String rate){
-        //get the subject id from the bid id and find tutor q and tutor competency
-        //bid/gashd?fields=
-        String subName="";
-        String subId="";
-        HttpResponse<String> response = GuiAction.initiateWebApiGET("bid/"+bidId, GuiAction.myApiKey);
-        try {
-            ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
-            subName = userNode.get("subject").get("name").asText();
-            subId = userNode.get("subject").get("id").asText();}
-        catch (Exception e){
+
+    //  a metod for student to select a tutor and close bid
+    private void selectTutor(){
+        String newRate="RM: "+rate.getText()+" "+allRates.getSelectedItem();
+        String weeklyS=weeklySeeion.getText();
+        String horsPerLson=hours.getText();
+        if (newRate.equals("") | weeklyS.equals("") |horsPerLson.equals("")){
+            offerWarning.setText("please fill all the fields");
+            offerWarning.setForeground(Color.red);
         }
+        else{
+            createContract(weeklyS,horsPerLson,newRate);
+            offerWarning.setText("contract creation in process, waiting for tutor");
+            offerWarning.setForeground(Color.BLUE);}
+    }
+    //a method to find tutor competency
+    private int getTuteComp(String subName){
         //get tutor competency in the subject
         String endpoint = "user/"+acceptedTutor+"?fields=competencies.subject";
         int tutorcompetencyLevel = 0;
@@ -252,9 +251,11 @@ public class ViewMessages implements ActionListener {
             }
         }
         catch (Exception e){}
-
-        //get tutor qualification
-        endpoint = "user?fields=qualifications";
+        return tutorcompetencyLevel;
+    }
+    //a method to get a tutors qualification
+    private String getTuteQual(){
+        String endpoint = "user?fields=qualifications";
         String tutorQ = "";
         HttpResponse<String> newResonse = GuiAction.initiateWebApiGET(endpoint, GuiAction.myApiKey);
         try{
@@ -270,16 +271,52 @@ public class ViewMessages implements ActionListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (tutorQ.equals("")){
-            tutorQ="unknown";
-        }
-
-
-        OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,subId,subName,Integer.toString(tutorcompetencyLevel),weeklySess,hrsperlsn,rate,"","","","",tutorQ);
-        //create contract with first party to sign as student
-        createContractAction contract=new createContractAction(offer,"student",userId,bidId);
-        contract.storeContract();
+        return tutorQ;
     }
+    //if the student chooses a tutor then a contract is created
+    private void createContract(String weeklySess,String hrsperlsn,String rate){
+        //get the subject id from the bid id and find tutor q and tutor competency
+        String subName="";
+        String subId="";
+        String requiredComp="";
+        HttpResponse<String> response = GuiAction.initiateWebApiGET("bid/"+bidId, GuiAction.myApiKey);
+        try {
+            ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
+            subName = userNode.get("subject").get("name").asText();
+            subId = userNode.get("subject").get("id").asText();
+            requiredComp = userNode.get("additionalInfo").get("requiredCompetency").asText();}
+        catch (Exception e){
+        }
+        int tutorcompetencyLevel=getTuteComp(subName);
+        //get tutor qualification
+        String tutorQ=getTuteQual();
+        if (tutorQ.equals("")){
+            tutorQ="unknown"; }
+        OpenBidOffer offer=new OpenBidOffer(userId,acceptedTutor,"","");
+        offer.setClassInfo(weeklySess,hrsperlsn,rate,requiredComp);
+        offer.setExtraInfo("no","");
+        offer.setSubjectInfo(subId,subName,Integer.toString(tutorcompetencyLevel),tutorQ);
+        storeContract(offer);
+
+        
+    }
+    //calls createContractAction to store a contract
+    private void storeContract(OpenBidOffer offer){
+        //create contract with first party to sign as student
+        String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
+        if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
+            contWarning.setText(contExpiryDate);
+            contWarning.setForeground(Color.RED);
+            offerWarning.setVisible(false);
+        }
+        else {
+            createContractAction contract=new createContractAction(offer,"student",userId,bidId, contExpiryDate);
+            contract.storeContract();
+            offerWarning.setVisible(true);
+        }
+    }
+
+
 
 
 // displays a ui to get details abt the contract since close bid is communicated with messages
@@ -344,15 +381,36 @@ public class ViewMessages implements ActionListener {
         allRates = new JComboBox(rateTypes);
         allRates.setBounds(110, 260, 100, 25);
         newPanel.add(allRates);
-
+        
+        
+        // allow student to choose contract duration 
+        JLabel contDurationHeader = new JLabel("Please specify contract duration before selecting tutor");
+        contDurationHeader.setBounds(10,290,450,25);
+        contDurationHeader.setForeground(Color.BLUE);
+        newPanel.add(contDurationHeader);
+        
+        JLabel contDuration = new JLabel("Contract duration");
+        contDuration.setBounds(10,320,450,25);
+        newPanel.add(contDuration);
+        
+        
+        contDurationInput = new JTextField(20);
+        contDurationInput.setBounds(120, 320, 70, 25);
+        contDurationInput.setText("6");
+        newPanel.add(contDurationInput);
+        
+        contWarning = new JLabel();
+        contWarning.setBounds(200, 320, 500, 25);
+        newPanel.add(contWarning);
+        
         //add a close button
         confirm = new JButton("Confirm");
-        confirm.setBounds(10, 310, 100, 25);
+        confirm.setBounds(10, 350, 100, 25);
         confirm.addActionListener(this);
         newPanel.add(confirm);
 
         offerWarning = new JLabel("");
-        offerWarning.setBounds(10, 340, 1200, 25);
+        offerWarning.setBounds(10, 370, 1200, 25);
         newPanel.add(offerWarning);
 
         frame.setVisible(true);
@@ -405,34 +463,23 @@ public class ViewMessages implements ActionListener {
         //get all bid messages
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid/"+bidid+"?fields=messages", GuiAction.myApiKey);
         try {
-
             ObjectNode userNode = new ObjectMapper().readValue(userResponse.body(), ObjectNode.class);
-            String fname=GuiAction.removeQuotations(userNode.get("initiator").get("familyName").toString());
-            String gname=GuiAction.removeQuotations(userNode.get("initiator").get("givenName").toString());
-            studentName=gname+" "+fname;
+            studentName=GuiAction.removeQuotations(userNode.get("initiator").get("givenName").toString())+" "+GuiAction.removeQuotations(userNode.get("initiator").get("familyName").toString());
             for (JsonNode msgNode : userNode.get("messages")) {
                 //convert the srting date the message was posted to date
                 String msg=GuiAction.removeQuotations(msgNode.get("content").toString());
                 String datePosted=GuiAction.removeQuotations(msgNode.get("datePosted").toString());
-                SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                Date newDate = sourceFormat.parse(datePosted);
+                Date newDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(datePosted);
                 //we want the messages send by the tutor
                 if (msgNode.get("poster").get("id").toString().contains(tutorId)){
-                    treeMap.put(newDate,msg);
-                }
+                    treeMap.put(newDate,msg); }
                 //we want what the student sent to this tutor-- additional info of message contains the id of the tutor the message is sent to
                 else if (msgNode.get("poster").get("id").toString().contains(studentId) && msgNode.get("additionalInfo").toString().equals("{}")==false){
                     String messagedTutor=msgNode.get("additionalInfo").get("tutorId").toString();
                     if (messagedTutor.contains(tutorId)){
                         String message=GuiAction.removeQuotations(msgNode.get("content").toString());
-                        treeMap.put(newDate,message);
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-        }
-
+                        treeMap.put(newDate,message); } } }
+        } catch (Exception e) {}
         return treeMap;
     }
 }

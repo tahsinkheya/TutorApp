@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +33,9 @@ public class ViewRequestAction implements GuiAction, ActionListener {
         fullName=name;
 
     }
+    //getter methods
+    private String getUserId(){return userId;}
+    private String getfullName(){return fullName;}
     /* Show the tutor all the requests made by students  */
     @Override
     public void show() {
@@ -81,17 +85,6 @@ public class ViewRequestAction implements GuiAction, ActionListener {
         warning=new JLabel();
         warning.setBounds(10,240,1200,25);
         panel.add(warning);
-
-
-        /*
-        testBtn = new JButton("Test");
-        testBtn.setBounds(10, 280, 80, 25);
-        testBtn.addActionListener(this);
-        panel.add(testBtn);
-        */
-
-
-
         frame.setVisible(true);
 
     }
@@ -101,29 +94,29 @@ public class ViewRequestAction implements GuiAction, ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == viewDetails) {
             //show request details
-            if (bidType.size()!=0) {
-                String bidid = getSelectedRequest();
-                String bidTypeOfselected = getSelectedBidType();
-                int selectedRequestPos = allRequests.getSelectedIndex();
-                String selectedStudentId=studentId.get(selectedRequestPos);
-
-                if (bidTypeOfselected.contains("open")) {
-                    //create open bid action
-                    BidAction b = new OpenBidAction(bidid, userId, fullName);
-                } else {
-                    System.out.println(selectedStudentId);
-                    BidAction c = new CloseBidAction(bidid, userId,fullName,selectedStudentId);
-                }
-            }
-            else{
-                warning.setText("there are no active requests available");
-                warning.setForeground(Color.red);
-            }
+            shoeReqDetail();
 
         }
         else if (e.getSource()==closeBtn){
             frame.setVisible(false);
         }
+    }
+// a method that is called when a button is clisked to show bid details by using BIDAction class
+    private void shoeReqDetail(){
+        if (bidType.size()!=0) {
+            String bidid = getSelectedRequest();
+            String bidTypeOfselected = getSelectedBidType();
+            int selectedRequestPos = allRequests.getSelectedIndex();
+            String selectedStudentId=studentId.get(selectedRequestPos);
+            if (bidTypeOfselected.contains("open")) {
+                //create open bid action  and close depending on the type
+                new OpenBidAction(bidid, getUserId(), getfullName()); }
+            else {
+                new CloseBidAction(bidid, getUserId(),getfullName(),selectedStudentId); }
+        }
+        else{
+            warning.setText("there are no active requests available");
+            warning.setForeground(Color.red); }
     }
     //gets all student requests and put them in the drop down menu
     private void showAllStudentRequests(){
@@ -138,50 +131,46 @@ public class ViewRequestAction implements GuiAction, ActionListener {
                         String bidCloseTime = "";
                         // this will throw an exception. The requested bid always has additional info, so this exception will not cause any problem
                         if(bidNode.get("additionalInfo").equals(null)) {
-                            System.out.println("Additional info is null");
-                        }
+                            System.out.println("Additional info is null"); }
                         else {
                             try{
                                 closeTimeDb = bidNode.get("additionalInfo").get("requestClosesAt").toString();
-                                bidCloseTime = GuiAction.removeQuotations(closeTimeDb);
-                            }
+                                bidCloseTime = GuiAction.removeQuotations(closeTimeDb); }
                             catch(Exception e){System.out.println("requestClosesAt not found");}
 //
                         }
 
-                        String status = bidNode.get("type").toString();
-                        String requester = node.get("userName").toString();
-                        String subject = bidNode.get("subject").get("name").toString();
-                        String topic = bidNode.get("subject").get("description").toString();
-                        String output = "Status: "+status+"    "+"Requested by: "+requester+"    "+ "Subject: "+subject  +"    "+ "Topic: "+ topic+"    " + "Closes at: " + bidCloseTime;
-                        // put all available bids in the JCombo Box
-                        //make sure only active bids are shown by checking again
-                        if (closeTimeDb!=""){
-                            String today = new Date().toInstant().toString();
-                            SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                            Date todayDate = sourceFormat.parse(today);
-                            Date endDate = sourceFormat.parse(bidCloseTime);
-                            if (todayDate.after(endDate)==false){
-                                comboBoxItems.add(output);
-                                String bidId = bidNode.get("id").toString();
-                                allStudentBidList.add(bidId);
-                                bidType.add(status);
-                                String studId=node.get("id").toString();
-                                studentId.add(GuiAction.removeQuotations(studId));
-                            }
-
-
-                        }
+                        putOpenRequests(bidNode,node,closeTimeDb,bidCloseTime);
                     }
                 }
             }
         }
         catch(Exception e) {
             System.out.println(e.getCause());
-            System.out.println(e.getStackTrace()[0].getLineNumber());
         }
     }
-
+//a method to put details abt an active request in the jcombobox
+    private void putOpenRequests(JsonNode bidNode,JsonNode node,String closeTimeDb, String bidCloseTime ) throws ParseException {
+        String status = bidNode.get("type").toString();
+        String requester = node.get("userName").toString();
+        String subject = bidNode.get("subject").get("name").toString();
+        String topic = bidNode.get("subject").get("description").toString();
+        String output = "Status: "+status+"    "+"Requested by: "+requester+"    "+ "Subject: "+subject  +"    "+ "Topic: "+ topic+"    " + "Closes at: " + bidCloseTime;
+        // put all available bids in the JCombo Box
+        //make sure only active bids are shown by checking again
+        if (closeTimeDb!=""){
+            String today = new Date().toInstant().toString();
+            SimpleDateFormat sourceFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            Date todayDate = sourceFormat.parse(today);
+            Date endDate = sourceFormat.parse(bidCloseTime);
+            if (todayDate.after(endDate)==false){
+                comboBoxItems.add(output);
+                String bidId = bidNode.get("id").toString();
+                allStudentBidList.add(bidId);
+                bidType.add(status);
+                String studId=node.get("id").toString();
+                studentId.add(GuiAction.removeQuotations(studId)); } }
+    }
     /* Method to get the bid id of the request selected from JComboBox */
     private String getSelectedRequest() {
         // get the index of the selected request

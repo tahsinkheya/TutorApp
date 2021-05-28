@@ -25,12 +25,14 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
     private ArrayList<String> bids = new ArrayList<String>();
     private ArrayList<String> students = new ArrayList<String>();
     private ArrayList<String> tutorNames = new ArrayList<String>();
+    private JPanel panel;
 
 //CONSTRUCTOR
     public ViewMessagesToTutorAction(String userId) {
         tutorId=userId;
     }
-
+//getter for instance variable
+    private String getTutorId(){return tutorId;}
     @Override
     public void show() {
         //show new frame
@@ -40,7 +42,7 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
         newFrame.setSize(900, 700);
         newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel panel = new JPanel();
+        panel = new JPanel();
         // adding panel to frame
         newFrame.add(panel);
         panel.setLayout(null);
@@ -85,7 +87,11 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
         warning = new JLabel();
         warning.setBounds(10, 210, 700, 25);
         panel.add(warning);
+        showMessageUI();
 
+    }
+    //a method to show ui that has getting message related stuff
+    private void showMessageUI(){
         JLabel text=new JLabel("if you want to send a message to this student please write a message below and click Send");
         text.setBounds(10, 480, 700, 25);
         panel.add(text);
@@ -105,14 +111,12 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
         newWarning.setBounds(10, 570, 700, 25);
         panel.add(newWarning);
         newFrame.setVisible(true);
-
     }
 //a method to get all the messages connected to a bid if its form the student or this tutor
     private void getAllbidMessage(){
         HttpResponse<String> userResponse = GuiAction.initiateWebApiGET("bid?fields=messages", myApiKey);
         try {
             ObjectNode[] userNodes = new ObjectMapper().readValue(userResponse.body(), ObjectNode[].class);
-            System.out.println(userResponse.statusCode());
             for (ObjectNode node : userNodes) {
                 //check if bud is of type close
                 String bidType=node.get("type").asText();
@@ -120,53 +124,35 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
                     for (JsonNode msgNode : node.get("messages")) {
                         String tutor = msgNode.get("poster").get("id").asText();
                         // if senders and this tutors id is same then we are gonna add this bid as an option
-                        if (tutor.contains(tutorId)){
+                        if (tutor.contains(getTutorId())){
                             String newBidId=node.get("id").asText();
                             if (bids.contains(newBidId)==false){
-                                String studentId=node.get("initiator").get("id").asText();
-                                students.add(studentId);
-                                bids.add(newBidId);
-                                String fullname=GuiAction.removeQuotations(msgNode.get("poster").get("givenName").toString())+" "+GuiAction.removeQuotations(msgNode.get("poster").get("familyName").toString());
-                                tutorNames.add(fullname);
-                                String studentusername=node.get("initiator").get("userName").asText();
-                                String subject=node.get("subject").get("name").asText();
-                                String desc=node.get("subject").get("description").asText();
-                                newComboBoxItems.add("subject: "+subject+" "+desc+" by "+studentusername);
-                            }
-
-                        }
-                    }
+                                getMessageDetails(msgNode,node,newBidId); } } }
                 }
 
             }
 
         }catch(Exception e){}
-
     }
-
+// A HELPER METHOD TO PUT message detials in vector for later use
+    private void getMessageDetails(JsonNode msgNode,JsonNode node,String newBidId){
+        String studentId=node.get("initiator").get("id").asText();
+        students.add(studentId);
+        bids.add(newBidId);
+        String fullname=GuiAction.removeQuotations(msgNode.get("poster").get("givenName").toString())+" "+GuiAction.removeQuotations(msgNode.get("poster").get("familyName").toString());
+        tutorNames.add(fullname);
+        String studentusername=node.get("initiator").get("userName").asText();
+        String subject=node.get("subject").get("name").asText();
+        String desc=node.get("subject").get("description").asText();
+        newComboBoxItems.add("subject: "+subject+" "+desc+" by "+studentusername);
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==closeBtn){
             newFrame.setVisible(false);
         }
         else if (e.getSource()==offerView){
-            if (bids.size()==0){
-                warning.setText("you dont have any messages to view");
-            }
-            else{
-                sendMsg.setEnabled(true);
-                int index=moreOffers.getSelectedIndex();
-                String bidId=bids.get(index);
-                String studentId=students.get(index);
-                ViewMessages v= new ViewMessages(bidId,tutorId);
-                TreeMap<Date,String> tree=v.getMessages(tutorId,studentId,bidId);
-                Iterator itr=tree.values().iterator();
-                String output="";
-                //iterate through TreeMap values iterator
-                while(itr.hasNext())
-                    output+=itr.next()+"\n";
-                offerDetails.setText(output);
-                }
+            viewOfferMessages();
         }
         else if(e.getSource()==sendMsg){
             String msg=field.getText();
@@ -177,14 +163,34 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
                 newWarning.setText("please enter the text you want to send");
             }
             else{
-                storeMessage(msg,bidId,tutorId,tutorNames.get(index),studentId);
+                storeMessage(msg,bidId,getTutorId(),tutorNames.get(index),studentId);
             }
         }
 
     }
+    //a helper method thats called when a button is clicked to displau messages
+    private void viewOfferMessages(){
+        if (bids.size()==0){
+            warning.setText("you dont have any messages to view");
+        }
+        else{
+            sendMsg.setEnabled(true);
+            int index=moreOffers.getSelectedIndex();
+            String bidId=bids.get(index);
+            String studentId=students.get(index);
+            ViewMessages v= new ViewMessages(bidId,getTutorId());
+            TreeMap<Date,String> tree=v.getMessages(getTutorId(),studentId,bidId);
+            Iterator itr=tree.values().iterator();
+            String output="";
+            //iterate through TreeMap values iterator
+            while(itr.hasNext())
+                output+=itr.next()+"\n";
+            offerDetails.setText(output);
+        }
+    }
 // a method to store messages in the database
     private void storeMessage(String msg,String bidId,String userId,String userFullName,String studentId){
-        String jsonString = null;
+        String jsonString ;
         // create the message object
         JSONObject msgInfo=new JSONObject();
         msgInfo.put("bidId", bidId);
@@ -198,7 +204,7 @@ public class ViewMessagesToTutorAction implements GuiAction , ActionListener {
         // convert message to JSON string
         jsonString = msgInfo.toString();
         HttpResponse<String> userResponse=GuiAction.updateWebApi("message",myApiKey,jsonString);
-        System.out.println(userResponse.statusCode());
+
         warning.setText("your response has been saved successfully");
     }
 }

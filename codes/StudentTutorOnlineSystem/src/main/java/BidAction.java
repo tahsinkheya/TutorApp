@@ -8,56 +8,55 @@ import java.util.ArrayList;
 * base class for tutors to call when they want to view open and close bids*/
 public abstract class BidAction {
     protected static String myApiKey=OnlineMatchingClient.myApiKey;
-    //method called by subclasses to get info abt the bid
-    public ArrayList<String> getBidInfo(String bidId){
-        ArrayList<String> bidInfo = new ArrayList<String>();
-        //initialise strings
-        String endpoint = "bid/"+bidId;
-        String subName = "";
-        String subDesc = "";
-        String comp = "";
-        String weeklysess = "";
-        String hoursperless = "";
-        String rate = "";
-        String initiatorId = "";
-        String subId = "";
-        String initiatorgname = "";
-        String initiatorfname = "";
-        HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, myApiKey);
-        try {
-            ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
-
-            //get all info abt bid and store them in the arraylist
-            String subjectName = userNode.get("subject").get("name").toString();
-            String subjectDesc = userNode.get("subject").get("description").toString();
-            subId = userNode.get("subject").get("id").toString();
-            subName = GuiAction.removeQuotations(subjectName);
-            subDesc = GuiAction.removeQuotations(subjectDesc);
-            comp=userNode.get("additionalInfo").get("requiredCompetency").toString();
-            weeklysess=userNode.get("additionalInfo").get("weeklySessions").toString();
-            hoursperless=userNode.get("additionalInfo").get("hoursPerLesson").toString();
-            initiatorId=userNode.get("initiator").get("id").toString();
-            initiatorgname=userNode.get("initiator").get("givenName").toString();
-            initiatorfname=userNode.get("initiator").get("familyName").toString();
-
-            rate=userNode.get("additionalInfo").get("rate").toString();
-
-
-        }
-        catch (Exception e){
-            System.out.println("Error!!!");
-            System.out.println(e.getCause());
-        }
-        String studentFullName=GuiAction.removeQuotations(initiatorgname)+" " +GuiAction.removeQuotations(initiatorfname);
+    private ArrayList<String> bidInfo = new ArrayList<String>();
+    private void getSubInfo(ObjectNode userNode){
+        String subjectName = userNode.get("subject").get("name").toString();
+        String subjectDesc = userNode.get("subject").get("description").toString();
+        String subName = GuiAction.removeQuotations(subjectName);
+        String subDesc = GuiAction.removeQuotations(subjectDesc);
         bidInfo.add(subName);
         bidInfo.add(subDesc);
+    }
+
+    private void getLessonInfo(ObjectNode userNode){
+        String comp=userNode.get("additionalInfo").get("requiredCompetency").toString();
+        String weeklysess=userNode.get("additionalInfo").get("weeklySessions").toString();
+        String hoursperless=userNode.get("additionalInfo").get("hoursPerLesson").toString();
+        String rate=userNode.get("additionalInfo").get("rate").toString();
         bidInfo.add(GuiAction.removeQuotations(comp));
         bidInfo.add(GuiAction.removeQuotations(weeklysess));
         bidInfo.add(GuiAction.removeQuotations(hoursperless));
         bidInfo.add(GuiAction.removeQuotations(rate));
+    }
+
+    //method called by subclasses to get info abt the bid
+    public ArrayList<String> getBidInfo(String bidId){
+        //initialise strings
+        String endpoint = "bid/"+bidId;
+        String initiatorId = "";
+        String subId = "";
+        String initiatorgname = "";
+        String initiatorfname = "";
+        String requireComp="";
+        HttpResponse<String> response = GuiAction.initiateWebApiGET(endpoint, myApiKey);
+        try {
+            ObjectNode userNode = new ObjectMapper().readValue(response.body(), ObjectNode.class);
+            //get all info abt bid and store them in the arraylist
+            getSubInfo(userNode);
+            getLessonInfo(userNode);
+            subId = userNode.get("subject").get("id").toString();
+            initiatorId=userNode.get("initiator").get("id").toString();
+            initiatorgname=userNode.get("initiator").get("givenName").toString();
+            initiatorfname=userNode.get("initiator").get("familyName").toString();
+            requireComp=userNode.get("additionalInfo").get("requiredCompetency").asText();
+             }
+        catch (Exception e){
+            System.out.println("Error!!!"); }
+        String studentFullName=GuiAction.removeQuotations(initiatorgname)+" " +GuiAction.removeQuotations(initiatorfname);
         bidInfo.add(GuiAction.removeQuotations(initiatorId));
         bidInfo.add(GuiAction.removeQuotations(subId));
         bidInfo.add(studentFullName);
+        bidInfo.add(requireComp);
         return bidInfo;
     }
     //method called by subclasses to get tutor qualifications when making a bid offer

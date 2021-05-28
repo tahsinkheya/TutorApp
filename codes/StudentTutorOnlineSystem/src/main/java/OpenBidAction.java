@@ -2,16 +2,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInput;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 /**
@@ -23,12 +28,13 @@ public class OpenBidAction extends BidAction implements ActionListener {
     private String userId;
 
     private JPanel panel;
-    private JLabel subName,subDesc,requiredComp,weekSess,Hlp,rate;
+    private JLabel subName,subDesc,requiredComp,weekSess,Hlp,rate, contWarning;
     private JButton viewOtherBids,makeBidOffer,buyOutBtn;
     private JFrame frame;
     private static JLabel competencyAlert;
     private ArrayList<String> bidInfo;
     private String userFullName;
+    private JTextField contDurationInput;
     public OpenBidAction(String bidId, String uId, String fname){
         bidid=bidId;
         userId=uId;
@@ -85,7 +91,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
         rate.setBounds(10,200,340,25);
         panel.add(rate);
 
-        viewOtherBids = new JButton("View other offers to this request");
+        viewOtherBids = new JButton("Subscribe to this Bid");
         viewOtherBids.setBounds(10, 230, 300, 25);
         viewOtherBids.addActionListener(this);
         panel.add(viewOtherBids);
@@ -96,18 +102,38 @@ public class OpenBidAction extends BidAction implements ActionListener {
         panel.add(makeBidOffer);
 
 
-        competencyAlert = new JLabel();
-        competencyAlert.setBounds(10,350,450,25);
-        panel.add(competencyAlert);
-
-
+        // allow tutor to choose contract duration 
+        JLabel contDuration = new JLabel("Please specify contract duration before buying out");
+        contDuration.setBounds(10,310,450,25);
+        contDuration.setForeground(Color.BLUE);
+        panel.add(contDuration);
+        
+        contDuration = new JLabel("Contract duration");
+        contDuration.setBounds(10,350,450,25);
+        panel.add(contDuration);
+        
+        
+        contDurationInput = new JTextField(20);
+        contDurationInput.setBounds(120, 350, 70, 25);
+        contDurationInput.setText("6");
+        panel.add(contDurationInput);
+        
+        contWarning = new JLabel();
+        contWarning.setBounds(200, 350, 500, 25);
+        panel.add(contWarning);
+        		
+        		
         buyOutBtn = new JButton("Buy Out Bid");
-        buyOutBtn.setBounds(10, 310, 300, 25);
+        buyOutBtn.setBounds(10, 400, 300, 25);
         buyOutBtn.addActionListener(this);
         panel.add(buyOutBtn);
+        
+
+        competencyAlert = new JLabel();
+        competencyAlert.setBounds(10,430,450,25);
+        panel.add(competencyAlert);
+
         frame.setVisible(true);
-
-
 
     }
 
@@ -132,7 +158,6 @@ public class OpenBidAction extends BidAction implements ActionListener {
         }
         catch (Exception e){
             System.out.println("Error!!!");
-            System.out.println(e.getCause());
         }
 
         // competency level is zero
@@ -146,10 +171,7 @@ public class OpenBidAction extends BidAction implements ActionListener {
      * */
     private boolean isCompetent(int tutorCompetency) {
         boolean retVal=false;
-        System.out.println("Inside the Competency check function");
         int competencyRequired=Integer.parseInt(bidInfo.get(2));
-        System.out.println(competencyRequired);
-        System.out.println(tutorCompetency);
         int twoLvlHigher=competencyRequired+2;
         if (tutorCompetency>=twoLvlHigher){
             return true;
@@ -164,50 +186,120 @@ public class OpenBidAction extends BidAction implements ActionListener {
             String tutorQualification=TutorQualification(userId);
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
+
             if (isCompetent(level)==false){
-                competencyAlert.setText("You do not have the required competency to bid on this request");
-                competencyAlert.setForeground(Color.RED);
+                showMessage("You do not have the required competency to bid on this request","red");
             }
 
             else{
                 //can bid
-                //String tutorQualification=TutorQualification();
                 frame.setVisible(false);
-                MakeOpenBidOffer newBid=new MakeOpenBidOffer(bidid,userId,level,tutorQualification);
+                new MakeOpenBidOffer(bidid,userId,level,tutorQualification);
             }
 
         }
         else if (e.getSource()==viewOtherBids){
-            frame.setVisible(false);
-            ViewOtherTutorBids offer=new ViewOtherTutorBids(bidid,userId);
+            showMessage("you are now subscribed to this open bid.","blue");
+            subscribe();
         }
         else if (e.getSource()==buyOutBtn){
             String subName = bidInfo.get(0);
             int level = findTutorCompetency(subName);
             if (isCompetent(level)==false){
-                competencyAlert.setText("You do not have the required competency to buy out this bid");
-                competencyAlert.setForeground(Color.RED);
+                showMessage("You do not have the required competency to buy out this bid","red");
             }
             else{
                 //can create contract and wait for student to sign
                 createContract(userId,level);
-                competencyAlert.setText("contract creation in process. waiting for student");
-                competencyAlert.setForeground(Color.blue);
+                showMessage("contract creation in process. waiting for student","blue");
             }
 
+        }
+    }
+
+    //a method that allows tutors to subsribes to openbids
+    private void subscribe() {
+        String endpoint = "user/" + userId;
+        int count = 0;
+        JSONObject jsonObj=new JSONObject();
+        System.out.println(bidid);
+        jsonObj.put("bidId",bidid);
+        jsonObj.put("bidInfo","by "+bidInfo.get(8)+" for "+bidInfo.get(0)+" : "+bidInfo.get(1));
+        JSONObject additionalInfo=new JSONObject();
+        JSONObject[] arr=null;
+        HttpResponse<String> userResponse = GuiAction.initiateWebApiGET(endpoint, myApiKey);
+        try {
+            JsonNode jsonNode = new ObjectMapper().readValue(userResponse.body(), JsonNode.class);
+            if (jsonNode.get("additionalInfo").toString().equals("{}") == true) {
+                count = 1;
+                arr=new JSONObject[1];
+                arr[0]= jsonObj;}
+            else{
+                count=Integer.parseInt(jsonNode.get("additionalInfo").get("count").asText())+1;
+                String previousBid=jsonNode.get("additionalInfo").get("bids").asText();
+                String joinedMinusBrackets = previousBid.substring( 1, previousBid.length() - 1);
+                String[] bidsSubscribedTo = joinedMinusBrackets.split( ", ");
+                arr=new JSONObject[bidsSubscribedTo.length+1];
+                arr[0]=jsonObj;
+                int loopVar=1;
+                for (String bid: bidsSubscribedTo){ // add the previos bids
+                    //convert to json
+                    JSONParser parser = new JSONParser();
+                    JSONObject json = (JSONObject) parser.parse(bid);
+                    arr[loopVar]=json;
+                    loopVar=loopVar+1;
+                }
+
+            }
+        }catch(Exception e){System.out.println(e.getMessage());
+            System.out.println(e.getStackTrace()[0].getLineNumber());
+        }
+        JSONObject userInfo=new JSONObject();
+        additionalInfo.put("bids", Arrays.toString(arr));
+        additionalInfo.put("count",Integer.toString(count));
+        userInfo.put("additionalInfo",additionalInfo);
+        GuiAction.patchWebApi(endpoint,userInfo.toString());
+    }
+
+//method to show warning to user
+    private void showMessage(String msg,String colour){
+        competencyAlert.setText(msg);
+        if (colour.contains("blue")){
+            competencyAlert.setForeground(Color.blue);}
+        else{
+            competencyAlert.setForeground(Color.red);
         }
     }
     //method used by tutor to create contract when buying out a bid
     private void createContract(String userId,int tuteCompetency){
         //lets create a OpenBidOffer and pass it to the createcontractaction class
         String studentId=bidInfo.get(6);
+        OpenBidOffer offer=creatOffer(userId,tuteCompetency);
+        //tutor is the first party to sign
+        String contExpiryDate = GuiAction.getContractExpiryDate(contDurationInput.getText().toString());
+        if(contExpiryDate.equals("Contract duration must be atleast 3 months")) {
+        	contWarning.setText(contExpiryDate);
+        	contWarning.setForeground(Color.RED);
+        	competencyAlert.setVisible(false);
+        }
+        else {
+        	createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid, contExpiryDate);
+            contract.storeContract();
+            competencyAlert.setVisible(true);
+        }
+
+    }
+    //a method to create an open bid offer instance for use later
+    private OpenBidOffer creatOffer(String userId,Integer tuteCompetency){
+        String studentId=bidInfo.get(6);
         String tutorQualification=TutorQualification(userId);
         String tutorCompetency=Integer.toString(tuteCompetency);
-        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(7),bidInfo.get(1),tutorCompetency,bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(8),userFullName,"no","",tutorQualification);
-        //tutor is the first party to sign
-        createContractAction contract=new createContractAction(offer,"tutor",studentId,bidid);
-        contract.storeContract();
-
+        //set all info
+        OpenBidOffer offer=new OpenBidOffer(userId,studentId,bidInfo.get(8),userFullName);
+        offer.setClassInfo(bidInfo.get(3),bidInfo.get(4),bidInfo.get(5),bidInfo.get(9));
+        offer.setExtraInfo("no","");
+        offer.setSubjectInfo(bidInfo.get(7),bidInfo.get(1),tutorCompetency,tutorQualification);
+        return offer;
     }
 
 

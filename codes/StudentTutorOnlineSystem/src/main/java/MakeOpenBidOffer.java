@@ -34,6 +34,13 @@ public class MakeOpenBidOffer implements ActionListener {
         userId=userid;
         tutorComp=comp;
         tutorQ=tutorQuali;
+        showUI();
+
+
+
+    }
+    //method to shoe the UI
+    private void showUI(){
         frame = new JFrame();
         // Setting the width and height of frame
         frame.setSize(900, 600);
@@ -116,8 +123,6 @@ public class MakeOpenBidOffer implements ActionListener {
 
 
         frame.setVisible(true);
-
-
     }
 
     @Override
@@ -134,30 +139,9 @@ public class MakeOpenBidOffer implements ActionListener {
                 warning.setText("Please fill in the details about rate, duration and session");
             }
             else{
-                String jsonString = null;
                 // create the message object
-                JSONObject msgInfo=new JSONObject();
-                msgInfo.put("bidId", bidid);
-                msgInfo.put("posterId", userId);
-                msgInfo.put("datePosted", new Date().toInstant().toString());
-                msgInfo.put("content", "an open bid offer");
-                JSONObject additionalInfo=new JSONObject();
-                additionalInfo.put("rate","RM:"+rate+" "+rateType);
-                additionalInfo.put("duration",duration);
-                additionalInfo.put("numberOfSession",sess);
-                additionalInfo.put("extraInfo",extra);
-                additionalInfo.put("freeLesson",freeLess);
-                additionalInfo.put("tutorComp",String.valueOf(tutorComp));
-                additionalInfo.put("tutorQualification",tutorQ);
-                msgInfo.put("additionalInfo", additionalInfo);
-
-                // convert message to JSON string
-                jsonString = msgInfo.toString();
-                postMessage("message",jsonString);
+                createMessage(rate,rateType,duration,sess,extra,freeLess);
             }
-
-
-
         }
         else if (e.getSource()==closeBtn){
             //close the window
@@ -165,39 +149,43 @@ public class MakeOpenBidOffer implements ActionListener {
         }
     }
 
+    private void createMessage(String rate,String rateType,String duration,String sess,String extra,String freeLess){
+        String jsonString ;
+        JSONObject msgInfo=new JSONObject();
+        System.out.println(bidid);
+        msgInfo.put("bidId", bidid);
+        msgInfo.put("posterId", userId);
+        msgInfo.put("datePosted", new Date().toInstant().toString());
+        msgInfo.put("content", "an open bid offer");
+        JSONObject additionalInfo=new JSONObject();
+        additionalInfo.put("rate","RM:"+rate+" "+rateType);
+        additionalInfo.put("duration",duration);
+        additionalInfo.put("numberOfSession",sess);
+        additionalInfo.put("extraInfo",extra);
+        additionalInfo.put("freeLesson",freeLess);
+        additionalInfo.put("tutorComp",String.valueOf(tutorComp));
+        additionalInfo.put("tutorQualification",tutorQ);
+        msgInfo.put("additionalInfo", additionalInfo);
+
+        // convert message to JSON string
+        jsonString = msgInfo.toString();
+        postMessage("message",jsonString);
+    }
+
+
     /* Method to create a new class instances in db
      * This is to store the message in the database */
     private void postMessage(String endpoint, String jsonString) {
-
         // create a new message in the database
-        String Url = "https://fit3077.com/api/v1/"+endpoint;
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest
-                .newBuilder(URI.create(Url))
-                .setHeader("Authorization", GuiAction.myApiKey)
-                .header("Content-Type","application/json") // This header needs to be set when sending a JSON request body.
-                .POST(HttpRequest.BodyPublishers.ofString(jsonString))
-                .build();
-
-        try {
-            HttpResponse<String> postResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            // get the id of the newly created object
-            ObjectNode jsonNode = new ObjectMapper().readValue(postResponse.body(), ObjectNode.class);
-
+        HttpResponse<String> postResponse = GuiAction.updateWebApi(endpoint,GuiAction.myApiKey,jsonString);
             if (postResponse.statusCode()==201){
                 warning.setText("Your offer has been saved");
             }
             else{
                 warning.setText("there was an error when saving ur response,please try again");
             }
-//            Student.showAllRequests();
 
-        }
-        catch(Exception e){
-            System.out.println(e.getCause());
-            System.out.println(e.getMessage());
 
-        }
     }
 
 }
