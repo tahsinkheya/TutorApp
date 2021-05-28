@@ -74,7 +74,7 @@ public interface GuiAction {
         	if(contractLength < 3) {
         		return "Contract duration must be atleast 3 months";
         	}
-        	System.out.println("Duration set by user is: "+contractLength);
+        	
         }
         
     	Calendar date = Calendar.getInstance();

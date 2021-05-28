@@ -287,8 +287,7 @@ public class viewContractAction implements GuiAction{
 			  
 				         long difference_In_Days = (difference_In_Time/ (1000 * 60 * 60 * 24))% 365;
 				         if( (difference_In_Years == 0) && (difference_In_Days <= 31)) {
-				        	 System.out.println("Contracts expiring in a month time");
-				        	 System.out.println( "years: "+difference_In_Years+" days: " + difference_In_Days + " days ");
+				        	 System.out.println("There are contracts expiring in a month time");
 				        	 return true;
 				         }
 				         
